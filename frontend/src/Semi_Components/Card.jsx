@@ -4,7 +4,7 @@ import user2 from '../assets/user2.jpg'
 import user3 from '../assets/user3.jpg'
 import user1 from '../assets/user1.png'
 import picExperience from '../assets/concept-portrait-overstimulated-person.jpg'
-
+import Tilt from 'react-parallax-tilt';
 
 
 
@@ -12,21 +12,21 @@ let citations = [
   {
     content: 'Les larmes qui coulent sont amères mais plus amères encore sont celles qui ne coulent pas',
     star: '★ ★ ★ ★ ★ ★',
-    emptyStar:'',
+    emptyStar: '',
     user: 'Lina Mine',
     image: user1
   },
   {
     content: 'Qui Ne Tente Rien N’a Rien',
     star: '★ ★ ★',
-    emptyStar:' ★ ★ ★',
+    emptyStar: ' ★ ★ ★',
     user: 'Sami Loreou',
     image: user2
   },
   {
     content: 'Patience is not the ability to wait, but the ability to keep a good attitude while waiting',
     star: '★ ★ ★ ★ ★',
-    emptyStar:' ★',
+    emptyStar: ' ★',
     user: 'Yao Perna',
     image: user3
   },
@@ -44,7 +44,7 @@ let experiences = [
 ];
 
 const CitationCard = ({ content, star, emptyStar, user, image }) => (
-  <div className="card px-2 pb-10 pt-14 justify-center flex-col gap-y-8">
+  <Tilt className="card px-2 pb-10 pt-14 justify-center flex-col gap-y-8">
     <div className="flex flex-col gap-y-3 place-items-center justify-center min-h-[161px]">
       <p className="text-white/90 text-[18px] charm text-center">
         <span>‘’</span> {content} <span>‘’</span>
@@ -60,7 +60,7 @@ const CitationCard = ({ content, star, emptyStar, user, image }) => (
       </p>
       <img src={image} alt="user" className="h-9 rounded-full object-cover" />
     </div>
-  </div>
+  </Tilt>
 );
 
 const ExperienceCard = ({ title, content, star, userName, userImage, image }) => (
