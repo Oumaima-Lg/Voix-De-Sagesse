@@ -118,7 +118,7 @@ const StyledWrapper = styled.div`
     -webkit-transform: translateY(-50%);
     transform: translateY(-50%);
     border-radius: 50%;
-    border: 3px solid #ef565f;
+    border: 3px solid #5a2c82;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
     right: 10px;
@@ -136,7 +136,7 @@ const StyledWrapper = styled.div`
 
     100% {
       opacity: 1;
-      border: 3px solid #60d480;
+      border: 3px solid #A09F87;
       left: -68%;
     }
   }
@@ -152,7 +152,7 @@ const StyledWrapper = styled.div`
 
     100% {
       opacity: 1;
-      border: 3px solid #60d480;
+      border: 3px solid #A09F87;
       left: -68%;
     }
   }`;

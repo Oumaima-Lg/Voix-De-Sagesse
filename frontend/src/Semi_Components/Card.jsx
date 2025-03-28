@@ -12,18 +12,21 @@ let citations = [
   {
     content: 'Les larmes qui coulent sont amères mais plus amères encore sont celles qui ne coulent pas',
     star: '★ ★ ★ ★ ★ ★',
+    emptyStar:'',
     user: 'Lina Mine',
     image: user1
   },
   {
     content: 'Qui Ne Tente Rien N’a Rien',
     star: '★ ★ ★',
+    emptyStar:' ★ ★ ★',
     user: 'Sami Loreou',
     image: user2
   },
   {
     content: 'Patience is not the ability to wait, but the ability to keep a good attitude while waiting',
     star: '★ ★ ★ ★ ★',
+    emptyStar:' ★',
     user: 'Yao Perna',
     image: user3
   },
@@ -40,14 +43,15 @@ let experiences = [
   },
 ];
 
-const CitationCard = ({ content, star, user, image }) => (
+const CitationCard = ({ content, star, emptyStar, user, image }) => (
   <div className="card px-2 pb-10 pt-14 justify-center flex-col gap-y-8">
     <div className="flex flex-col gap-y-3 place-items-center justify-center min-h-[161px]">
       <p className="text-white/90 text-[18px] charm text-center">
         <span>‘’</span> {content} <span>‘’</span>
       </p>
-      <div className="z-[1]">
+      <div className="z-[1] flex items-center gap-1">
         <StyledStars>{star}</StyledStars>
+        <p className='text-[1.2em] text-gray-400'>{emptyStar}</p>
       </div>
     </div>
     <div className="z-[1] flex justify-between items-center gap-x-14">
@@ -111,7 +115,7 @@ const StyledStars = styled.div`
 
 const AnimatedWrapper = styled.div`
   opacity: 0;
-  transform: translateX(-90px);
+  transform: translateX(-100px);
   animation: fadeInUp 2.6s ease forwards;
 
   @keyframes fadeInUp {

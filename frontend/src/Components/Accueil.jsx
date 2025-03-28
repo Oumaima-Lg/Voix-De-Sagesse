@@ -4,7 +4,7 @@ import brain from '../assets/brain.jpg'
 const Accueil = () => {
   return (
     <section id='Accueil' className='text-white section min-h-[85vh] lg:min-h-[78vh]'>
-      <div className='sm:container p-[20px] mx-auto flex xl:flex-row flex-col-reverse  items-center gap-x-12 gap-y-16'>
+      <div className='sm:container p-[20px] pt-22 mx-auto flex xl:flex-row flex-col-reverse  items-center gap-x-12 gap-y-16'>
         <div className='flex-1 space-y-10 place-items-center'>
           <div className='text-gradient lg:text-6xl text-5xl charm'>
             Bienvenue

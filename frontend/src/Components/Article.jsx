@@ -8,7 +8,7 @@ const Article = () => {
 
   return (
     <section id='Article' className='section text-white'>
-      <div className='sm:container mx-auto p-[20px] flex flex-col lg:gap-y-15 gap-y-12'>
+      <div className='sm:container mx-auto p-[20px] pt-22  flex flex-col lg:gap-y-15 gap-y-12'>
         <div className='text-gradient lg:text-6xl text-center lg:text-left text-5xl charm'>
           Article
         </div>
