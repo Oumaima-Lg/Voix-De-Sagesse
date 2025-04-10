@@ -6,19 +6,26 @@
   --breakpoint-xs: 319px;
   --color-start: #A09F87;
   --color-end: #4C3163;
+  /* --breakpoint-sm: 490px; */
 }
+
+
+
+/* * {
+  overflow-x: hidden;
+  outline: 1px solid red;
+} */
 
 .charm {
   font-family: 'Charm', cursive;
 }
 
-/* Personnalisation du dégradé pour la bordure */
 .border-image-1 {
   border-image: linear-gradient(to right, #f43f5e, #fbbf24) 1;
-  border: 3px solid #5a2c82;
+  /* border: 3px solid; */
 }
 
-.border-image-gradient:hover {
+.border-image-gradient {
   border-image: linear-gradient(to bottom, #A09F87, #4C3163) 1;
   border-radius: 20px !important;
 
@@ -28,7 +35,7 @@
 @layer base {
 
   .section {
-    @apply py-8 lg:py-24 flex items-center;
+    @apply py-8 lg:py-24 flex items-center ;
   }
 
 
@@ -44,6 +51,13 @@
     @apply hover:bg-gradient-to-br hover:from-[#4C3163] hover:to-[#A09F87];
   }
 
+  .field {
+    @apply flex items-center justify-center gap-2 rounded-4 py-2 px-4 bg-[#1f2029];
+  }
+
+  .input-field {
+    @apply bg-none border-0 outline-0 text-[#d3d3d3] w-full;
+  }
 
   .border-gradient {
     @apply border-4 rounded-2xl border-t-[var(--color-start)] border-l-[var(--color-start)] border-r-[var(--color-end)] border-b-[var(--color-end)];
@@ -53,6 +67,7 @@
     @apply border-4 rounded-2xl hover:border-t-[var(--color-end)] hover:border-l-[var(--color-end)] hover:border-r-[var(--color-start)] hover:border-b-[var(--color-start)];
   }
 
+}
 
 
 

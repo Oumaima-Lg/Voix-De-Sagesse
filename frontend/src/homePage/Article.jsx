@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import magic from '../assets/magicBook.jpg';
-import Switch from '../Semi_Components/Switch';
-import Card from '../Semi_Components/Card';
+import Switch from '../semiComponents/Switch';
+import Card from '../semiComponents/CardArticle';
 
 const Article = () => {
   const [isToggled, setIsToggled] = useState(false);
 
   return (
-    <section id='Article' className='section text-white'>
-      <div className='sm:container mx-auto p-[20px] pt-22  flex flex-col lg:gap-y-15 gap-y-12'>
+    <section id='Article' className='section text-white '>
+      <div className='sm:container mx-auto p-[20px] pt-22 pb-0 flex flex-col lg:gap-y-15 gap-y-12'>
         <div className='text-gradient lg:text-6xl text-center lg:text-left text-5xl charm'>
           Article
         </div>

@@ -1,8 +1,8 @@
 import React from 'react'
-import Form from '../Semi_Components/CardContact';
+import Form from '../semiComponents/CardContact';
 import robot from '../assets/robot.png';
 import { motion } from 'framer-motion';
-import { fadeIn } from '../Motions/variants';
+import { fadeIn } from '../motions/variants';
 
 // import Spline from '@splinetool/react-spline';
 
@@ -15,8 +15,8 @@ import { fadeIn } from '../Motions/variants';
 
 const Contact = () => {
   return (
-    <section id='Contact' className='section text-white'>
-      <div className='sm:container mx-auto p-[20px] pt-22 flex flex-col gap-y-18'>
+    <section id='Contact' className='section text-white '>
+      <div className='sm:container mx-auto p-[20px] pt-35 flex flex-col gap-y-18 mb-20'>
         <motion.div
           variants={fadeIn('right', 0.3)}
           initial="hidden"
@@ -25,12 +25,12 @@ const Contact = () => {
         >
           Contact
         </motion.div>
-        <div className='flex place-items-center md:flex-row flex-col gap-y-16'>
+        <div className='flex place-items-center justify-between md:flex-row flex-col gap-y-16'>
           <motion.div
             variants={fadeIn('right', 0.4)}
             initial="hidden"
             whileInView={'show'}
-            className='flex-1'
+            className='flex-2'
           >
             <Form />
           </motion.div>
