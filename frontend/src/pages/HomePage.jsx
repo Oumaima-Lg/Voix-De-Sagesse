@@ -9,7 +9,7 @@ import Fouter from '../homePage/Fouter'
 
 const HomePage = () => {
     return (
-        <div className='bg-[url(/src/assets/diego.jpg)] bg-cover relative '>
+        <div className='bg-[url(/src/assets/diego.jpg)] bg-cover relative'>
             <Header isHidden={false}  />
             <Accueil />
             <About />

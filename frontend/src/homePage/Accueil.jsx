@@ -21,7 +21,7 @@ const Accueil = () => {
             variants={fadeIn('up', 0.4)}
             initial="hidden" whileInView={'show'}
             viewport={{ once: false, amount: 0.7 }}
-            className='text-white/80 lg:text-[30px] text-[20px] charm lg:leading-18 leading-8  lg:text-current text-center'
+            className='text-white/80 lg:text-[30px] text-[20px] charm 2xl:leading-18 lg:leading-14 leading-8  lg:text-current text-center'
           >
             Un espace où les mots prennent vie. Ici, proverbes, citations et expériences personnelles se partagent pour nourrir l'âme et éclairer le chemin de chacun. Chaque partage devient une source d'inspiration, un écho de sagesse traversant le temps et les cultures. Chaque histoire, leçon et pensée a le pouvoir de transformer et d’enrichir la vie des autres.
           </motion.div>

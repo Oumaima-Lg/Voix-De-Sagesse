@@ -52,7 +52,7 @@
   }
 
   .field {
-    @apply flex items-center justify-center gap-2 rounded-4 py-2 px-4 bg-[#1f2029];
+    @apply flex items-center justify-center gap-2 rounded-lg py-2 px-4 bg-[#1f2029];
   }
 
   .input-field {
@@ -70,16 +70,3 @@
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-}

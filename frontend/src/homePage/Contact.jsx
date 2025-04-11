@@ -12,6 +12,24 @@ import { fadeIn } from '../motions/variants';
 //   );
 // }
 
+// import Spline from '@splinetool/react-spline';
+
+// export function AppSpline() {
+//   return (
+//     <Spline scene="https://prod.spline.design/tArGKfoMGH3aCNk3/scene.splinecode" />
+//   );
+// }
+
+import Spline from '@splinetool/react-spline';
+
+export function AppSpline() {
+  return (
+    <Spline scene="https://prod.spline.design/VbFDnYNrBVOXKv9u/scene.splinecode" />
+  );
+}
+
+
+
 
 const Contact = () => {
   return (
@@ -25,7 +43,7 @@ const Contact = () => {
         >
           Contact
         </motion.div>
-        <div className='flex place-items-center justify-between md:flex-row flex-col gap-y-16'>
+        <div className='flex place-items-center justify-between lg:flex-row flex-col gap-y-16 relative'>
           <motion.div
             variants={fadeIn('right', 0.4)}
             initial="hidden"
@@ -34,19 +52,29 @@ const Contact = () => {
           >
             <Form />
           </motion.div>
-          <motion.div
-            variants={fadeIn('left', 0.3)}
-            initial="hidden"
-            whileInView={'show'}
-            className='flex-1 lg:relative flex flex-col-reverse gap-y-4 justify-center items-center'
+          <div
+            className='flex-1 flex flex-col-reverse gap-y-4 justify-center items-center'
           >
-            <div className='lg:absolute left-38 top-[-170px]'>
+            <motion.div
+              variants={fadeIn('left', 0.3)}
+              initial="hidden"
+              whileInView={'show'}
+              className='lg:absolute right-30'
+            >
               <img src={robot} alt="" className='object-cover' />
-            </div>
-            <div className='lg:absolute left-12 top-[-180px]'>
+            </motion.div>
+            <motion.div
+              variants={fadeIn('left', 0.2)}
+              initial="hidden"
+              whileInView={'show'}
+              className='lg:absolute  right-65 top-[-20px]'
+            >
               <p className='charm text-white text-xl bg-black/48 backdrop-blur-2xl px-4 py-5 rounded-3xl' >I Hate You All</p>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
+        </div>
+        <div className='hidden xl:block'>
+          <AppSpline />
         </div>
       </div>
     </section>
