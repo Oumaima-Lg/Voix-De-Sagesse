@@ -2,7 +2,9 @@ import React from 'react'
 import iconSagesse from '../assets/iconSagesse.png'
 import iconHistoire from '../assets/iconHistoire.png'
 import { motion } from 'framer-motion';
-import { fadeIn } from '../Motions/variants';
+// import { fadeIn } from '../motions/variants';
+import { fadeIn, textVariant, staggerContainer } from "../motions/motion";
+
 
 
 let fiches = [
@@ -24,7 +26,7 @@ let fiches = [
 fiches = fiches.map((fiche, index) => {
   const { title, content, image, text_button } = fiche;
   return (
-    <div className='border-gradient border-gradient-hover flex-1 sm:px-14 sm:py-8 px-4 py-4 flex flex-col justify-between sm:gap-y-18 gap-y-8 transform transition-transform duration-600 hover:scale-105'>
+    <motion.div variants={fadeIn("right", "spring", index * 0.5, 0.75)} className='border-gradient border-gradient-hover flex-1 sm:px-14 sm:py-8 px-4 py-4 flex flex-col justify-between sm:gap-y-18 gap-y-8 transform transition-transform duration-600 hover:scale-105'>
       <div className='flex flex-col sm:gap-y-16 gap-y-10 items-center'>
         <h2 className='charm sm:text-4xl text-3xl text-center'>{title}</h2>
         <p className='text-center charm sm:text-2xl text-xl text-white/95'>{content}</p>
@@ -37,7 +39,7 @@ fiches = fiches.map((fiche, index) => {
           <button className='border-4 border-gradient sm:py-2 sm:px-4 py-1 px-2  font-bold  sm:text-xl text-[16px] cursor-pointer hover:border-white/45 background-gradient' >Partager votre <br /> {text_button}</button>
         </div>
       </div>
-    </div>
+    </motion.div>
 
   );
 });
@@ -45,21 +47,23 @@ fiches = fiches.map((fiche, index) => {
 
 const About = () => {
   return (
-    <section id='About' className='section text-white'>
-      <div className='sm:container mx-auto p-[20px] pt-22 flex flex-col gap-y-18'>
-        <div
-          // variants={fadeIn('right', 0.3)}
-          // initial="hidden"
-          // whileInView={'show'}
-          // viewport={{ once: false, amount: 0.3 }}
+    <motion.section id='About' className='section text-white '
+      variants={staggerContainer()}
+      initial='hidden'
+      whileInView='show'
+      viewport={{ once: false, amount: 0.25 }}
+    >
+      <div className='container mx-auto p-[20px] pt-22 flex flex-col gap-y-18'>
+        <motion.div
+         variants={textVariant()}
           className='text-gradient lg:text-6xl text-center lg:text-left text-5xl charm'>
           Leçon de vie
-        </div>
-        <div className='flex gap-18 lg:flex-row flex-col'>
+        </motion.div>
+        <div className='flex gap-18 lg:flex-row flex-col' >
           {fiches}
         </div>
       </div>
-    </section>
+    </motion.section>
   )
 }
 
