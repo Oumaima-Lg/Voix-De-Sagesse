@@ -5,7 +5,7 @@ import Fouter from '../homePage/Fouter'
 
 const LoginPage = () => {
     return (
-        <div className='bg-[url(/src/assets/diego.jpg)] bg-cover h-screen'>
+        <div className='bg-[url(/src/assets/diego.jpg)] bg-cover min-h-screen relative'>
             <Header isHidden={true} />
             <Login />
             <Fouter></Fouter>

@@ -144,7 +144,7 @@ const LoginForm = () => {
                             <button className="btn btn-border-gradient text-amber-50! mb-6!" type="submit">CONNEXION</button>
                             <a href="#" className="block mb-6! border-b-1 max-w-max mx-auto">Mot de passe oublié ?</a>
                             <div className='h-0.5 bg-gradient-to-br from-[#4C3163] to-[#A09F87]' />
-                            <button className="btn btn-border-gradient text-amber-50!" type="submit"> <a href="/register">Créer un nouveau compte</a></button>                            
+                            <button className="btn btn-border-gradient text-amber-50!" type="submit"> <a href="/auth/register">Créer un nouveau compte</a></button>                            
                         </div>
 
                     </form>

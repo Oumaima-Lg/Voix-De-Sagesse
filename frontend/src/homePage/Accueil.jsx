@@ -30,7 +30,7 @@ const Accueil = () => {
             initial="hidden" whileInView={'show'}
             viewport={{ once: false, amount: 0.7 }}
           >
-            <button className='border-gradient hover:border-white/45 lg:px-6 lg:py-4 px-4 py-2 text-xl lg:text-2xl font-bold cursor-pointer background-gradient '><LinkRouter to='/login'>Se Connecter</LinkRouter></button>
+            <button className='border-gradient hover:border-white/45 lg:px-6 lg:py-4 px-4 py-2 text-xl lg:text-2xl font-bold cursor-pointer background-gradient '><LinkRouter to='/auth/login'>Se Connecter</LinkRouter></button>
           </motion.div>
         </div>
         <motion.div

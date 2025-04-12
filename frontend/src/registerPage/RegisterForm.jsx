@@ -26,7 +26,7 @@ const RegisterForm = () => {
                         <div>
                             <button className="btn btn-border-gradient text-amber-50! mb-6!" type="submit">S'inscrire</button>
                             <div className='h-0.5 mb-6 bg-gradient-to-br from-[#4C3163] to-[#A09F87]' />
-                            <a href="/login" className="block mb-6! border-b-1 max-w-max mx-auto">Vous avez déja un compte ?</a>
+                            <a href="/auth/login" className="block mb-6! border-b-1 max-w-max mx-auto">Vous avez déja un compte ?</a>
                         </div>
 
                     </form>

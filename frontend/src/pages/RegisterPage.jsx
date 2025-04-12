@@ -5,7 +5,7 @@ import Fouter from '../homePage/Fouter'
 
 const RegisterPage = () => {
     return (
-        <div className='bg-[url(/src/assets/diego.jpg)] bg-cover h-screen'>
+        <div className='bg-[url(/src/assets/diego.jpg)] bg-cover min-h-screen relative'>
             <Header isHidden={true} />
             <Register />
             <Fouter></Fouter>
