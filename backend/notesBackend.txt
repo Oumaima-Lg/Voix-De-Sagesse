@@ -1,0 +1,88 @@
+Annotations :
+
+@RestController : Indique que la classe est un contrôleur REST. Elle gère les requêtes HTTP et renvoie des réponses JSON ou XML.
+
+@RequestMapping : Définit le chemin de base pour toutes les méthodes du contrôleur.
+
+@GetMapping, @PostMapping, @PutMapping, @DeleteMapping : Ces annotations sont utilisées pour lier les méthodes aux différentes requêtes HTTP.
+
+@PathVariable : Permet d'extraire des variables d'URL, comme les IDs.
+
+@RequestBody : Permet de lier les objets envoyés dans le corps de la requête HTTP à des paramètres Java.
+
+------------------------------------------------------------------------------------------------------------------------
+
+Réponse HTTP :
+
+Utilisation de ResponseEntity pour définir les réponses HTTP avec des codes d'état appropriés 
+(par exemple, HttpStatus.CREATED pour une création réussie, ou HttpStatus.NOT_FOUND si l'objet n'est pas trouvé).
+
+------------------------------------------------------------------------------------------------------------------------
+
+CORS (Cross-Origin Resource Sharing) est un mécanisme de sécurité qui permet à des ressources d'un serveur 
+d'être partagées avec des domaines différents (origines) afin de permettre des requêtes entre des applications web servies sur des origines distinctes.
+
+------------------------------------------------------------------------------------------------------------------------
+
+Fonctionnalités de spring-boot-devtools :
+Spring Boot DevTools fournit des outils utiles pour améliorer le développement d'applications Spring Boot, tels que :
+
+Redémarrage automatique : Lorsqu'une modification est effectuée dans le code source, l'application est automatiquement redémarrée,
+ ce qui permet de voir rapidement les changements sans redémarrer manuellement le serveur.
+
+Activer la mise en cache du template : DevTools peut désactiver certaines caches, comme ceux des templates, pour s'assurer que 
+les modifications soient immédiatement visibles.
+
+Console améliorée : Elle améliore les messages dans la console, rendant les logs plus clairs et utiles, notamment en 
+ajoutant des couleurs pour la lisibilité.
+
+Propriétés de configuration de développement : Certaines propriétés de configuration peuvent être activées pour améliorer
+ l'expérience de développement, comme le rechargement automatique des fichiers de ressources statiques.
+
+------------------------------------------------------------------------------------------------------------------------
+
+ Fonctionnalités de spring-boot-starter-validation :
+Ce starter permet d'intégrer facilement des mécanismes de validation dans une application Spring Boot. Voici les principales fonctionnalités :
+
+Validation des Beans :
+
+Vous pouvez ajouter des annotations de validation à vos objets (beans) pour garantir que les données respectent des contraintes spécifiques avant d'être traitées.
+
+Par exemple, vous pouvez utiliser des annotations comme @NotNull, @Size, @Email, @Min, @Max, etc.
+
+Validation côté serveur :
+
+Lorsque vous utilisez Spring MVC ou Spring WebFlux, la validation peut être appliquée automatiquement sur les objets reçus dans les contrôleurs via 
+l'annotation @Valid ou @Validated.
+
+Cela permet de s'assurer que les données envoyées par l'utilisateur respectent les contraintes définies avant de les utiliser dans l'application.
+
+Messages d'erreur personnalisés :
+
+Vous pouvez personnaliser les messages d'erreur pour chaque contrainte de validation, en utilisant un fichier messages.properties ou une autre méthode
+ de gestion des messages.
+
+Facilité d'intégration avec Spring Boot :
+
+Spring Boot prend en charge l'intégration de la validation en configurant automatiquement les composants nécessaires. Il suffit de déclarer cette 
+dépendance dans le pom.xml, et Spring Boot se charge de l'intégration.
+
+------------------------------------------------------------------------------------------------------------------------
+
+Comportement combiné de @RestControllerAdvice :
+L'annotation @RestControllerAdvice est donc une version combinée qui :
+
+Applique les fonctionnalités de @ControllerAdvice, ce qui permet de définir des comportements globaux pour la gestion des exceptions ou des logiques partagées.
+
+Ajoute @ResponseBody, ce qui signifie que les méthodes de la classe annotée avec @RestControllerAdvice renverront directement des objets en réponse HTTP, 
+généralement au format JSON ou XML, sans avoir besoin de vues JSP ou HTML.
+
+
+------------------------------------------------------------------------------------------------------------------------
+
+import org.springframework.core.env.Environment;
+
+L'importation de la classe Environment de Spring permet à ton code de utiliser
+ les fonctionnalités liées à l'environnement d'exécution de l'application, 
+ en particulier pour accéder aux propriétés et configurations externes
+  de l'application.
