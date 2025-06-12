@@ -1,10 +1,10 @@
 import React from 'react'
-import Header from '../homePage/Header'
-import Accueil from '../homePage/Accueil'
-import About from '../homePage/About'
-import Article from '../homePage/Article'
-import Contact from '../homePage/Contact'
-import Fouter from '../homePage/Fouter'
+import Header from '../pages_details/homePage/Header'
+import Accueil from '../pages_details/homePage/Accueil'
+import About from '../pages_details/homePage/About'
+import Article from '../pages_details/homePage/Article'
+import Contact from '../pages_details/homePage/Contact'
+import Fouter from '../pages_details/homePage/Fouter'
 
 
 const HomePage = () => {

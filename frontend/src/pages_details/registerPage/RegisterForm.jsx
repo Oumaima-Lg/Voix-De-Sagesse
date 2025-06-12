@@ -1,7 +1,39 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useState } from 'react';
+import { registerUser } from '../../services/UserService';
+
+const form = {
+    nom: "",
+    prenom: "",
+    email: "",
+    motdepasse: "",
+    confirmerMotdepasse: "",
+    accountType: "ADMIN"
+}
 
 const RegisterForm = () => {
+
+    const [data, setData] = useState(form);
+
+    const handleChange = (e) => {
+        console.log(e.target);
+        setData({ ...data, [e.target.name]: e.target.value });
+    }
+
+    const handleSubmit = (e) => {
+        e.preventDefault(); // Si vous n'avez pas déjà inclus cela, il est important de l'ajouter pour empêcher le comportement par défaut du formulaire
+
+        registerUser(data).then((res) => {
+            console.log(res);
+            alert('Inscription réussie !');
+
+        }).catch((err) => {
+            console.log(err);
+        });
+
+    }
+
     return (
         <StyledWrapper>
             <div className="mx-auto  p-14">
@@ -9,22 +41,22 @@ const RegisterForm = () => {
                     <h4 className="text-gradient lg:text-4xl sm:text-3xl text-xl text-center lg:px-20 px-10 pt-2">Créer un compte</h4>
                     <form className='flex flex-col md:gap-4 gap-2'>
                         <div className="flex items-center justify-center gap-2 rounded-4 sm:py-2 py-1 lg:px-4 bg-[#1f2029]">
-                            <input autoComplete="off" id="regfirstname" placeholder="Prénom" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto " name="regfirstname" type="text" />
+                            <input autoComplete="off" value={data.prenom} onChange={handleChange} id="prenom"  name="prenom" type="text" placeholder="Prénom" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto " />
                         </div>
                         <div className="flex items-center justify-center gap-2 rounded-4 sm:py-2 py-1 lg:px-4 px-2 bg-[#1f2029]">
-                            <input autoComplete="off" id="reglastname" placeholder="Nom de famille" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto" name="reglastname" type="text" />
+                            <input autoComplete="off" value={data.nom} onChange={handleChange} id="nom"  name="nom" type="text" placeholder="Nom de famille" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto" />
                         </div>
                         <div className="flex items-center justify-center gap-2 rounded-4 sm:py-2 py-1 lg:px-4 px-2 bg-[#1f2029]">
-                            <input autoComplete="off" id="regemail" placeholder="Email" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto" name="regemail" type="email" />
+                            <input autoComplete="off" value={data.email} onChange={handleChange} id="email"  name="email" type="text" placeholder="Email" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto"  />
                         </div>
                         <div className="flex items-center justify-center gap-2 rounded-4 sm:py-2 py-1 lg:px-4 px-2 bg-[#1f2029]">
-                            <input autoComplete="off" id="regpassword" placeholder="Mot de passe" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto" name="regpassword" type="password" />
+                            <input autoComplete="off" value={data.motdepasse} onChange={handleChange} id="motdepasse"  name="motdepasse" type="text" placeholder="Mot de passe" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto"  />
                         </div>
                         <div className="flex items-center justify-center gap-2 rounded-4 sm:py-2 py-1 lg:px-4 px-2 bg-[#1f2029]">
-                            <input autoComplete="off" id="regpasswordconfirm" placeholder="Confirmez le mot de passe" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto" name="regpasswordconfirm" type="password" />
+                            <input autoComplete="off" value={data.confirmerMotdepasse} onChange={handleChange} id="confirmerMotdepasse"  name="confirmerMotdepasse" type="text" placeholder="Confirmez le mot de passe" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto" />
                         </div>
                         <div>
-                            <button className="btn btn-border-gradient text-amber-50! mb-6!" type="submit">S'inscrire</button>
+                            <button className="btn btn-border-gradient text-amber-50! mb-6!" onClick={handleSubmit} >S'inscrire</button>
                             <div className='h-0.5 mb-6 bg-gradient-to-br from-[#4C3163] to-[#A09F87]' />
                             <a href="/auth/login" className="block mb-6! border-b-1 max-w-max mx-auto">Vous avez déja un compte ?</a>
                         </div>

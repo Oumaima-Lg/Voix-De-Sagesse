@@ -1,7 +1,7 @@
 import React from 'react'
-import brain from '../assets/brain.jpg'
+import brain from '../../assets/brain.jpg'
 import { motion } from 'framer-motion';
-import { fadeIn } from '../motions/variants';
+import { fadeIn } from '../../motions/variants';
 import { Link as LinkRouter } from "react-router-dom";
 
 const Accueil = () => {

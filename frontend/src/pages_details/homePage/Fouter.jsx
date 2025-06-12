@@ -1,5 +1,5 @@
 import React from 'react'
-import arrow from '../assets/arrow.png';
+import arrow from '../../assets/arrow.png';
 
 const Fouter = () => {
   return (
