@@ -4,17 +4,13 @@
 
 @theme {
   --breakpoint-xs: 319px;
+  --breakpoint-sm: 439px;
   --color-start: #A09F87;
   --color-end: #4C3163;
   /* --breakpoint-sm: 490px; */
 }
 
 
-
-/* * {
-  overflow-x: hidden;
-  outline: 1px solid red;
-} */
 
 .charm {
   font-family: 'Charm', cursive;
@@ -30,6 +26,7 @@
   border-radius: 20px !important;
 
 }
+
 
 
 @layer base {
@@ -67,6 +64,23 @@
     @apply border-4 rounded-2xl hover:border-t-[var(--color-end)] hover:border-l-[var(--color-end)] hover:border-r-[var(--color-start)] hover:border-b-[var(--color-start)];
   }
 
+}
+
+
+
+
+
+/* Animation for shine effect */
+@keyframes shine {
+  0% {
+    background-position: 100%;
+  }
+  100% {
+    background-position: -100%;
+  }
+}
+.animate-shine {
+  animation: shine 5s linear infinite;
 }
 
 

@@ -12,6 +12,7 @@ module.exports = {
       fontFamily: {
         charm: ['"Charm"', 'cursive'], 
       },
+     
     },
     // container: {
     //   padding: {
@@ -30,3 +31,4 @@ module.exports = {
 //   },
 //   plugins: [],
 // };
+

@@ -6,8 +6,6 @@ import user1 from '../assets/user1.png'
 import picExperience from '../assets/concept-portrait-overstimulated-person.jpg'
 import Tilt from 'react-parallax-tilt';
 
-
-
 let citations = [
   {
     content: 'Les larmes qui coulent sont amères mais plus amères encore sont celles qui ne coulent pas',
@@ -42,6 +40,7 @@ let experiences = [
     image: picExperience,
   },
 ];
+
 
 const CitationCard = ({ content, star, emptyStar, user, image }) => (
   <Tilt className="card px-2 pb-10 pt-14 justify-center flex-col gap-y-8">

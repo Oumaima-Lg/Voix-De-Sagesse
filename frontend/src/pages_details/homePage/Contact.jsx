@@ -73,9 +73,9 @@ const Contact = () => {
             </motion.div>
           </div>
         </div>
-        <div className='hidden xl:block'>
+        {/* <div className='hidden xl:block border-7 border-amber-600 w-1/4 h-[400px]  overflow-hidden'>
           <AppSpline />
-        </div>
+        </div> */}
       </div>
     </section>
   )
