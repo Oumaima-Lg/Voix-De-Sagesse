@@ -5,9 +5,15 @@ import RegisterPage from './pages/RegisterPage'
 import ArticlaPage from './pages/ArticlaPage'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
+import '@mantine/core/styles.css';
+import { MantineProvider } from '@mantine/core';
+import '@mantine/carousel/styles.css';
+
 const App = () => {
   return (
-    <BrowserRouter>
+
+    < MantineProvider defaultColorScheme="dark" >
+      <BrowserRouter>
         <Routes>
           <Route path="*" element={<HomePage />} />
           <Route path="/auth/login" element={<LoginPage />} />
@@ -17,8 +23,11 @@ const App = () => {
           <Route path="/articla/nouveauArticle" element={<ArticlaPage />} />
         </Routes>
       </BrowserRouter>
-    
+    </MantineProvider >
+
+
   )
 }
 
 export default App
+

@@ -4,12 +4,18 @@
 
 @theme {
   --breakpoint-xs: 319px;
-  --breakpoint-sm: 439px;
+  --breakpoint-smm: 439px;
   --color-start: #A09F87;
-  --color-end: #4C3163;
+  --color-end: #4C3163; 
   /* --breakpoint-sm: 490px; */
 }
 
+.carousel-control {
+  color: #4C3163 !important;
+  /* font-size: 100px !important; */
+  background: #A09F87 !important;
+  border-color: #4C3163 !important;
+}
 
 
 .charm {
