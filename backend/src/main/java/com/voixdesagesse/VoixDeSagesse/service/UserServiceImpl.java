@@ -1,18 +1,12 @@
 package com.voixdesagesse.VoixDeSagesse.service;
 
-
 import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
 import com.voixdesagesse.VoixDeSagesse.repository.UserRepository;
-
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import com.voixdesagesse.VoixDeSagesse.entity.User;
-
 import org.springframework.stereotype.Service;
-
 import com.voixdesagesse.VoixDeSagesse.dto.LoginDTO;
 import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
 import com.voixdesagesse.VoixDeSagesse.utility.Utilities;
@@ -35,7 +29,7 @@ public class UserServiceImpl implements UserService {
         userDTO.setId(Utilities.getNextSequence("users"));
         userDTO.setMotdepasse(passwordEncoder.encode(userDTO.getMotdepasse()));
 
-        User user = userDTO.toEntity(); // Convertir UserDTO en User
+        User user = userDTO.toEntity(); 
         user = userRepository.save(user);
         
         return user.toDTO(); 

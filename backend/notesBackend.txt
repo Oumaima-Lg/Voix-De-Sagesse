@@ -86,3 +86,36 @@ L'importation de la classe Environment de Spring permet à ton code de utiliser
  les fonctionnalités liées à l'environnement d'exécution de l'application, 
  en particulier pour accéder aux propriétés et configurations externes
   de l'application.
+
+------------------------------------------------------------------------------------------------------------------------
+
+@Service(value = "userService")
+public class UserServiceImpl implements UserService
+
+la valeur par defaut est userServiceImpl (premier caractére en minuscule)
+
+
+
+
+------------------------------------------Bean ---------------------------------------------------------------------------
+1. Définition d'un "bean" dans Spring 🌱
+Un bean est un objet instancié, configuré et géré par le conteneur Spring. C'est un composant réutilisable qui forme la base d'une application Spring.
+
+Exemple concret :
+Si tu as une classe UserService, Spring en crée une instance (objet), la configure (injection de dépendances, etc.), et la met à disposition dans son "conteneur". Cet objet devient un bean.
+
+2. Cycle de vie d'un bean 🔄
+Instanciation : Spring crée l'objet via un constructeur ou une factory.
+
+Configuration : Injection des dépendances (ex: @Autowired).
+
+Initialisation : Méthodes comme @PostConstruct peuvent être appelées.
+
+Destruction : Si besoin, nettoyage avant suppression (ex: @PreDestroy).
+
+3. Pourquoi utiliser des beans ? 🎯
+Gestion centralisée : Spring contrôle leur cycle de vie.
+
+Injection de dépendances : Les beans peuvent s'utiliser entre eux sans new.
+
+Modularité : Les composants sont découplés et testables.

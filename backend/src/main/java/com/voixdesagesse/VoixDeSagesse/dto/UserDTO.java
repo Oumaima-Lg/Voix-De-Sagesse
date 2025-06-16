@@ -40,10 +40,11 @@ public class UserDTO {
     private Date dateInscription;
     private String role;
     private String bio;
+    private AccountType accountType;
     private List<Article> articles; 
 
     public User toEntity() {
-        return new User(this.id, this.nom, this.prenom, this.email, this.motdepasse, this.dateInscription, this.role, this.bio, this.articles);
+        return new User(this.id, this.nom, this.prenom, this.email, this.motdepasse, this.dateInscription, this.role, this.bio, this.accountType ,this.articles);
     }
     
 }

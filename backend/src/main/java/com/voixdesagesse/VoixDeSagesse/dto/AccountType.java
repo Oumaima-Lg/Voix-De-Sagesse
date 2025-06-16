@@ -1,5 +1,6 @@
 package com.voixdesagesse.VoixDeSagesse.dto;
 
-public class AccountType {
+public enum AccountType {
+    APPLICANT,  ADMIN 
     
 }
