@@ -13,6 +13,11 @@ import ShinyText from '../../blocks/TextAnimations/ShinyText/ShinyText';
 import { Link as LinkRouter } from "react-router-dom";
 import { BiCollapseHorizontal } from "react-icons/bi";
 import Switch from '../../semiComponents/SideButton';
+import { BsLayoutSidebarInset } from "react-icons/bs";
+import { useDisclosure } from '@mantine/hooks';
+import { Drawer, Button, BackgroundImage } from '@mantine/core';
+import { IconXboxX } from '@tabler/icons-react';
+
 
 import Spline from '@splinetool/react-spline';
 
@@ -26,6 +31,7 @@ export function AppSpline() {
 
 
 const Home = () => {
+    const [opened, { open, close }] = useDisclosure(false);
     return (
 
         <div className='flex sm:flex-row flex-col   mx-auto lg:pt-34 pt-22 min-h-screen bg-gradient-to-bl from-[#171717] from-55% to-[#4E3F59] to-100%'>
@@ -59,40 +65,94 @@ const Home = () => {
                 </div>
             </div>
 
-            <div className='sm:hidden flex items-center justify-center pt-20 pb-10'>
-                <Switch />
+            <div className='sm:hidden fixed bottom-0 z-20 flex items-center justify-center rounded-se-full bg-gradient-to-tr from-[var(--color-end)] from-20%  to-[var(--color-start)] to-100%  p-2 pt-6 pr-8 cursor-pointer  inset-shadow-sm inset-shadow-white/40' >
+                <Button variant="subtle" size="compact-xs" onClick={open} className='sm:hidden size-0 '  >
+                </Button>
+                <div className='text-3xl text-[var(--color-start)] ' >
+                    <BsLayoutSidebarInset />
+                </div>
             </div>
-            <div className=' fixed bottom-0 top-30 left-0 right-0'>
-                <div className=' border-x-3 border-b-3 px-4  border-[#202020]  md:h-3/4 h-2/3 md:w-3/4 w-2/3 bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100%  rounded-lg shadow-lg    text-white flex flex-col justify-between  py-20 '>
+
+
+            {/* <Button variant="default" onClick={open}>
+                Open Drawer
+            </Button> */}
+            <Drawer
+                opened={opened}
+                onClose={close}
+                size="xs"
+                transitionProps={{
+                    transition: 'rotate-left',
+                    duration: 150,
+                    timingFunction: 'linear',
+                }}
+
+                withCloseButton={true}
+                closeButtonProps={{
+                    icon: <IconXboxX size={30} stroke={1.7} color='white' />,
+                }}
+
+                className='sm:hidden'
+
+                styles={{
+                    content: { background: 'linear-gradient(135deg, #171717 54%, #4E3F59 100%)', borderRadius: '0.5rem', },
+                    header: { background: 'linear-gradient(135deg, #171717 100%, #4E3F59 100%)', borderRadius: '0.5rem', borderLeft: '3px solid #202020', borderRight: '3px solid #202020', borderTop: '3px solid #202020', },
+
+                }}
+            >
+                <div className="border-x-3 absolute bottom-0 left-0 border-b-3 py-30 px-4 size-full border-[#202020] bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% rounded-lg shadow-lg text-white flex flex-col justify-between items-start ">
+                    <div className="flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu mb-6">
+                        <PiArticleLight className="text-5xl" />
+                        <LinkRouter to="/articla/article" className="font-bold text-xl">
+                            Article
+                        </LinkRouter>
+                    </div>
+                    <div className="flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu mb-6">
+                        <IoCreateOutline className="text-5xl" />
+                        <div className="font-bold text-xl">
+                            Nouveau <br /> Article
+                        </div>
+                    </div>
+                    <div className="flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu">
+                        <PiArchiveLight className="text-5xl" />
+                        <div className="font-bold text-xl">
+                            Vos articles <br /> personnels
+                        </div>
+                    </div>
+                </div>
+            </Drawer>
+
+            <div className='hidden fixed bottom-0 top-0 z-70 left-0 '>
+                <div className=' border-x-3 border-b-3 px-4 size-full  border-[#202020]  bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100%  rounded-lg shadow-lg   text-white flex flex-col justify-between items-start  py-50 '>
 
                     <div className='flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu' >
-                        <div>
-                            <PiArticleLight className='md:text-5xl text-2xl' />
+                        <div className=''>
+                            <PiArticleLight className=' text-5xl ' />
                         </div>
-                        <LinkRouter to='/articla/article' className='font-bold md:text-xl text-sm'>
+                        <LinkRouter to='/articla/article' className='font-bold text-xl'>
                             Article
                         </LinkRouter>
                     </div>
                     <div className='flex flex-row items-center gap-3 cursor-pointer  hover:text-[#A09F87] hover:scale-105 transform-gpu' >
                         <div>
-                            <IoCreateOutline className='md:text-5xl text-2xl' />
+                            <IoCreateOutline className='text-5xl' />
                         </div>
-                        <div className='font-bold md:text-xl text-sm'>
+                        <div className='font-bold text-xl '>
                             Nouveau <br /> Article
                         </div>
                     </div>
                     <div className='flex flex-row items-center gap-3 cursor-pointer  hover:text-[#A09F87] hover:scale-105 transform-gpu' >
                         <div>
-                            <PiArchiveLight className='md:text-5xl text-2xl' />
+                            <PiArchiveLight className='text-5xl' />
                         </div>
-                        <div className='font-bold md:text-xl text-sm'>
+                        <div className='font-bold text-xl'>
                             Vos articles <br /> personnels
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className='w-full  sm:w-5/6 flex flex-col  gap-6 lg:gap-10 '>
+            <div className='w-full pt-10 sm:pt-0  sm:w-5/6 flex flex-col  gap-6 lg:gap-10 px-5'>
                 <div className='pt-5 text-center  text-gradient charm xl:text-6xl text-3xl leading-tight '>
                     {/* BIENVENUE OUMAIMA LAGHJIBI */}
                     <ShinyText text=" BIENVENUE OUMAIMA LAGHJIBI" disabled={false} speed={3} className='' />
