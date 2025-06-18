@@ -29,7 +29,7 @@ const LoginForm = () => {
             alert('Login réussie!');
 
         }).catch((err) => {
-            console.log(err);
+            console.log(err.response.data);
         });
 
     }

@@ -2,6 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { useState } from 'react';
 import { registerUser } from '../../services/UserService';
+import { signupValidation } from '../../services/FormValidation';
+import { TextInput } from '@mantine/core';
 
 const form = {
     nom: "",
@@ -15,14 +17,17 @@ const form = {
 const RegisterForm = () => {
 
     const [data, setData] = useState(form);
+    const [formError, setFormError] = useState(form);
 
     const handleChange = (e) => {
         console.log(e.target);
-        setData({ ...data, [e.target.name]: e.target.value });
+        let name = e.target.name, value = e.target.value;
+        setData({ ...data, [name]: value });
+        setFormError({ ...formError, [name]: signupValidation(name, value) });
     }
 
     const handleSubmit = (e) => {
-        e.preventDefault(); // Si vous n'avez pas déjà inclus cela, il est important de l'ajouter pour empêcher le comportement par défaut du formulaire
+        e.preventDefault(); // il est important de l'ajouter pour empêcher le comportement par défaut du formulaire
 
         registerUser(data).then((res) => {
             console.log(res);
@@ -40,21 +45,49 @@ const RegisterForm = () => {
                 <div className='card mx-auto border-4 border-image-gradient sm:px-9 sm:py-4 px-4 py-2 flex flex-col md:gap-10 sm:gap-8 gap-6'>
                     <h4 className="text-gradient lg:text-4xl sm:text-3xl text-xl text-center lg:px-20 px-10 pt-2">Créer un compte</h4>
                     <form className='flex flex-col md:gap-4 gap-2'>
-                        <div className="flex items-center justify-center gap-2 rounded-4 sm:py-2 py-1 lg:px-4 bg-[#1f2029]">
-                            <input autoComplete="off" value={data.prenom} onChange={handleChange} id="prenom"  name="prenom" type="text" placeholder="Prénom" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto " />
-                        </div>
-                        <div className="flex items-center justify-center gap-2 rounded-4 sm:py-2 py-1 lg:px-4 px-2 bg-[#1f2029]">
-                            <input autoComplete="off" value={data.nom} onChange={handleChange} id="nom"  name="nom" type="text" placeholder="Nom de famille" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto" />
-                        </div>
-                        <div className="flex items-center justify-center gap-2 rounded-4 sm:py-2 py-1 lg:px-4 px-2 bg-[#1f2029]">
-                            <input autoComplete="off" value={data.email} onChange={handleChange} id="email"  name="email" type="text" placeholder="Email" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto"  />
-                        </div>
-                        <div className="flex items-center justify-center gap-2 rounded-4 sm:py-2 py-1 lg:px-4 px-2 bg-[#1f2029]">
-                            <input autoComplete="off" value={data.motdepasse} onChange={handleChange} id="motdepasse"  name="motdepasse" type="text" placeholder="Mot de passe" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto"  />
-                        </div>
-                        <div className="flex items-center justify-center gap-2 rounded-4 sm:py-2 py-1 lg:px-4 px-2 bg-[#1f2029]">
-                            <input autoComplete="off" value={data.confirmerMotdepasse} onChange={handleChange} id="confirmerMotdepasse"  name="confirmerMotdepasse" type="text" placeholder="Confirmez le mot de passe" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto" />
-                        </div>
+                        {/* <input autoComplete="off" value={data.prenom} onChange={handleChange} id="prenom" name="prenom" type="text" placeholder="Prénom" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto " /> */}
+                        <TextInput
+                            error={formError.prenom}
+                            size='lg'
+                            placeholder="Prénom"
+                            value={data.prenom}
+                            onChange={handleChange}
+                            name="prenom"
+                        />
+                        <TextInput
+                            error={formError.nom}
+                            size='lg'
+                            placeholder="Nom de famille"
+                            value={data.nom}
+                            onChange={handleChange}
+                            name="nom"
+                        /> <TextInput
+                            error={formError.email}
+                            size='lg'
+                            placeholder="Email"
+                            value={data.email}
+                            onChange={handleChange}
+                            name="email"
+                        />
+                        <TextInput
+                            error={formError.motdepasse}
+                            size='lg'
+                            placeholder="Mot de passe"
+                            value={data.motdepasse}
+                            onChange={handleChange}
+                            name="motdepasse"
+                        />
+
+                        <TextInput
+                            error={formError.confirmerMotdepasse}
+                            size='lg'
+                            placeholder="Confirmez le mot de passe"
+                            value={data.confirmerMotdepasse}
+                            onChange={handleChange}
+                            name="confirmerMotdepasse"
+                            whithAsterik
+                        />
+
                         <div>
                             <button className="btn btn-border-gradient text-amber-50! mb-6!" onClick={handleSubmit} >S'inscrire</button>
                             <div className='h-0.5 mb-6 bg-gradient-to-br from-[#4C3163] to-[#A09F87]' />
