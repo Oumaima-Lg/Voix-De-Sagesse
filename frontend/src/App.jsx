@@ -4,15 +4,18 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ArticlaPage from './pages/ArticlaPage'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import '@mantine/notifications/styles.css';
 
 import '@mantine/core/styles.css';
 import { MantineProvider } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
 import '@mantine/carousel/styles.css';
 
 const App = () => {
   return (
 
     < MantineProvider defaultColorScheme="dark" >
+      <Notifications  position="top-center" zIndex={1000} />
       <BrowserRouter>
         <Routes>
           <Route path="*" element={<HomePage />} />

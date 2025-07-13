@@ -4,6 +4,10 @@ import { useState } from 'react';
 import { registerUser } from '../../services/UserService';
 import { signupValidation } from '../../services/FormValidation';
 import { TextInput } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
+import { IconCheck } from '@tabler/icons-react';
+import { useNavigate } from 'react-router-dom';
+import { Link as LinkRouter } from "react-router-dom";
 
 const form = {
     nom: "",
@@ -18,26 +22,151 @@ const RegisterForm = () => {
 
     const [data, setData] = useState(form);
     const [formError, setFormError] = useState(form);
+    const navigate = useNavigate();
 
-    const handleChange = (e) => {
-        console.log(e.target);
+
+    const handleChangeOldVersion = (e) => {
+        // console.log(e);
         let name = e.target.name, value = e.target.value;
         setData({ ...data, [name]: value });
         setFormError({ ...formError, [name]: signupValidation(name, value) });
+
+        console.log("avant if", formError);
+
+        if (name === "motdepasse" && data.confirmerMotdepasse !== "") {
+            if (data.confirmerMotdepasse !== value) {
+                console.log("dans if", formError);
+                setFormError({ ...formError, confirmerMotdepasse: "Passwords do not match." });
+            }
+
+            else
+                setFormError({ ...formError, confirmerMotdepasse: "" });
+            setFormError({ ...formError, [name]: signupValidation(name, value) });
+        }
+
+        if (name === "confirmerMotdepasse") {
+            if (data.motdepasse !== value)
+                setFormError({ ...formError, [name]: "Passwords do not match." });
+            else
+                setFormError({ ...formError, [name]: "" });
+        }
+
+
     }
+
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        const newData = { ...data, [name]: value };
+        setData(newData);
+
+        const newErrors = { ...formError, [name]: signupValidation(name, value) };
+
+        if (name === "motdepasse" && newData.confirmerMotdepasse !== "") {
+            newErrors.confirmerMotdepasse =
+                newData.confirmerMotdepasse !== value ?
+                    "Passwords do not match." : "";
+        }
+
+        if (name === "confirmerMotdepasse") {
+            newErrors.confirmerMotdepasse =
+                newData.motdepasse !== value ?
+                    "Passwords do not match." : "";
+        }
+
+        setFormError(newErrors);
+    };
+
 
     const handleSubmit = (e) => {
+
+        let valid = true;
+        let newFormError = {};
+
+        for (let key in data) {
+            if (key === "accountType") continue;
+
+            if (key === "confirmerMotdepasse") {
+                if (data[key] !== data["motdepasse"]) {
+                    newFormError[key] = "Passwords do not match.";
+                }
+            } else {
+                newFormError[key] = signupValidation(key, data[key]);
+            }
+
+            if (newFormError[key]) valid = false;
+        }
+
+        setFormError(newFormError);
+
         e.preventDefault(); // il est important de l'ajouter pour empêcher le comportement par défaut du formulaire
 
-        registerUser(data).then((res) => {
-            console.log(res);
-            alert('Inscription réussie !');
+        if (valid === true) {
+            registerUser(data).then((res) => {
+                console.log(res);
+                // alert('Inscription réussie !');
+                setData(form);
+                notifications.show({
+                    title: 'success',
+                    message: 'Do not forget to star Mantine on GitHub! 🌟',
+                    withCloseButton: true,
+                    className: "!border-green-500",
+                    icon: <IconCheck style={{ width: "90%", height: "90%" }} />,
+                    color:"teal"
 
-        }).catch((err) => {
-            console.log(err);
-        });
+                })
+                
+                setTimeout( () => {
+                    navigate("/auth/login")
+                }, 4000 )
 
+            }).catch((err) => {
+                console.log(err);
+                notifications.show({
+                    title: 'failed',
+                    message: err.response.data.errorMessage,
+                    withCloseButton: true,
+                    // className: "!border-red-500",
+                    // icon: <IconX style={{ width: "90%", height: "90%" }} />,
+                    // color:"red"
+
+                })
+            });
+        }
     }
+
+    // const handleSubmit = () => {
+    //     e.preventDefault();
+
+    //     let valid = true;
+    //     let newFormError = {};
+
+    //     for (let key in data) {
+    //         if (key === "accountType") continue;
+
+    //         if (key === "confirmPassword") {
+    //             if (data[key] !== data["password"]) {
+    //                 newFormError[key] = "Passwords do not match.";
+    //             }
+    //         } else {
+    //             newFormError[key] = signupValidation(key, data[key]);
+    //         }
+
+    //         if (newFormError[key]) valid = false;
+    //     }
+
+    //     setFormError(newFormError);
+    //     console.log(valid);
+
+    //     if (valid === true) {
+    //         registerUser(data)
+    //             .then((res) => {
+    //                 console.log(res);
+    //             })
+    //             .catch((err) => console.log(err));
+    //     }
+    // };
+
 
     return (
         <StyledWrapper>
@@ -46,14 +175,7 @@ const RegisterForm = () => {
                     <h4 className="text-gradient lg:text-4xl sm:text-3xl text-xl text-center lg:px-20 px-10 pt-2">Créer un compte</h4>
                     <form className='flex flex-col md:gap-4 gap-2'>
                         {/* <input autoComplete="off" value={data.prenom} onChange={handleChange} id="prenom" name="prenom" type="text" placeholder="Prénom" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto " /> */}
-                        <TextInput
-                            error={formError.prenom}
-                            size='lg'
-                            placeholder="Prénom"
-                            value={data.prenom}
-                            onChange={handleChange}
-                            name="prenom"
-                        />
+                        <TextInput error={formError.prenom} size='lg' placeholder="Prénom" value={data.prenom} onChange={handleChange} name="prenom" />
                         <TextInput
                             error={formError.nom}
                             size='lg'
@@ -61,7 +183,8 @@ const RegisterForm = () => {
                             value={data.nom}
                             onChange={handleChange}
                             name="nom"
-                        /> <TextInput
+                        /> 
+                        <TextInput
                             error={formError.email}
                             size='lg'
                             placeholder="Email"
@@ -77,7 +200,6 @@ const RegisterForm = () => {
                             onChange={handleChange}
                             name="motdepasse"
                         />
-
                         <TextInput
                             error={formError.confirmerMotdepasse}
                             size='lg'
@@ -87,11 +209,10 @@ const RegisterForm = () => {
                             name="confirmerMotdepasse"
                             whithAsterik
                         />
-
                         <div>
                             <button className="btn btn-border-gradient text-amber-50! mb-6!" onClick={handleSubmit} >S'inscrire</button>
                             <div className='h-0.5 mb-6 bg-gradient-to-br from-[#4C3163] to-[#A09F87]' />
-                            <a href="/auth/login" className="block mb-6! border-b-1 max-w-max mx-auto">Vous avez déja un compte ?</a>
+                            <span className="block mb-6! border-b-1 max-w-max mx-auto cursor-pointer" onClick={ () => {navigate("/auth/login"); setFormError(form); setData(form)} }>Vous avez déja un compte ?</span>
                         </div>
 
                     </form>
