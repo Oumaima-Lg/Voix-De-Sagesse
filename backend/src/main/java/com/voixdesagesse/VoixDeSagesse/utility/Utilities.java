@@ -1,5 +1,7 @@
 package com.voixdesagesse.VoixDeSagesse.utility;
 
+import java.security.SecureRandom;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -28,11 +30,19 @@ public class Utilities {
         // Permet de spécifier les opérations d'update à effectuer sur le document MongoDB.
         update.inc("seq", 1);
         FindAndModifyOptions options = new FindAndModifyOptions();
-        options.returnNew(true);
+        options.returnNew(true).upsert(true);
         Sequence seq = mongoOperation.findAndModify(query, update, options, Sequence.class);
         if (seq == null) throw new ArticlaException("Unable to get sequence id for key : " + key);
         return seq.getSeq();
     }
 
-    
+    public static String generateOTP () {
+        StringBuilder otp  = new StringBuilder();
+        SecureRandom random = new SecureRandom();
+        for (int i = 0; i < 6; i++) {
+            otp.append(random.nextInt(10));
+        }
+        return otp.toString();
+        
+    }
 }

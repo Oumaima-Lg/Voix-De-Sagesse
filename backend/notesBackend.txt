@@ -12,7 +12,7 @@ Annotations :
 
 ------------------------------------------------------------------------------------------------------------------------
 
-Réponse HTTP :
+Réponse HTTP : ResponseEntity
 
 Utilisation de ResponseEntity pour définir les réponses HTTP avec des codes d'état appropriés 
 (par exemple, HttpStatus.CREATED pour une création réussie, ou HttpStatus.NOT_FOUND si l'objet n'est pas trouvé).
