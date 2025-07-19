@@ -3,7 +3,6 @@ package com.voixdesagesse.VoixDeSagesse.dto;
 import java.sql.Date;
 import java.util.List;
 
-
 import com.voixdesagesse.VoixDeSagesse.entity.Article;
 import com.voixdesagesse.VoixDeSagesse.entity.User;
 
@@ -50,4 +49,3 @@ public class UserDTO {
 }
 
 // password validation regex for uppercase lowercase special character and number and should have lenght between 8 to 15
-// 3:36:57
