@@ -14,4 +14,3 @@ public class VoixDeSagesseApplication {
 
 }
 
-// 4:40:00

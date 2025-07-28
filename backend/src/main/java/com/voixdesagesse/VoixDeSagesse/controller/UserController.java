@@ -60,7 +60,6 @@ public class UserController {
         userService.verifyOtp(email, otp);
         return new ResponseEntity<>(new ResponseDTO("OTP has been verified."), HttpStatus.OK);
     }
-
     
 
 }

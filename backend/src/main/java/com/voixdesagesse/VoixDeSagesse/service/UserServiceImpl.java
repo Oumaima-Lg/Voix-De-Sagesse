@@ -109,7 +109,6 @@ public class UserServiceImpl implements UserService {
         List<OTP> expiredOTPs = otpRepository.findByCreationTimeBefore(expiry);
         if (!expiredOTPs.isEmpty()) {
             otpRepository.deleteAll(expiredOTPs);
-            System.out.println("Removed " + expiredOTPs.size() + " expired OTPs.");
         }
     }
 

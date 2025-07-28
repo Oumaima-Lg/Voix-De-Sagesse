@@ -17,7 +17,6 @@ import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 
-
 @RestControllerAdvice
 public class ExceptionControllerAdvice {
 
@@ -26,29 +25,35 @@ public class ExceptionControllerAdvice {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorInfo> generalException(Exception exception) {
-        ErrorInfo error = new ErrorInfo(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value() , LocalDateTime.now());
+        ErrorInfo error = new ErrorInfo(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                LocalDateTime.now());
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(ArticlaException.class)
     public ResponseEntity<ErrorInfo> generalException(ArticlaException exception) {
         String msg = environment.getProperty(exception.getMessage());
-        ErrorInfo error = new ErrorInfo(msg, HttpStatus.INTERNAL_SERVER_ERROR.value() , LocalDateTime.now());
+        ErrorInfo error = new ErrorInfo(msg, HttpStatus.INTERNAL_SERVER_ERROR.value(), LocalDateTime.now());
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})
+    @ExceptionHandler({ MethodArgumentNotValidException.class, ConstraintViolationException.class })
     public ResponseEntity<ErrorInfo> validatorExceptionHandler(Exception exception) {
         String msg = "";
-        if(exception instanceof MethodArgumentNotValidException manvException) {
-            msg = manvException.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(", "));
+        if (exception instanceof MethodArgumentNotValidException manvException) {
+            msg = manvException.getAllErrors().stream().map(ObjectError::getDefaultMessage)
+                    .collect(Collectors.joining(", "));
         } else {
-            ConstraintViolationException cvException = (ConstraintViolationException)exception;
-            msg = cvException.getConstraintViolations().stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(", "));
+            ConstraintViolationException cvException = (ConstraintViolationException) exception;
+            msg = cvException.getConstraintViolations().stream().map(ConstraintViolation::getMessage)
+                    .collect(Collectors.joining(", "));
         }
-        ErrorInfo error = new ErrorInfo(msg, HttpStatus.BAD_REQUEST.value() , LocalDateTime.now());
+        ErrorInfo error = new ErrorInfo(msg, HttpStatus.BAD_REQUEST.value(), LocalDateTime.now());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
-    
 }
+
+
+// Valid pour valider les objets (MethodArgumentNotValidException)
+// @Validated ou validation de paramètres simples (ConstraintViolationException)

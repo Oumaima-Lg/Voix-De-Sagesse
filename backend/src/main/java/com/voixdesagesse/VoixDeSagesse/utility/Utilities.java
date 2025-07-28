@@ -25,9 +25,7 @@ public class Utilities {
 
     public static Long getNextSequence(String key) throws ArticlaException {
         Query query = new Query(Criteria.where("_id").is(key));
-        // La requête query est créée pour chercher un document où la clé _id est égale à key
         Update update = new Update();
-        // Permet de spécifier les opérations d'update à effectuer sur le document MongoDB.
         update.inc("seq", 1);
         FindAndModifyOptions options = new FindAndModifyOptions();
         options.returnNew(true).upsert(true);
@@ -46,3 +44,39 @@ public class Utilities {
         
     }
 }
+
+
+// 🔹 Query (classe)
+// Sert à construire une requête MongoDB.
+// Utilisée pour définir des critères de recherche dans une collection Mongo.
+// Query query = new Query(Criteria.where("_id").is("user_1"));
+// 👉 Cela correspond à la requête Mongo suivante :
+// { "_id": "user_1" }
+
+// 🔹 Criteria (classe)
+// Permet de définir les conditions (filtres) de ta requête.
+// Elle est utilisée à l’intérieur d’un objet Query.
+// Criteria.where("age").gte(18)     // age >= 18
+// Criteria.where("status").is("active")
+
+// 🔹 Update (classe)
+// Sert à définir les modifications à appliquer sur un document existant.
+// Update update = new Update().inc("seq", 1);
+// 👉 Cela signifie : incrémenter le champ seq de 1 (équivalent à $inc en MongoDB).
+
+// 🔹 FindAndModifyOptions (classe)
+// returnNew(true) : retourne le nouveau document modifié (sinon il retourne l'ancien).
+// upsert(true) : crée un document si aucun ne correspond à la requête (comme insertIfNotExists).
+// FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(true);
+
+// 🔹 findAndModify (méthode)
+// Définie dans : MongoOperations ou MongoTemplate
+// Cette méthode permet de :
+// Trouver un document
+// Le modifier
+// Et retourner l’ancien ou le nouveau document
+// <T> T findAndModify(Query query, Update update, FindAndModifyOptions options, Class<T> entityClass);
+
+
+
+
