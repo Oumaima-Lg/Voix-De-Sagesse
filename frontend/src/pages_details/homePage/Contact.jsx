@@ -33,7 +33,7 @@ export function AppSpline() {
 
 const Contact = () => {
   return (
-    <section id='Contact' className='section text-white '>
+    <section id='Contact' className='section text-white border-1 border-white/0'>
       <div className='sm:container mx-auto p-[20px] pt-35 flex flex-col gap-y-18 mb-20'>
         <motion.div
           variants={fadeIn('right', 0.3)}

@@ -10,6 +10,7 @@ import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import ResetPassword from './ResetPassword';
+import { errorNotification, successNotification } from '../../services/NotificationService';
 
 
 
@@ -49,28 +50,13 @@ const LoginForm = () => {
             loginUser(data).then((res) => {
                 console.log(res);
                 // alert('Login réussie!');
-                notifications.show({
-                    title: 'success',
-                    message: 'Do not forget to star Mantine on GitHub! 🌟',
-                    withCloseButton: true,
-                    className: "!border-green-500",
-                    icon: <IconCheck style={{ width: "90%", height: "90%" }} />,
-                    color: "teal"
-                })
+                successNotification('Success', 'Login réussie !');
                 setTimeout(() => {
                     navigate("/articla")
                 }, 4000)
             }).catch((err) => {
                 console.log(err.response.data);
-                notifications.show({
-                    title: 'failed',
-                    message: err.response.data.errorMessage,
-                    withCloseButton: true,
-                    className: "!border-red-500 !border-1",
-                    icon: <IconX style={{ width: "90%", height: "90%" }} />,
-                    color:"red"
-
-                })
+                errorNotification('Failed', err.response.data.errorMessage);
             });
         }
     }

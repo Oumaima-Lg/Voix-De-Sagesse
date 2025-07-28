@@ -8,6 +8,7 @@ import { notifications } from '@mantine/notifications';
 import { IconCheck } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { Link as LinkRouter } from "react-router-dom";
+import { errorNotification, successNotification } from '../../services/NotificationService';
 
 const form = {
     nom: "",
@@ -106,15 +107,7 @@ const RegisterForm = () => {
                 console.log(res);
                 // alert('Inscription réussie !');
                 setData(form);
-                notifications.show({
-                    title: 'success',
-                    message: 'Do not forget to star Mantine on GitHub! 🌟',
-                    withCloseButton: true,
-                    className: "!border-green-500",
-                    icon: <IconCheck style={{ width: "90%", height: "90%" }} />,
-                    color:"teal"
-
-                })
+                successNotification('Success', 'Inscription réussie !');
                 
                 setTimeout( () => {
                     navigate("/auth/login")
@@ -122,15 +115,8 @@ const RegisterForm = () => {
 
             }).catch((err) => {
                 console.log(err);
-                notifications.show({
-                    title: 'failed',
-                    message: err.response.data.errorMessage,
-                    withCloseButton: true,
-                    // className: "!border-red-500",
-                    // icon: <IconX style={{ width: "90%", height: "90%" }} />,
-                    // color:"red"
-
-                })
+                errorNotification('Failed',  err.response.data.errorMessage);
+                
             });
         }
     }
