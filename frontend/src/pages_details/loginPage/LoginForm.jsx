@@ -11,18 +11,23 @@ import { IconCheck, IconX } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import ResetPassword from './ResetPassword';
 import { errorNotification, successNotification } from '../../services/NotificationService';
-
+import { useDispatch } from 'react-redux';
+import { setUser } from '../../Slices/UserSlice';
+import { LoadingOverlay, Button, Group, Box } from '@mantine/core';
 
 
 // log1@45HG
 
-const form = {
-    email: "",
-    motdepasse: "",
-}
 
 
 const LoginForm = () => {
+    const [loading, setLoading] = useState(false);
+    const [visible, { toggle }] = useDisclosure(true);
+    const dispatch = useDispatch();
+    const form = {
+        email: "",
+        motdepasse: "",
+    }
 
     const [data, setData] = useState(form);
     const [formError, setFormError] = useState(form);
@@ -36,6 +41,7 @@ const LoginForm = () => {
     }
 
     const handleSubmit = (e) => {
+       
         let valid = true;
         let newFormError = {};
         for (let key in data) {
@@ -47,14 +53,18 @@ const LoginForm = () => {
         e.preventDefault(); //  pour empêcher le comportement par défaut du formulaire
         console.log("data recu : ", data);
         if (valid) {
+            setLoading(true);
             loginUser(data).then((res) => {
                 console.log(res);
                 // alert('Login réussie!');
                 successNotification('Success', 'Login réussie !');
                 setTimeout(() => {
+                    setLoading(false);
+                    dispatch(setUser(res));
                     navigate("/articla")
                 }, 4000)
             }).catch((err) => {
+                setLoading(false);
                 console.log(err.response.data);
                 errorNotification('Failed', err.response.data.errorMessage);
             });
@@ -63,45 +73,51 @@ const LoginForm = () => {
 
     return (
         <>
-        
-        <StyledWrapper>
-            <div className="mx-auto  p-14">
-                <div className='card mx-auto border-4 border-image-gradient sm:px-9 sm:py-4 px-4 py-2 flex flex-col md:gap-10 sm:gap-8 gap-6'>
-                    <h4 className="text-gradient lg:text-4xl sm:text-3xl text-xl text-center lg:px-20 px-10 pt-2">Se Connecter</h4>
-                    <form className='flex flex-col md:gap-4 gap-2'>
-                        <TextInput
-                            error={formError.email}
-                            size='lg'
-                            placeholder="Email"
-                            value={data.email}
-                            onChange={handleChange}
-                            name="email"
-                        />
-                        <TextInput
-                            error={formError.motdepasse}
-                            size='lg'
-                            placeholder="Mot de passe"
-                            value={data.motdepasse}
-                            onChange={handleChange}
-                            name="motdepasse"
-                        />
 
-                        <div>
-                            <button className="btn btn-border-gradient text-amber-50! mb-6!" onClick={handleSubmit}>CONNEXION</button>
-                            <div onClick={open} className="block mb-6! border-b-1 max-w-max mx-auto cursor-pointer">Mot de passe oublié ?</div>
-                            <div className='h-0.5 bg-gradient-to-br from-[#4C3163] to-[#A09F87]' />
-                            <button className="btn btn-border-gradient text-amber-50! cursor-pointer" onClick={ (e) => {e.preventDefault(); navigate("/auth/register"); setFormError(form); setData(form)} }  >
-                                Créer un nouveau compte
-                            </button>
-                        </div>
-                    </form>
+            <StyledWrapper>
+                <div className="mx-auto  p-14">
+                    <div className='card mx-auto border-4 border-image-gradient sm:px-9 sm:py-4 px-4 py-2 flex flex-col md:gap-10 sm:gap-8 gap-6'>
+                        <h4 className="text-gradient lg:text-4xl sm:text-3xl text-xl text-center lg:px-20 px-10 pt-2">Se Connecter</h4>
+                        <form className='flex flex-col md:gap-4 gap-2'>
+                            <TextInput
+                                error={formError.email}
+                                size='lg'
+                                placeholder="Email"
+                                value={data.email}
+                                onChange={handleChange}
+                                name="email"
+                            />
+                            <TextInput
+                                error={formError.motdepasse}
+                                size='lg'
+                                placeholder="Mot de passe"
+                                value={data.motdepasse}
+                                onChange={handleChange}
+                                name="motdepasse"
+                            />
+
+                            <div>
+                                <LoadingOverlay
+                                    visible={loading}
+                                    zIndex={1000}
+                                    overlayProps={{ radius: 'sm', blur: 2 }}
+                                    loaderProps={{ color: '#A09F87', type: 'bars' }}
+                                />
+                                <button className="btn btn-border-gradient text-amber-50! mb-6!" onClick={handleSubmit}>CONNEXION</button>
+                                <div onClick={open} className="block mb-6! border-b-1 max-w-max mx-auto cursor-pointer">Mot de passe oublié ?</div>
+                                <div className='h-0.5 bg-gradient-to-br from-[#4C3163] to-[#A09F87]' />
+                                <button className="btn btn-border-gradient text-amber-50! cursor-pointer" onClick={(e) => { e.preventDefault(); navigate("/auth/register"); setFormError(form); setData(form) }}  >
+                                    Créer un nouveau compte
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </div>
-        </StyledWrapper>
+            </StyledWrapper>
 
-        <div>
-            <ResetPassword opened={opened} close={close} />
-        </div>
+            <div>
+                <ResetPassword opened={opened} close={close} />
+            </div>
 
         </>
     );

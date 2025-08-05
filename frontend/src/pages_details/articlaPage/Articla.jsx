@@ -3,6 +3,7 @@ import HeaderArticla from './HeaderArticla'
 import Home from './Home'
 import Article from './Article'
 import { useLocation } from 'react-router-dom'
+import Profile from './Profile'
 
 
 const Articla = () => {
@@ -16,6 +17,8 @@ const Articla = () => {
                 return <Article />
             case '/articla/nouveauArticle':
                 return <nvArticle />
+            case '/articla/profile':
+                return <Profile />
             default:
                 return <Home />
         }

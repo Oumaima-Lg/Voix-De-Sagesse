@@ -20,6 +20,7 @@ import { IconXboxX } from '@tabler/icons-react';
 
 
 import Spline from '@splinetool/react-spline';
+import { useSelector } from 'react-redux'
 
 export function AppSpline() {
     return (
@@ -32,6 +33,7 @@ export function AppSpline() {
 
 const Home = () => {
     const [opened, { open, close }] = useDisclosure(false);
+    const user = useSelector((state) => state.user);
     return (
 
         <div className='flex sm:flex-row flex-col   mx-auto lg:pt-34 pt-22 min-h-screen bg-gradient-to-bl from-[#171717] from-55% to-[#4E3F59] to-100%'>
@@ -154,8 +156,8 @@ const Home = () => {
 
             <div className='w-full pt-10 sm:pt-0  sm:w-5/6 flex flex-col  gap-6 lg:gap-10 px-5'>
                 <div className='pt-5 text-center  text-gradient charm xl:text-6xl text-3xl leading-tight '>
-                    {/* BIENVENUE OUMAIMA LAGHJIBI */}
-                    <ShinyText text=" BIENVENUE OUMAIMA LAGHJIBI" disabled={false} speed={3} className='' />
+                    {/* <ShinyText text=" BIENVENUE OUMAIMA LAGHJIBI" disabled={false} speed={3} className='' /> */}
+                    <ShinyText text={"BIENVENUE " + user.nom.toUpperCase() + " " + user.prenom.toUpperCase()} disabled={false} speed={3} className='' />
                 </div>
                 <div className='flex lg:flex-row flex-col justify-between size-full'>
                     <div className='flex flex-col lg:items-end lg:justify-end justify-center items-center  '>

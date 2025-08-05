@@ -1,17 +1,32 @@
 import React, {useState} from 'react'
 
 import arrow from '../../assets/arrow.png';
-import { Link as LinkRouter } from "react-router-dom";
+import { Link as LinkRouter, useNavigate } from "react-router-dom";
 import vector from '../../assets/vector.png';
 import oumi from '../../assets/oumi.png';
 import PermIdentityIcon from '@mui/icons-material/PermIdentity';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import LogoutIcon from '@mui/icons-material/Logout';
+import { useDispatch, useSelector } from 'react-redux';
+import { removeUser } from '../../Slices/UserSlice';
+
 
 
 
 const HeaderArticla = () => {
-     const [toggle, setToggle] = useState(false);
+    const navigate = useNavigate();
+    const [toggle, setToggle] = useState(false);
+    const dispatch = useDispatch();
+    const user = useSelector((state) => state.user);
+    const handleLogout=()=>{
+        dispatch(removeUser());
+        navigate("*");
+    }
+    const handleProfile=()=>{
+        navigate("/articla/profile");
+        setToggle(!toggle);
+    }
+    
     return (
         <div>
             <header className='pt-4 fixed z-50 right-0 left-0 top-0 bg-black/1 backdrop-blur-2xl'>
@@ -30,7 +45,7 @@ const HeaderArticla = () => {
                                 onClick={() => setToggle(!toggle)}
                              />
                         </div>
-                        <div className='sm:text-sm text-xs text-center'>Oumaima laghjibi</div>
+                        <div className='sm:text-sm text-xs text-center'>{user.nom + " " + user.prenom}</div>
                         <div className=''>
                             <img src={oumi} alt="" />
                         </div>
@@ -38,21 +53,21 @@ const HeaderArticla = () => {
                         <div className={`${ toggle ? "flex" : "hidden"} absolute top-13 right-0 left-0 h-50 py-6 px-2 flex-col justify-between bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] border-3 border-[#202020] rounded-lg`}>
                                 <div className='flex gap-2 items-center cursor-pointer hover:scale-105 transform-gpu hover:text-[#A09F87]'>
                                     <div>
-                                        <PermIdentityIcon fontSize='large'  />
+                                        <PermIdentityIcon fontSize='medium'  />
                                     </div>
-                                    <div className='text-md font-medium'>Votre Profil</div>
+                                    <button className='text-md font-medium cursor-pointer' onClick={handleProfile}>Votre Profil</button>
                                 </div>
                                 <div className='flex gap-2 items-center cursor-pointer hover:scale-105 transform-gpu hover:text-[#A09F87]'>
                                     <div>
-                                        <BookmarkBorderIcon fontSize='large'  />
+                                        <BookmarkBorderIcon fontSize='medium'  />
                                     </div>
                                     <div className='text-md font-medium'>Vos Favoris</div>
                                 </div>
-                                <div className='flex gap-2 items-center cursor-pointer hover:scale-105 transform-gpu hover:text-[#A09F87]'>
-                                    <div>
-                                        <LogoutIcon fontSize='large'  />
+                                <div className='flex gap-2 items-center cursor-pointer  text-orange-600 hover:scale-105 transform-gpu hover:text-[#A09F87]'>
+                                    <div className='pl-1'>
+                                        <LogoutIcon fontSize='medium'  />
                                     </div>
-                                    <div className='text-md font-medium'>Se Déconnecter</div>
+                                    <button className='text-md font-medium cursor-pointer' onClick={handleLogout}>Se Déconnecter</button>
                                 </div>                               
                         </div>
                     </div>
