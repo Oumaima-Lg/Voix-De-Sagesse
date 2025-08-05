@@ -8,13 +8,16 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.LoginDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.ResponseDTO;
-import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
+import com.voixdesagesse.VoixDeSagesse.dto.UserProfileDTO;
+import com.voixdesagesse.VoixDeSagesse.dto.UserRegistrationDTO;
 import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
 import com.voixdesagesse.VoixDeSagesse.service.UserService;
 
@@ -32,9 +35,9 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/auth/register")
-    public ResponseEntity<UserDTO> registerUser(@RequestBody @Valid UserDTO userDTO) throws ArticlaException {
-        userDTO = userService.registerUser(userDTO);
-        return new ResponseEntity<>(userDTO, HttpStatus.CREATED);
+    public ResponseEntity<UserRegistrationDTO> registerUser(@RequestBody @Valid UserRegistrationDTO registerDTO) throws ArticlaException {
+                
+        return new ResponseEntity<>(userService.registerUser(registerDTO), HttpStatus.CREATED);
     }
 
     @PostMapping("/auth/login")
@@ -61,5 +64,10 @@ public class UserController {
         return new ResponseEntity<>(new ResponseDTO("OTP has been verified."), HttpStatus.OK);
     }
     
+    @PutMapping("/profile")
+    public ResponseEntity<UserProfileDTO> updateUserProfile(@Valid @RequestBody UserProfileDTO profileDTO) throws ArticlaException {
+        UserProfileDTO updatedUser = userService.updateUserProfile(profileDTO);
+        return ResponseEntity.ok(updatedUser);
+    }
 
 }

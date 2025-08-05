@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import com.voixdesagesse.VoixDeSagesse.dto.LoginDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.ResponseDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
+import com.voixdesagesse.VoixDeSagesse.dto.UserProfileDTO;
+import com.voixdesagesse.VoixDeSagesse.dto.UserRegistrationDTO;
 import com.voixdesagesse.VoixDeSagesse.entity.Data;
 import com.voixdesagesse.VoixDeSagesse.entity.OTP;
 import com.voixdesagesse.VoixDeSagesse.entity.User;
@@ -40,7 +42,7 @@ public class UserServiceImpl implements UserService {
     private JavaMailSender mailSender;
 
     @Override
-    public UserDTO registerUser(UserDTO userDTO) throws ArticlaException {
+    public UserRegistrationDTO registerUser(UserRegistrationDTO userDTO) throws ArticlaException {
 
         Optional<User> optional = userRepository.findByEmail(userDTO.getEmail());
         if (optional.isPresent())
@@ -52,7 +54,7 @@ public class UserServiceImpl implements UserService {
         User user = userDTO.toEntity();
         user = userRepository.save(user);
 
-        return user.toDTO();
+        return user.toRegisterDTO();
     }
 
     @Override
@@ -110,6 +112,18 @@ public class UserServiceImpl implements UserService {
         if (!expiredOTPs.isEmpty()) {
             otpRepository.deleteAll(expiredOTPs);
         }
+    }
+
+    @Override
+    public UserProfileDTO updateUserProfile(UserProfileDTO profileDTO) throws ArticlaException {
+        User user = userRepository.findById(profileDTO.getId()).orElseThrow(() -> new ArticlaException("USER_NOT_FOUND"));
+        user.setNom(profileDTO.getNom());
+        user.setPrenom(profileDTO.getPrenom());
+        // save into a repo Image
+        user.setProfilePicture(profileDTO.getProfilePicture());
+        user.setBio(profileDTO.getBio());
+        userRepository.save(user);
+        return profileDTO;
     }
 
 }

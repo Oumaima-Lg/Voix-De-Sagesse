@@ -1,15 +1,17 @@
 package com.voixdesagesse.VoixDeSagesse.service;
 
+import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.LoginDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.ResponseDTO;
-import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
+import com.voixdesagesse.VoixDeSagesse.dto.UserProfileDTO;
+import com.voixdesagesse.VoixDeSagesse.dto.UserRegistrationDTO;
 import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
 
 
 // @Service
 public interface UserService {
 
-    public UserDTO registerUser(UserDTO userDTO) throws ArticlaException;
+    public UserRegistrationDTO  registerUser(UserRegistrationDTO userDTO) throws ArticlaException;
 
     public UserDTO loginUser(LoginDTO loginDTO) throws ArticlaException;
 
@@ -18,5 +20,7 @@ public interface UserService {
     public Boolean verifyOtp(String email, String otp) throws ArticlaException;
 
     public ResponseDTO changePassword(LoginDTO loginDTO) throws ArticlaException;
+
+    public UserProfileDTO updateUserProfile(UserProfileDTO profileDTO) throws ArticlaException;
 
 }
