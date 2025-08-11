@@ -3,7 +3,6 @@ import axios from "axios";
 const base_url = "http://localhost:8080/users/";
 
 const registerUser = async (user) => {
-    console.log("Corps de la requête:", user); 
     return axios.post(`${base_url}auth/register`, user)
         .then(res => res.data)
         .catch(error => { throw error; });
@@ -33,4 +32,10 @@ const changePass=async(email, motdepasse) => {
     .catch(error =>{throw error;});
 }
 
-export { registerUser, loginUser, sendOtp, verifyOtp, changePass };
+const updateUserProfile = async (userProfile) => {
+    return axios.put(`${base_url}updateProfile`, userProfile)
+    .then(res => res.data)
+    .catch(error => { throw error; });
+}
+
+export { registerUser, loginUser, sendOtp, verifyOtp, changePass, updateUserProfile };

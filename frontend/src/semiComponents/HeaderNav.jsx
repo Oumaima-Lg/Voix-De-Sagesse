@@ -21,7 +21,7 @@ const HeaderNav = ({ isHidden }) => {
         Contact
       </Link>
       {user ? <LinkRouter to='/articla' className={`${!isHidden ? "block" : "hidden"} text-white cursor-pointer border-2! border-gradient hover:border-white/45 background-gradient p-2 `}>
-                 Se connecter
+                Mon espace
               </LinkRouter> 
             : <LinkRouter to='/auth/login' className={`${!isHidden ? "block" : "hidden"} text-white cursor-pointer border-2! border-gradient hover:border-white/45 background-gradient p-2 `}>
                 Se connecter

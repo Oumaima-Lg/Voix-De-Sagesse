@@ -61,7 +61,7 @@ const LoginForm = () => {
                 setTimeout(() => {
                     setLoading(false);
                     dispatch(setUser(res));
-                    navigate("/articla")
+                    navigate("/articla");
                 }, 4000)
             }).catch((err) => {
                 setLoading(false);

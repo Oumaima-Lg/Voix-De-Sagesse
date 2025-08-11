@@ -2,13 +2,14 @@
 
 import { useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
-// import { updateUser } from "../../Slices/UserSlice"
-import HeaderArticla from "./HeaderArticla"
 import ShinyText from "../../blocks/TextAnimations/ShinyText/ShinyText"
 import { PiUser, PiUserCircle, PiCamera, PiPencil, PiCheck, PiX } from "react-icons/pi"
 import { IoPersonOutline, IoMailOutline, IoCallOutline, IoLocationOutline } from "react-icons/io5"
 import { MdOutlineLanguage, MdOutlineNotifications, MdOutlineVisibility } from "react-icons/md"
 import profileAvatar from "../../assets/profileAvatar.jpg"
+import { errorNotification, successNotification } from "../../services/NotificationService"
+import { updateUser } from "../../Slices/UserSlice"
+import { updateUserProfile } from '../../services/UserService';
 
 
 
@@ -17,6 +18,7 @@ const Profile = () => {
     const dispatch = useDispatch()
     const [isEditing, setIsEditing] = useState(false)
     const [editedUser, setEditedUser] = useState({
+        id: user.id || "",
         nom: user.nom || "",
         prenom: user.prenom || "",
         email: user.email || "",
@@ -39,7 +41,14 @@ const Profile = () => {
     }
 
     const handleSave = () => {
-        // dispatch(updateUser(editedUser))
+        updateUserProfile(editedUser).then((res) => {
+            console.log(res);
+            dispatch(updateUser(res));
+            successNotification('Success', 'Profile updated successfully!');
+        }).catch((err) => {
+            console.log(err);
+            errorNotification('Error', err.response.data.errorMessage);
+        })
         setIsEditing(false)
     }
 
@@ -283,7 +292,7 @@ const Profile = () => {
                                 {isEditing ? (
                                     <textarea
                                         value={editedUser.bio}
-                                        onChange={(e) => handleInputChange("biography", e.target.value)}
+                                        onChange={(e) => handleInputChange("bio", e.target.value)}
                                         rows={4}
                                         className="w-full bg-[#202020] border-2 border-[#4C3163] rounded-lg px-4 py-3 text-white focus:border-[#A09F87] focus:outline-none transition-colors resize-none"
                                         placeholder="Parlez-nous de vous..."

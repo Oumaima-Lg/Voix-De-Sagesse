@@ -35,6 +35,11 @@ const UserSlice = createSlice({
       setItem("user", action.payload); // effet de bord
       return action.payload; // met à jour l'état avec le nouvel utilisateur
     },
+    updateUser: (state, action) => {
+      const updatedUser = { ...state, ...action.payload };
+      setItem("user", updatedUser); 
+      return updatedUser; // met à jour l'état avec l'utilisateur modifié
+    },
     removeUser: () => {
       removeItem("user"); // effet de bord
       return null; // réinitialise l'état
@@ -42,5 +47,5 @@ const UserSlice = createSlice({
   },
 });
 
-export const { setUser, removeUser } = UserSlice.actions;
+export const { setUser, updateUser, removeUser } = UserSlice.actions;
 export default UserSlice.reducer;

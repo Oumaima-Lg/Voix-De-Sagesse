@@ -9,6 +9,7 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useDispatch, useSelector } from 'react-redux';
 import { removeUser } from '../../Slices/UserSlice';
+import MenuBar from "./MenuBar";
 
 
 
@@ -20,7 +21,7 @@ const HeaderArticla = () => {
     const user = useSelector((state) => state.user);
     const handleLogout=()=>{
         dispatch(removeUser());
-        navigate("*");
+        navigate("/");
     }
     const handleProfile=()=>{
         navigate("/articla/profile");
@@ -38,6 +39,9 @@ const HeaderArticla = () => {
                                 Voix De Sagesse
                             </span>
                         </LinkRouter>
+                    </div>
+                    <div>
+                        <MenuBar />
                     </div>
                     <div className='text-white flex  items-center sm:gap-4 gap-2 bg-[#202020] pl-4 rounded-l-[8px] relative'>
                         <div>

@@ -52,9 +52,9 @@ const Home = () => {
                         <div>
                             <IoCreateOutline className='md:text-5xl text-2xl' />
                         </div>
-                        <div className='font-bold md:text-xl text-sm'>
+                        <LinkRouter to="/articla/nouveauArticle" className="font-bold md:text-xl text-sm">
                             Nouveau <br /> Article
-                        </div>
+                        </LinkRouter>
                     </div>
                     <div className='flex flex-row items-center gap-3 cursor-pointer  hover:text-[#A09F87] hover:scale-105 transform-gpu' >
                         <div>
