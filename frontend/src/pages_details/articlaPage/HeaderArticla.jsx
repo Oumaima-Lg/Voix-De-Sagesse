@@ -40,9 +40,9 @@ const HeaderArticla = () => {
                             </span>
                         </LinkRouter>
                     </div>
-                    <div>
+                    {/* <div>
                         <MenuBar />
-                    </div>
+                    </div> */}
                     <div className='text-white flex  items-center sm:gap-4 gap-2 bg-[#202020] pl-4 rounded-l-[8px] relative'>
                         <div>
                             <img src={vector} alt="" className='cursor-pointer hover:scale-110 transform-gpu'

@@ -16,10 +16,6 @@ import { setUser } from '../../Slices/UserSlice';
 import { LoadingOverlay, Button, Group, Box } from '@mantine/core';
 
 
-// log1@45HG
-
-
-
 const LoginForm = () => {
     const [loading, setLoading] = useState(false);
     const [visible, { toggle }] = useDisclosure(true);

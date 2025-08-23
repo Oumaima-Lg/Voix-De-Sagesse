@@ -13,7 +13,7 @@ const Articla = () => {
         switch(location.pathname) {
             case '/articla':
                 return <Home />
-            case '/articla/article':
+            case '/articla/favorite':
                 return <Article />
             case '/articla/nouveauArticle':
                 return <nvArticle />

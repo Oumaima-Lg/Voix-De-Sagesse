@@ -16,7 +16,7 @@ const form = {
     email: "",
     motdepasse: "",
     confirmerMotdepasse: "",
-    accountType: "ADMIN"
+    accountType: "USER"
 }
 
 const RegisterForm = () => {

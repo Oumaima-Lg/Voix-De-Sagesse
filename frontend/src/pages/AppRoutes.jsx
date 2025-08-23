@@ -20,7 +20,7 @@ const AppRoutes = () => {
             <Route path="/auth/login" element={user ? <Navigate to="/articla" /> : <LoginPage />} />
             <Route path="/auth/register" element={user ? <Navigate to="/articla" /> : <RegisterPage />} />
             <Route path="/articla" element={<ArticlaPage />} />
-            {/* <Route path="/articla/article" element={<ArticlaPage />} /> */}
+            <Route path="/articla/favorite" element={<ArticlaPage />} />
             <Route path="/articla/article" element={<ArticleFeed />} />
             <Route path="/articla/nouveauArticle" element={<ArticleTypeSelection />} />
             <Route path="/articla/creerArticle" element={<CreateArticleForm />} />

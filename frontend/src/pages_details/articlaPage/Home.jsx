@@ -61,7 +61,9 @@ const Home = () => {
                             <PiArchiveLight className='md:text-5xl text-2xl' />
                         </div>
                         <div className='font-bold md:text-xl text-sm'>
-                            Vos articles <br /> personnels
+                            <LinkRouter to="/articla/favorite" className="font-bold md:text-xl text-sm">
+                                Vos articles <br /> personnels
+                            </LinkRouter>
                         </div>
                     </div>
                 </div>

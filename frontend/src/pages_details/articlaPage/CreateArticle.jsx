@@ -1,26 +1,31 @@
-"use client"
 
 import { useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { ArrowLeft, Send, Tag, User, Quote, BookOpen } from "lucide-react"
 import { FaQuoteLeft } from "react-icons/fa"
 import { BiBook } from "react-icons/bi"
+import { useSelector } from "react-redux"
+import { createHistoireArticle, createSagesseArticle } from "../../services/ArticleService"
+import { errorNotification, successNotification } from "../../services/NotificationService"
 
 const CreateArticleForm = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const searchParams = new URLSearchParams(location.search)
   const type = searchParams.get("type") || "wisdom"
+  const isWisdom = type === "wisdom"
 
-  const [formData, setFormData] = useState({
+  const form = {
     title: "",
     content: "",
-    author: "",
     source: "",
     category: "",
     tags: "",
     lesson: "",
-  })
+  }
+
+  const [formData, setFormData] = useState(form)
+  const user = useSelector((state) => state.user)
 
   const handleBack = () => {
     navigate("/articla/nouveauArticle")
@@ -29,15 +34,64 @@ const CreateArticleForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
     console.log("Form submitted:", formData)
-    // Redirect to articles feed after submission
-    navigate("/articla/article")
-  }
+    const tagsArray = formData.tags
+      .split(",")
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
+    // Sagesse
+    if (isWisdom) {
+      console.log("Sagesse Sagesse");
+      const data = {
+        content: formData.title,
+        userId: user.id,
+        source: formData.source,
+        category: formData.category,
+        tags: tagsArray,
+      }
+      createSagesseArticle(data).then((res) => {
+        console.log(res);
+        setFormData(form);
+        successNotification('Success', 'Création Article/Sagesse !');
+
+        setTimeout(() => {
+          navigate("/articla")
+        }, 4000)
+
+      }).catch((err) => {
+        console.log(err);
+        errorNotification('Failed', err.response.data.errorMessage);
+      });
+    } else {
+      console.log("Sagesse Sagesse");
+      const data = {
+        title: formData.title,
+        content: formData.content,
+        userId: user.id,
+        lesson: formData.lesson,
+        category: formData.category,
+        tags: tagsArray,
+      }
+      createHistoireArticle(data).then((res) => {
+        console.log(res);
+        setFormData(form);
+        successNotification('Success', 'Création Article/Histoire !');
+
+        setTimeout(() => {
+          navigate("/articla")
+        }, 4000)
+
+      }).catch((err) => {
+        console.log(err);
+        errorNotification('Failed', err.response.data.errorMessage);
+      });
+    }
+  } 
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const isWisdom = type === "wisdom"
+
 
   return (
     <div className="min-h-screen p-6 flex items-center justify-center bg-gradient-to-bl from-[#171717] from-55% to-[#4E3F59] to-100%">
@@ -68,25 +122,27 @@ const CreateArticleForm = () => {
         {/* Form */}
         <div className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Title/Quote Field */}
-              <div className="space-y-2">
-                <label className="text-[#A09F87] font-semibold flex items-center gap-2">
-                  {isWisdom ? <Quote className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
-                  {isWisdom ? "Citation/Proverbe" : "Titre de l'histoire"}
-                </label>
-                <input
-                  value={formData.title}
-                  onChange={(e) => handleInputChange("title", e.target.value)}
-                  placeholder={
-                    isWisdom ? "Entrez votre citation ou proverbe..." : "Donnez un titre à votre histoire..."
-                  }
-                  className="w-full bg-[#202020] border border-[#4C3163] text-white placeholder:text-gray-400 focus:border-[#A09F87] px-3 py-2 rounded outline-none"
-                />
-              </div>
+            {/* Title/Quote Field */}
+            <div className="space-y-2">
+              <label className="text-[#A09F87] font-semibold flex items-center gap-2">
+                {isWisdom ? <Quote className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
+                {isWisdom ? "Citation/Proverbe" : "Titre de l'histoire"}
+              </label>
+              <input
+                value={formData.title}
+                onChange={(e) => handleInputChange("title", e.target.value)}
+                placeholder={
+                  isWisdom ? "Entrez votre citation ou proverbe..." : "Donnez un titre à votre histoire..."
+                }
+                className="w-full bg-[#202020] border border-[#4C3163] text-white placeholder:text-gray-400 focus:border-[#A09F87] px-3 py-2 rounded outline-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ">
+
 
               {/* Author/Source Field */}
-              {isWisdom && (
+              {/* {isWisdom && (
                 <div className="space-y-2">
                   <label className="text-[#A09F87] font-semibold flex items-center gap-2">
                     <User className="w-4 h-4" />
@@ -99,23 +155,23 @@ const CreateArticleForm = () => {
                     className="w-full bg-[#202020] border border-[#4C3163] text-white placeholder:text-gray-400 focus:border-[#A09F87] px-3 py-2 rounded outline-none"
                   />
                 </div>
-              )}
+              )} */}
 
               {/* Category Selection */}
               <div className="space-y-2">
                 <label className="text-[#A09F87] font-semibold">Catégorie</label>
                 <select
                   onChange={(e) => handleInputChange("category", e.target.value)}
-                  className="w-full bg-[#202020] border border-[#4C3163] text-white focus:border-[#A09F87] px-3 py-2 rounded outline-none"
+                  className="w-full mt-1.5 bg-[#202020] border border-[#4C3163] text-white focus:border-[#A09F87] px-3 py-2 rounded outline-none"
                 >
                   <option value="">Choisir une catégorie</option>
                   {isWisdom ? (
                     <>
                       <option value="philosophie">Philosophie</option>
                       <option value="inspiration">Inspiration</option>
-                      <option value="vie-quotidienne">Vie quotidienne</option>
-                      <option value="citations-celebres">Citations célèbres</option>
-                      <option value="sagesse-populaire">Sagesse populaire</option>
+                      <option value="vie_quotidienne">Vie quotidienne</option>
+                      <option value="citations_celebres">Citations célèbres</option>
+                      <option value="sagesse_populaire">Sagesse populaire</option>
                     </>
                   ) : (
                     <>

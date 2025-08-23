@@ -3,8 +3,10 @@ import brain from '../../assets/brain.jpg'
 import { motion } from 'framer-motion';
 import { fadeIn } from '../../motions/variants';
 import { Link as LinkRouter } from "react-router-dom";
+import { useSelector } from 'react-redux';
 
 const Accueil = () => {
+  const user = useSelector((state) => state.user);
   return (
     <section id='Accueil' className='text-white section min-h-[85vh] lg:min-h-[78vh]'>
       <div className='sm:container p-[20px] pt-22 mx-auto flex xl:flex-row flex-col-reverse  items-center gap-x-12 gap-y-16'>
@@ -30,7 +32,13 @@ const Accueil = () => {
             initial="hidden" whileInView={'show'}
             viewport={{ once: false, amount: 0.7 }}
           >
-            <button className='border-gradient hover:border-white/45 lg:px-6 lg:py-4 px-4 py-2 text-xl lg:text-2xl font-bold cursor-pointer background-gradient '><LinkRouter to='/auth/login'>Se Connecter</LinkRouter></button>
+            <button className='border-gradient hover:border-white/45 lg:px-6 lg:py-4 px-4 py-2 text-xl lg:text-2xl font-bold cursor-pointer background-gradient '>
+              {user ? 
+              <LinkRouter to='/articla'>Mon espace</LinkRouter>
+              :
+              <LinkRouter to='/auth/login'>Se Connecter</LinkRouter>
+              }
+            </button>
           </motion.div>
         </div>
         <motion.div
