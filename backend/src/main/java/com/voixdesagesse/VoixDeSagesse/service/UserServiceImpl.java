@@ -1,6 +1,7 @@
 package com.voixdesagesse.VoixDeSagesse.service;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,6 +53,12 @@ public class UserServiceImpl implements UserService {
         userDTO.setMotdepasse(passwordEncoder.encode(userDTO.getMotdepasse()));
 
         User user = userDTO.toEntity();
+        user.setUsername(user.getPrenom());
+        user.setFollowersCount(0L);
+        user.setContentCount(0L);
+        user.setFollowingCount(0L);
+        user.setLikedArticlesId(new HashSet<>());
+        user.setFollowingId(new HashSet<>());
         user = userRepository.save(user);
 
         return user.toRegisterDTO();
@@ -124,6 +131,11 @@ public class UserServiceImpl implements UserService {
         user.setBio(profileDTO.getBio());
         userRepository.save(user);
         return profileDTO;
+    }
+
+    @Override
+    public User getUserById(long userId) throws ArticlaException {
+        return userRepository.findById(userId).orElseThrow(() -> new ArticlaException("USER_NOT_FOUND"));
     }
 
 }

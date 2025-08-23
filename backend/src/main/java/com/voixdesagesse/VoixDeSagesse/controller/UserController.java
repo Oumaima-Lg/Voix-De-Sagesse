@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.LoginDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.ResponseDTO;
+import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserProfileDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserRegistrationDTO;
 import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
@@ -64,7 +64,7 @@ public class UserController {
         return new ResponseEntity<>(new ResponseDTO("OTP has been verified."), HttpStatus.OK);
     }
     
-    @PutMapping("/profile")
+    @PutMapping("/updateProfile")
     public ResponseEntity<UserProfileDTO> updateUserProfile(@Valid @RequestBody UserProfileDTO profileDTO) throws ArticlaException {
         UserProfileDTO updatedUser = userService.updateUserProfile(profileDTO);
         return ResponseEntity.ok(updatedUser);

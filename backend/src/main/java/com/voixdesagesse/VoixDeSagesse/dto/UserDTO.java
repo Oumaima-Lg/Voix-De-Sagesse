@@ -1,8 +1,8 @@
 package com.voixdesagesse.VoixDeSagesse.dto;
 
-import java.util.List;
 
-import com.voixdesagesse.VoixDeSagesse.entity.Article;
+import java.util.Set;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,12 +19,17 @@ public class UserDTO {
     private String email;
     private String motdepasse;
     private AccountType accountType;
+    private String username;
+    private String phoneNumber;
+    private String location;
+    private String website;
     private String profilePicture;
     private String bio;
     private Long contentCount;
     private Long followersCount;
     private Long followingCount;
     private Long likesReceived;
-    private List<Article> articles; 
+    private Set<Long> likedArticlesId;
+    private Set<Long> followingId;  
 
 }

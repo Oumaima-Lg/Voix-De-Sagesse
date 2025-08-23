@@ -12,6 +12,10 @@ public class UserProfileDTO {
     private Long id;
     private String nom;
     private String prenom;
+    private String username;
+    private String phoneNumber;
+    private String location;
+    private String website;
     private String profilePicture;
     @Size(max = 500, message = "{user.bio.exceeded}" )
     private String bio;

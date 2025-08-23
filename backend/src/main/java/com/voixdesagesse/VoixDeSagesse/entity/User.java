@@ -1,16 +1,14 @@
 package com.voixdesagesse.VoixDeSagesse.entity;
 
-import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.voixdesagesse.VoixDeSagesse.dto.AccountType;
-import com.voixdesagesse.VoixDeSagesse.dto.UserRegistrationDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
-
+import com.voixdesagesse.VoixDeSagesse.dto.UserRegistrationDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,6 +30,10 @@ public class User {
     private String motdepasse;
     private AccountType accountType;
 
+    private String username;
+    private String phoneNumber;
+    private String location;
+    private String website;
     private String profilePicture;
     private String bio;
     private Long contentCount;
@@ -39,8 +41,9 @@ public class User {
     private Long followingCount;
     private Long likesReceived;
 
-    @DBRef  // Utilisation de DBRef pour indiquer la référence à la collection Article
-    private List<Article> articles; 
+    // @DBRef  // Utilisation de DBRef pour indiquer la référence à la collection Article
+    private Set<Long> likedArticlesId; 
+    private Set<Long> followingId; 
     
 
     public UserRegistrationDTO toRegisterDTO() {
@@ -48,7 +51,9 @@ public class User {
     }
 
     public UserDTO toDTO() {
-        return new UserDTO(this.id, this.nom, this.prenom, this.email, this.motdepasse, this.accountType, this.profilePicture,this.bio, this.contentCount, this.followersCount, this.followingCount, this.likesReceived, this.articles);
+        return new UserDTO(this.id, this.nom, this.prenom, this.email, this.motdepasse, this.accountType, this.username, 
+        this.phoneNumber, this.location, this.website, this.profilePicture,this.bio, this.contentCount, this.followersCount, 
+        this.followingCount, this.likesReceived, this.likedArticlesId, this.followingId);
     }
 
 }

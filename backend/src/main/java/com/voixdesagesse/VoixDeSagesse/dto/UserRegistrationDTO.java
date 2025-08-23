@@ -47,3 +47,12 @@ public class UserRegistrationDTO {
 }
 
 // password validation regex for uppercase lowercase special character and number and should have lenght between 8 to 15
+
+
+// {
+//     "nom" : "oooo",
+//     "prenom" :  "oooo",
+//     "email" : "ooo@gmail.com",
+//     "motdepasse" : "oooo123m@",
+//     "accountType" : "USER"
+// }

@@ -5,6 +5,7 @@ import com.voixdesagesse.VoixDeSagesse.dto.LoginDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.ResponseDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserProfileDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserRegistrationDTO;
+import com.voixdesagesse.VoixDeSagesse.entity.User;
 import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
 
 
@@ -22,5 +23,7 @@ public interface UserService {
     public ResponseDTO changePassword(LoginDTO loginDTO) throws ArticlaException;
 
     public UserProfileDTO updateUserProfile(UserProfileDTO profileDTO) throws ArticlaException;
+
+     public User getUserById(long userId) throws ArticlaException;
 
 }

@@ -1,5 +1,25 @@
 package com.voixdesagesse.VoixDeSagesse.controller;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.voixdesagesse.VoixDeSagesse.dto.HistoireDTO;
+import com.voixdesagesse.VoixDeSagesse.dto.PosteDTO;
+import com.voixdesagesse.VoixDeSagesse.dto.SagesseDTO;
+import com.voixdesagesse.VoixDeSagesse.entity.Article;
+import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
+import com.voixdesagesse.VoixDeSagesse.service.ArticleService;
+
 // import com.voixdesagesse.VoixDeSagesse.entity.Article;
 // import com.voixdesagesse.VoixDeSagesse.service.ArticleService;
 // import org.springframework.beans.factory.annotation.Autowired;
@@ -10,19 +30,39 @@ package com.voixdesagesse.VoixDeSagesse.controller;
 // import java.util.List;
 // import java.util.Optional;
 
-// @RestController
-// @RequestMapping("/api/articles")
+@CrossOrigin
+@RestController
+@RequestMapping("/articles")
 public class ArticleController {
 
-    // @Autowired
-    // private ArticleService articleService;
+    @Autowired
+    private ArticleService articleService;
 
-    // // Créer un article
-    // @PostMapping
-    // public ResponseEntity<Article> createArticle(@RequestBody Article article) {
-    //     Article createdArticle = articleService.createArticle(article);
-    //     return new ResponseEntity<>(createdArticle, HttpStatus.CREATED);
-    // }
+    
+    @PostMapping("/createSaggesseArticla")
+    public ResponseEntity<Article> createArticle(@RequestBody SagesseDTO sagesseDTO) throws ArticlaException {
+        return new ResponseEntity<>(articleService.createSagesseArticle(sagesseDTO), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/createHistoireArticla")
+    public ResponseEntity<Article> createArticle(@RequestBody HistoireDTO histoireDTO) throws ArticlaException {
+        return new ResponseEntity<>(articleService.createHistoireArticle(histoireDTO), HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Article>> DisplayArticles() throws ArticlaException {
+        return ResponseEntity.ok(articleService.getAllArticles());
+    }
+
+    @GetMapping("/persoArticle/{userId}")
+    public ResponseEntity<List<Article>> DisplayArticlesByUser(@PathVariable long userId) throws ArticlaException {
+        return ResponseEntity.ok(articleService.getArticlesByUserId(userId));
+    }
+
+    @GetMapping("/posts/{currentUserId}")
+    public ResponseEntity<List<PosteDTO>> DisplayPosts(@PathVariable long currentUserId) throws ArticlaException {
+        return ResponseEntity.ok(articleService.displayPosts(currentUserId));
+    }
 
     // // Récupérer un article par ID
     // @GetMapping("/{id}")
