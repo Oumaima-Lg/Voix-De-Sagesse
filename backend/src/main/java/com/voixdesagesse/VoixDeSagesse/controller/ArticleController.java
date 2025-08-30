@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.voixdesagesse.VoixDeSagesse.dto.HistoireDTO;
@@ -30,7 +31,7 @@ import com.voixdesagesse.VoixDeSagesse.service.ArticleService;
 // import java.util.List;
 // import java.util.Optional;
 
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
 @RestController
 @RequestMapping("/articles")
 public class ArticleController {
@@ -62,6 +63,24 @@ public class ArticleController {
     @GetMapping("/posts/{currentUserId}")
     public ResponseEntity<List<PosteDTO>> DisplayPosts(@PathVariable long currentUserId) throws ArticlaException {
         return ResponseEntity.ok(articleService.displayPosts(currentUserId));
+    }
+
+   @PostMapping("/{id}/like")
+    public ResponseEntity<String> likeArticle(
+            @PathVariable Long id,
+            @RequestParam Long currentUserId) {
+
+        articleService.likeArticle(id, currentUserId);
+        return ResponseEntity.ok("Article liked successfully");
+    }
+
+    @PostMapping("/{id}/unlike")
+    public ResponseEntity<String> unlikeArticle(
+            @PathVariable Long id,
+            @RequestParam Long currentUserId) {
+
+        articleService.unlikeArticle(id, currentUserId);
+        return ResponseEntity.ok("Article unliked successfully");
     }
 
     // // Récupérer un article par ID

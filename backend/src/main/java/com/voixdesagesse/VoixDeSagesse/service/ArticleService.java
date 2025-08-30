@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.voixdesagesse.VoixDeSagesse.dto.ArticleType;
 import com.voixdesagesse.VoixDeSagesse.dto.HistoireDTO;
@@ -102,13 +103,38 @@ public class ArticleService {
         return posts;
     }
 
-    // // Mettre à jour un article
-    // public Article updateArticle(String id, Article updatedArticle) {
-    // if (articleRepository.existsById(id)) {
-    // updatedArticle.setId(id);
-    // return articleRepository.save(updatedArticle);
-    // }
-    // return null; // Si l'article n'existe pas
+
+
+    @Transactional
+    public void likeArticle(Long articleId, Long currentUserId) {
+        Article article = articleRepository.findById(articleId)
+            .orElseThrow(() -> new RuntimeException("Article not found"));
+
+        Long authorId = article.getUserId(); // auteur du post
+
+        articleRepository.incrementLikes(articleId);
+        userService.addLikedArticle(currentUserId, articleId);
+        userService.incrementLikesReceived(authorId);
+    }
+
+    @Transactional
+    public void unlikeArticle(Long articleId, Long currentUserId) {
+        Article article = articleRepository.findById(articleId)
+            .orElseThrow(() -> new RuntimeException("Article not found"));
+
+        Long authorId = article.getUserId(); // auteur du post
+
+        articleRepository.decrementLikes(articleId);
+        userService.removeLikedArticle(currentUserId, articleId);
+        userService.decrementLikesReceived(authorId);
+    }
+
+    // public Article updateArticleLikes(long id) {
+    //     if (articleRepository.existsById(id)) {
+    //     updatedArticle.setId(id);
+    //     return articleRepository.save(updatedArticle);
+    //     }
+    //     return null; // Si l'article n'existe pas
     // }
 
     // // Supprimer un article

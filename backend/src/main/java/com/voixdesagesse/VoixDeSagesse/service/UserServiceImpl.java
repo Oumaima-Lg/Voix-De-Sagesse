@@ -11,6 +11,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.voixdesagesse.VoixDeSagesse.dto.LoginDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.ResponseDTO;
@@ -136,6 +137,35 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserById(long userId) throws ArticlaException {
         return userRepository.findById(userId).orElseThrow(() -> new ArticlaException("USER_NOT_FOUND"));
+    }
+
+    @Override
+    @Transactional
+    public void addLikedArticle(Long currentUserId, Long articleId) {
+        userRepository.addLikedArticle(currentUserId, articleId);
+    }
+
+    @Override
+    @Transactional
+    public void removeLikedArticle(Long currentUserId, Long articleId) {
+        userRepository.removeLikedArticle(currentUserId, articleId);
+    }
+
+    @Override
+    @Transactional
+    public void incrementLikesReceived(Long userId) {
+        userRepository.incrementLikesReceived(userId);
+    }
+
+    @Override
+    @Transactional
+    public void decrementLikesReceived(Long userId) {
+        userRepository.decrementLikesReceived(userId);
+    }
+
+    @Override
+    public UserDTO getUserByEmail(String email) throws ArticlaException {
+        return userRepository.findByEmail(email).orElseThrow(() -> new ArticlaException("USER_NOT_FOUND")).toDTO();
     }
 
 }
