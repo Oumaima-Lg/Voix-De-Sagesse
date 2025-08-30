@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useState } from 'react';
-import { loginUser } from '../../services/UserService';
+// import { loginUser } from '../../services/UserService';
 import { Link as LinkRouter } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 import { loginValidation } from '../../services/FormValidation';
@@ -14,6 +14,10 @@ import { errorNotification, successNotification } from '../../services/Notificat
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../Slices/UserSlice';
 import { LoadingOverlay, Button, Group, Box } from '@mantine/core';
+import { setJwt } from '../../Slices/JwtSlice';
+import { loginUser } from '../../services/AuthService';
+import { jwtDecode } from "jwt-decode";
+
 
 
 const LoginForm = () => {
@@ -22,7 +26,7 @@ const LoginForm = () => {
     const dispatch = useDispatch();
     const form = {
         email: "",
-        motdepasse: "",
+        password: "",
     }
 
     const [data, setData] = useState(form);
@@ -37,7 +41,7 @@ const LoginForm = () => {
     }
 
     const handleSubmit = (e) => {
-       
+
         let valid = true;
         let newFormError = {};
         for (let key in data) {
@@ -51,12 +55,15 @@ const LoginForm = () => {
         if (valid) {
             setLoading(true);
             loginUser(data).then((res) => {
-                console.log(res);
+                // console.log(res);
                 // alert('Login réussie!');
                 successNotification('Success', 'Login réussie !');
+
                 setTimeout(() => {
                     setLoading(false);
-                    dispatch(setUser(res));
+                    dispatch(setJwt(res.jwt));
+                    const decoded = jwtDecode(res.jwt);
+                    dispatch(setUser({ ...decoded, email: decoded.sub }));
                     navigate("/articla");
                 }, 4000)
             }).catch((err) => {
@@ -84,12 +91,12 @@ const LoginForm = () => {
                                 name="email"
                             />
                             <TextInput
-                                error={formError.motdepasse}
+                                error={formError.password}
                                 size='lg'
                                 placeholder="Mot de passe"
-                                value={data.motdepasse}
+                                value={data.password}
                                 onChange={handleChange}
-                                name="motdepasse"
+                                name="password"
                             />
 
                             <div>

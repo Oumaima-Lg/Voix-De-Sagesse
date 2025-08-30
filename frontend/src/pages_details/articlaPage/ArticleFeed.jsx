@@ -5,8 +5,8 @@ import { FaQuoteLeft, FaHeart } from "react-icons/fa"
 import { BiBook } from "react-icons/bi"
 import { LoadingOverlay } from "@mantine/core"
 import { useSelector } from "react-redux"
-import { DisplayPosts } from "../../services/ArticleService"
-
+import { DisplayPosts, likeArticle, unlikeArticle } from "../../services/ArticleService"
+import oumi from '../../assets/oumi.png';
 
 
 const mockpostes = [
@@ -100,19 +100,42 @@ const posteFeed = () => {
     navigate("/articla")
   }
 
-  const handleLike = (posteId) => {
-    setPosts((prev) =>
-      prev.map((poste) =>
-        poste.article.id === posteId
-          ? {
-            ...poste,
-            liked: !poste.interaction.liked,
-            likes: poste.interaction.liked ? poste.article.likes - 1 : poste.article.likes + 1,
-          }
-          : poste,
-      ),
-    )
-  }
+  const handleLike = async (posteId) => {
+    try {
+      const poste = posts.find((p) => p.article.id === posteId);
+
+      if (poste.interaction.liked) {
+        await unlikeArticle(posteId, user.id);
+      } else {
+        await likeArticle(posteId, user.id);
+      }
+
+      // mettre à jour l’état APRES confirmation du backend
+      setPosts((prev) =>
+        prev.map((poste) =>
+          poste.article.id === posteId
+            ? {
+              ...poste,
+              interaction: {
+                ...poste.interaction,
+                liked: !poste.interaction.liked,
+              },
+              article: {
+                ...poste.article,
+                likes: poste.interaction.liked
+                  ? poste.article.likes - 1
+                  : poste.article.likes + 1,
+              },
+            }
+            : poste
+        )
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
 
   const handleFollow = (posteId) => {
     setPosts((prev) =>
@@ -179,17 +202,17 @@ const posteFeed = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {user.id !== poste.user.id && 
-                  <button
-                    onClick={() => handleFollow(poste.article.id)}
-                    className={`px-3 py-1 text-sm rounded transition-colors flex items-center gap-1 ${poste.interaction.following
-                      ? "bg-[#A09F87] text-[#171717] hover:bg-[#A09F87]/80"
-                      : "border border-[#A09F87] text-[#A09F87] hover:bg-[#A09F87] hover:text-[#171717]"
-                      }`}
-                  >
-                    {!poste.interaction.following && <UserPlus className="w-4 h-4" />}
-                    {poste.interaction.following ? "Suivi" : "Suivre"}
-                  </button> 
+                  {user.id !== poste.user.id &&
+                    <button
+                      onClick={() => handleFollow(poste.article.id)}
+                      className={`px-3 py-1 text-sm rounded transition-colors flex items-center gap-1 ${poste.interaction.following
+                        ? "bg-[#A09F87] text-[#171717] hover:bg-[#A09F87]/80"
+                        : "border border-[#A09F87] text-[#A09F87] hover:bg-[#A09F87] hover:text-[#171717]"
+                        }`}
+                    >
+                      {!poste.interaction.following && <UserPlus className="w-4 h-4" />}
+                      {poste.interaction.following ? "Suivi" : "Suivre"}
+                    </button>
                   }
                   <div className="relative">
                     <button
@@ -281,7 +304,7 @@ const posteFeed = () => {
               {/* Comment Input */}
               <div className="flex gap-3 pt-2 pb-6">
                 <div className="w-8 h-8 rounded-full bg-[#4C3163] flex items-center justify-center text-white text-xs font-semibold">
-                  Vous
+                  {user.profilePicture ?  <img src={oumi} alt="" /> : <span>Vous</span> }
                 </div>
                 <div className="flex-1 flex gap-2">
                   <input

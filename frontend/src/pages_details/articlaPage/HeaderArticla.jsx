@@ -20,7 +20,12 @@ const HeaderArticla = () => {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.user);
     const handleLogout=()=>{
+        localStorage.removeItem("token");
         dispatch(removeUser());
+        // sessionStorage.clear(); // si vous stockez des données dans sessionStorage
+        // Optionnel : informer le serveur de la déconnexion
+        // axiosInstance.post('/auth/logout').catch(() => {}); 
+
         navigate("/");
     }
     const handleProfile=()=>{
