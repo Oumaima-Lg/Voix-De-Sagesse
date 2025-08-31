@@ -49,16 +49,12 @@ public class JwtHelper {
     }
 
     // Extract all claims from token
-    private Claims extractAllClaims(String token) {
-        try {
+    private Claims extractAllClaims(String token) throws IllegalArgumentException {
             return Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid JWT token", e);
-        }
     }
 
     // Check if token is expired
@@ -155,15 +151,11 @@ public class JwtHelper {
     }
 
     // Refresh token (generate new token with same claims but new expiration)
-    public String refreshToken(String token) {
-        try {
-            final Claims claims = extractAllClaims(token);
-            claims.remove(Claims.ISSUED_AT);
-            claims.remove(Claims.EXPIRATION);
-            
-            return createToken(claims, claims.getSubject());
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Cannot refresh token", e);
-        }
+    public String refreshToken(String token) throws IllegalArgumentException {
+        final Claims claims = extractAllClaims(token);
+        claims.remove(Claims.ISSUED_AT);
+        claims.remove(Claims.EXPIRATION);
+        
+        return createToken(claims, claims.getSubject());
     }
 }

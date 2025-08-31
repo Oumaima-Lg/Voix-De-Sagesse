@@ -2,6 +2,8 @@ package com.voixdesagesse.VoixDeSagesse.jwt;
 
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,6 +16,8 @@ import com.voixdesagesse.VoixDeSagesse.service.UserService;
 
 @Service
 public class MyUserDetailsService implements UserDetailsService {
+
+    private static final Logger logger = LoggerFactory.getLogger(MyUserDetailsService.class);
 
     @Autowired
     private UserService userService;
@@ -36,7 +40,7 @@ public class MyUserDetailsService implements UserDetailsService {
                 new ArrayList<>()
             );
         } catch (ArticlaException e) {
-            e.printStackTrace();
+            logger.error("Error loading user by email: {}", email, e);
             throw new UsernameNotFoundException("User not found with email: " + email, e);
         }
     }

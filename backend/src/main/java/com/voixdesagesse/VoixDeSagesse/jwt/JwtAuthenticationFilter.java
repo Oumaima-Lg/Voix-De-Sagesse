@@ -2,6 +2,8 @@ package com.voixdesagesse.VoixDeSagesse.jwt;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +23,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+     private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     
     @Autowired
     private JwtHelper jwtHelper;
@@ -42,19 +46,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 username = this.jwtHelper.extractUsername(token);
             } catch (IllegalArgumentException e) {
-                logger.info("Illegal Argument while fetching the username !!");
-                e.printStackTrace();
+                log.warn("Illegal Argument while fetching username for token: {}", token.substring(0, 10) + "...");
             } catch (ExpiredJwtException e) {
-                logger.info("Given jwt token is expired !!");
-                e.printStackTrace();
+                log.warn("JWT token is expired for user: {}", e.getClaims().getSubject());
+           
             } catch (MalformedJwtException e) {
-                logger.info("Some changes has done in token !! Invalid Token");
-                e.printStackTrace();
+                 log.warn("Malformed JWT token detected");
+            
             } catch (Exception e) {
-                e.printStackTrace();
+                log.debug("Authorization header is missing or invalid");
             }
         } else {
-            logger.info("Invalid Header Value !! ");
+            log.info("Invalid Header Value !! ");
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -67,7 +70,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else {
-                logger.info("Validation fails !!");
+                log.warn("Token validation failed for user: {}", username);
             }
         }
 
