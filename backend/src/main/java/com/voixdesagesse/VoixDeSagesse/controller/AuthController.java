@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -61,7 +62,7 @@ public class AuthController {
             logger.error("Authentication failed - Bad credentials for email: {}", request.getEmail());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body("Invalid credentials");
-        } catch (Exception e) {
+        } catch (AuthenticationException e) {
             logger.error("Authentication error for email: {}", request.getEmail(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Authentication failed");
