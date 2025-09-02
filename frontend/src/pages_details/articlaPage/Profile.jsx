@@ -1,6 +1,4 @@
-
-
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import ShinyText from "../../blocks/TextAnimations/ShinyText/ShinyText"
 import { PiUser, PiUserCircle, PiCamera, PiPencil, PiCheck, PiX } from "react-icons/pi"
@@ -9,28 +7,69 @@ import { MdOutlineLanguage, MdOutlineNotifications, MdOutlineVisibility } from "
 import profileAvatar from "../../assets/profileAvatar.jpg"
 import { errorNotification, successNotification } from "../../services/NotificationService"
 import { updateUser } from "../../Slices/UserSlice"
-import { updateUserProfile } from '../../services/UserService';
-
+import { updateUserProfile, getUserProfile, uploadProfilePicture } from '../../services/UserService';
+import { LoadingOverlay } from "@mantine/core"
 
 
 const Profile = () => {
+
+    const [loading, setLoading] = useState(true);
+    const [uploadingImage, setUploadingImage] = useState(false);
     const user = useSelector((state) => state.user)
     const dispatch = useDispatch()
+
+    // Référence pour l'input file
+    const fileInputRef = useRef(null);
+
+    // État pour stocker les données du profil reçues du backend
+    const [userProfile, setUserProfile] = useState(null);
+
+    useEffect(() => {
+        setLoading(true);
+        getUserProfile(user.id)
+            .then((data) => {
+                console.log(data);
+                setUserProfile(data);
+                // Initialiser editedUser avec les données reçues
+                setEditedUser({
+                    id: data.id || "",
+                    nom: data.nom || "",
+                    prenom: data.prenom || "",
+                    email: data.email || "",
+                    username: data.username || "",
+                    phoneNumber: data.phoneNumber || "",
+                    location: data.location || "",
+                    bio: data.bio || "",
+                    website: data.website || "",
+                    // Garder les préférences du Redux car elles ne sont pas dans UserProfileDTO
+                    preferredLanguage: user.preferredLanguage || "fr",
+                    emailNotifications: user.emailNotifications || true,
+                    pushNotifications: user.pushNotifications || true,
+                    profileVisibility: user.profileVisibility || "PUBLIC",
+                });
+                setLoading(false);
+            })
+            .catch((err) => {
+                setLoading(false);
+                console.error(err);
+            });
+    }, [user.id, user.preferredLanguage, user.emailNotifications, user.pushNotifications, user.profileVisibility]);
+
     const [isEditing, setIsEditing] = useState(false)
     const [editedUser, setEditedUser] = useState({
-        id: user.id || "",
-        nom: user.nom || "",
-        prenom: user.prenom || "",
-        email: user.email || "",
-        username: user.username || "",
-        phoneNumber: user.phoneNumber || "",
-        location: user.location || "",
-        bio: user.bio || "",
-        website: user.website || "",
-        preferredLanguage: user.preferredLanguage || "fr",
-        emailNotifications: user.emailNotifications || true,
-        pushNotifications: user.pushNotifications || true,
-        profileVisibility: user.profileVisibility || "PUBLIC",
+        id: "",
+        nom: "",
+        prenom: "",
+        email: "",
+        username: "",
+        phoneNumber: "",
+        location: "",
+        bio: "",
+        website: "",
+        preferredLanguage: "fr",
+        emailNotifications: true,
+        pushNotifications: true,
+        profileVisibility: "PUBLIC",
     })
 
     const handleInputChange = (field, value) => {
@@ -44,6 +83,11 @@ const Profile = () => {
         updateUserProfile(editedUser).then((res) => {
             console.log(res);
             dispatch(updateUser(res));
+            // Mettre à jour userProfile avec les nouvelles données
+            setUserProfile(prev => ({
+                ...prev,
+                ...res
+            }));
             successNotification('Success', 'Profile updated successfully!');
         }).catch((err) => {
             console.log(err);
@@ -53,25 +97,100 @@ const Profile = () => {
     }
 
     const handleCancel = () => {
-        setEditedUser({
-            nom: user.nom || "",
-            prenom: user.prenom || "",
-            email: user.email || "",
-            username: user.username || "",
-            phoneNumber: user.phoneNumber || "",
-            location: user.location || "",
-            bio: user.bio || "",
-            website: user.website || "",
-            preferredLanguage: user.preferredLanguage || "fr",
-            emailNotifications: user.emailNotifications || true,
-            pushNotifications: user.pushNotifications || true,
-            profileVisibility: user.profileVisibility || "PUBLIC",
-        })
+        if (userProfile) {
+            setEditedUser({
+                id: userProfile.id || "",
+                nom: userProfile.nom || "",
+                prenom: userProfile.prenom || "",
+                email: userProfile.email || "",
+                username: userProfile.username || "",
+                phoneNumber: userProfile.phoneNumber || "",
+                location: userProfile.location || "",
+                bio: userProfile.bio || "",
+                website: userProfile.website || "",
+                // Garder les préférences du Redux
+                preferredLanguage: user.preferredLanguage || "fr",
+                emailNotifications: user.emailNotifications || true,
+                pushNotifications: user.pushNotifications || true,
+                profileVisibility: user.profileVisibility || "PUBLIC",
+            })
+        }
         setIsEditing(false)
+    }
+
+    const handleImageUpload = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Vérifier que c'est bien une image
+        if (!file.type.startsWith('image/')) {
+            errorNotification('Erreur', 'Veuillez sélectionner un fichier image valide.');
+            return;
+        }
+
+        // Vérifier la taille du fichier (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            errorNotification('Erreur', 'La taille de l\'image ne doit pas dépasser 5MB.');
+            return;
+        }
+
+        try {
+            setUploadingImage(true);
+
+            // Créer FormData pour l'upload
+            const formData = new FormData();
+            formData.append('profilePicture', file);
+            formData.append('userId', user.id);
+
+            // Appeler le service d'upload
+            const response = await uploadProfilePicture(formData);
+
+            console.log('Response from backend:', response);
+            console.log('Profile picture URL:', response.profilePictureUrl);
+
+            // Mettre à jour le profil local
+            setUserProfile(prev => ({
+                ...prev,
+                profilePicture: response.profilePictureUrl
+            }));
+
+            // Mettre à jour Redux si nécessaire
+            dispatch(updateUser({
+                ...user,
+                profilePicture: response.profilePictureUrl
+            }));
+
+            successNotification('Succès', 'Photo de profil mise à jour avec succès!');
+        } catch (error) {
+            console.error('Erreur lors de l\'upload:', error);
+            errorNotification('Erreur', 'Échec du téléchargement de l\'image. Veuillez réessayer.');
+        } finally {
+            setUploadingImage(false);
+        }
+    }
+
+    // Si les données ne sont pas encore chargées, afficher le loading
+    if (!userProfile) {
+        return (
+            <div className="pt-26 px-4 lg:px-8">
+                <LoadingOverlay
+                    visible={loading}
+                    zIndex={1000}
+                    overlayProps={{ radius: 'sm', blur: 2 }}
+                    loaderProps={{ color: '#A09F87', type: 'bars' }}
+                />
+            </div>
+        );
     }
 
     return (
         <div className="pt-26 px-4 lg:px-8">
+            <LoadingOverlay
+                visible={loading || uploadingImage}
+                zIndex={1000}
+                overlayProps={{ radius: 'sm', blur: 2 }}
+                loaderProps={{ color: '#A09F87', type: 'bars' }}
+            />
             {/* Titre principal */}
             <div className="text-center mb-8  text-gradient charm xl:text-5xl text-3xl leading-tight">
                 <ShinyText
@@ -91,36 +210,54 @@ const Profile = () => {
                             <div className="flex flex-col items-center mb-6">
                                 <div className="relative group">
                                     <img
-                                        src={user.profilePicture || profileAvatar}
+                                        src={userProfile.profilePicture ?
+                                            (userProfile.profilePicture.startsWith('http') ?
+                                                userProfile.profilePicture :
+                                                `http://localhost:8080${userProfile.profilePicture}` // Le chemin commence déjà par /uploads
+                                            ) : profileAvatar}
                                         alt="Profile"
                                         className="w-32 h-32 rounded-full border-4 border-[#A09F87] object-cover"
+                                        onError={(e) => {
+                                            console.error('Erreur de chargement de l\'image:', e.target.src);
+                                            e.target.src = profileAvatar;
+                                        }}
                                     />
-                                    <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center cursor-pointer">
+                                    <div
+                                        className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center cursor-pointer"
+                                        onClick={() => document.getElementById('profile-image-upload').click()}
+                                    >
                                         <PiCamera className="text-3xl text-[#A09F87]" />
                                     </div>
+                                    <input
+                                        id="profile-image-upload"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageUpload}
+                                        className="hidden"
+                                    />
                                 </div>
                                 <h2 className="text-2xl font-bold text-[#A09F87] mt-4 charm">
-                                    {user.nom} {user.prenom}
+                                    {userProfile.nom} {userProfile.prenom}
                                 </h2>
-                                <p className="text-gray-300">@{user.username || 'nom_utilisateur'}</p>
+                                <p className="text-gray-300">@{userProfile.username || 'nom_utilisateur'}</p>
                             </div>
 
                             {/* Statistiques */}
                             <div className="grid grid-cols-2 gap-4 mb-6">
                                 <div className="text-center p-3 bg-[#202020] rounded-lg">
-                                    <div className="text-2xl font-bold text-[#A09F87]">{user.contentCount || 0}</div>
+                                    <div className="text-2xl font-bold text-[#A09F87]">{userProfile.contentCount || 0}</div>
                                     <div className="text-sm text-gray-300">Articles</div>
                                 </div>
                                 <div className="text-center p-3 bg-[#202020] rounded-lg">
-                                    <div className="text-2xl font-bold text-[#A09F87]">{user.followersCount || 0}</div>
+                                    <div className="text-2xl font-bold text-[#A09F87]">{userProfile.followersCount || 0}</div>
                                     <div className="text-sm text-gray-300">Followers</div>
                                 </div>
                                 <div className="text-center p-3 bg-[#202020] rounded-lg">
-                                    <div className="text-2xl font-bold text-[#A09F87]">{user.followingCount || 0}</div>
+                                    <div className="text-2xl font-bold text-[#A09F87]">{userProfile.followingCount || 0}</div>
                                     <div className="text-sm text-gray-300">Following</div>
                                 </div>
                                 <div className="text-center p-3 bg-[#202020] rounded-lg">
-                                    <div className="text-2xl font-bold text-[#A09F87]">{user.likesReceivedCount || 0}</div>
+                                    <div className="text-2xl font-bold text-[#A09F87]">{userProfile.likesReceived || 0}</div>
                                     <div className="text-sm text-gray-300">Likes</div>
                                 </div>
                             </div>
@@ -177,7 +314,7 @@ const Profile = () => {
                                         />
                                     ) : (
                                         <div className="bg-[#202020] rounded-lg px-4 py-3 border-2 border-transparent">
-                                            {user.nom || "Non renseigné"}
+                                            {userProfile.nom || "Non renseigné"}
                                         </div>
                                     )}
                                 </div>
@@ -197,7 +334,7 @@ const Profile = () => {
                                         />
                                     ) : (
                                         <div className="bg-[#202020] rounded-lg px-4 py-3 border-2 border-transparent">
-                                            {user.prenom || "Non renseigné"}
+                                            {userProfile.prenom || "Non renseigné"}
                                         </div>
                                     )}
                                 </div>
@@ -217,7 +354,7 @@ const Profile = () => {
                                         />
                                     ) : (
                                         <div className="bg-[#202020] rounded-lg px-4 py-3 border-2 border-transparent">
-                                            {user.email || "Non renseigné"}
+                                            {userProfile.email || "Non renseigné"}
                                         </div>
                                     )}
                                 </div>
@@ -237,7 +374,7 @@ const Profile = () => {
                                         />
                                     ) : (
                                         <div className="bg-[#202020] rounded-lg px-4 py-3 border-2 border-transparent">
-                                            @{user.username || "Non renseigné"}
+                                            @{userProfile.username || "Non renseigné"}
                                         </div>
                                     )}
                                 </div>
@@ -257,7 +394,7 @@ const Profile = () => {
                                         />
                                     ) : (
                                         <div className="bg-[#202020] rounded-lg px-4 py-3 border-2 border-transparent">
-                                            {user.phoneNumber || "Non renseigné"}
+                                            {userProfile.phoneNumber || "Non renseigné"}
                                         </div>
                                     )}
                                 </div>
@@ -277,7 +414,7 @@ const Profile = () => {
                                         />
                                     ) : (
                                         <div className="bg-[#202020] rounded-lg px-4 py-3 border-2 border-transparent">
-                                            {user.location || "Non renseigné"}
+                                            {userProfile.location || "Non renseigné"}
                                         </div>
                                     )}
                                 </div>
@@ -299,7 +436,7 @@ const Profile = () => {
                                     />
                                 ) : (
                                     <div className="bg-[#202020] rounded-lg px-4 py-3 border-2 border-transparent min-h-[100px]">
-                                        {user.bio || "Aucune biographie renseignée"}
+                                        {userProfile.bio || "Aucune biographie renseignée"}
                                     </div>
                                 )}
                             </div>
@@ -320,14 +457,14 @@ const Profile = () => {
                                     />
                                 ) : (
                                     <div className="bg-[#202020] rounded-lg px-4 py-3 border-2 border-transparent">
-                                        {user.website ? (
+                                        {userProfile.website ? (
                                             <a
-                                                href={user.website}
+                                                href={userProfile.website}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="text-[#A09F87] hover:underline"
                                             >
-                                                {user.website}
+                                                {userProfile.website}
                                             </a>
                                         ) : (
                                             "Non renseigné"

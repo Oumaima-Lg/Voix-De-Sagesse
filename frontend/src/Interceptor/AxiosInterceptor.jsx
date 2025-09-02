@@ -16,6 +16,13 @@ axiosInstance.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Ne pas écraser le Content-Type si c'est déjà défini (important pour multipart/form-data)
+    if (config.headers['Content-Type'] === 'multipart/form-data') {
+      // Laisser axios définir automatiquement le Content-Type avec boundary
+      delete config.headers['Content-Type'];
+    }
+    
     return config;
   },
   (error) => {
@@ -33,8 +40,8 @@ axiosInstance.interceptors.response.use(
       // Token expiré ou invalide
       localStorage.removeItem("token");
       // Rediriger vers la page de connexion si nécessaire
-    //   window.location.href = '/login';
-        Navigate('/login');
+      // window.location.href = '/login';
+      Navigate('/login');
     }
     return Promise.reject(error);
   }
