@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.voixdesagesse.VoixDeSagesse.dto.AccountType;
 import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
+import com.voixdesagesse.VoixDeSagesse.dto.UserProfileDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserRegistrationDTO;
 
 import lombok.AllArgsConstructor;
@@ -54,6 +55,12 @@ public class User {
         return new UserDTO(this.id, this.nom, this.prenom, this.email, this.motdepasse, this.accountType, this.username, 
         this.phoneNumber, this.location, this.website, this.profilePicture,this.bio, this.contentCount, this.followersCount, 
         this.followingCount, this.likesReceived, this.likedArticlesId, this.followingId);
+    }
+
+    public UserProfileDTO toProfileDTO() {
+        return new UserProfileDTO(this.id, this.nom, this.prenom, this.email, this.username, 
+        this.phoneNumber, this.location, this.website, this.profilePicture, this.bio, this.contentCount, this.followersCount, 
+        this.followingCount, this.likesReceived);
     }
 
 }

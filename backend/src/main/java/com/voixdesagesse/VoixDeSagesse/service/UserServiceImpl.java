@@ -1,17 +1,24 @@
 package com.voixdesagesse.VoixDeSagesse.service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.voixdesagesse.VoixDeSagesse.dto.LoginDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.ResponseDTO;
@@ -30,6 +37,9 @@ import jakarta.mail.internet.MimeMessage;
 
 @Service(value = "userService")
 public class UserServiceImpl implements UserService {
+
+    @Value("${file.upload-dir:uploads/profile-pictures}")
+    private String uploadDir;
 
     @Autowired
     private UserRepository userRepository;
@@ -124,7 +134,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserProfileDTO updateUserProfile(UserProfileDTO profileDTO) throws ArticlaException {
-        User user = userRepository.findById(profileDTO.getId()).orElseThrow(() -> new ArticlaException("USER_NOT_FOUND"));
+        User user = userRepository.findById(profileDTO.getId())
+                .orElseThrow(() -> new ArticlaException("USER_NOT_FOUND"));
         user.setNom(profileDTO.getNom());
         user.setPrenom(profileDTO.getPrenom());
         // save into a repo Image
@@ -166,6 +177,64 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO getUserByEmail(String email) throws ArticlaException {
         return userRepository.findByEmail(email).orElseThrow(() -> new ArticlaException("USER_NOT_FOUND")).toDTO();
+    }
+
+    @Override
+    public UserProfileDTO getUserProfileById(long userId) throws ArticlaException {
+        User user = getUserById(userId);
+        return user.toProfileDTO();
+    }
+
+    @Override
+    public String saveProfilePicture(MultipartFile file, Long userId) throws IOException {
+        // Créer le dossier s'il n'existe pas
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        // Générer un nom unique pour le fichier
+        String originalFilename = file.getOriginalFilename();
+        String fileExtension = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf("."))
+                : ".jpg";
+        String uniqueFileName = "profile_" + userId + "_" + System.currentTimeMillis() + fileExtension;
+
+        // Sauvegarder le fichier
+        Path filePath = uploadPath.resolve(uniqueFileName);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        // Construire l'URL accessible
+        String profilePictureUrl = "/uploads/profile-pictures/" + uniqueFileName;
+
+        // Mettre à jour l'utilisateur en base
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+
+            // Supprimer l'ancienne image si elle existe
+            if (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) {
+                deleteOldProfilePicture(user.getProfilePicture());
+            }
+
+            user.setProfilePicture(profilePictureUrl);
+            userRepository.save(user);
+        }
+
+        return profilePictureUrl;
+    }
+
+    private void deleteOldProfilePicture(String oldPictureUrl) {
+        try {
+            // Extraire le nom de fichier de l'URL
+            String fileName = oldPictureUrl.substring(oldPictureUrl.lastIndexOf("/") + 1);
+            Path oldFilePath = Paths.get(uploadDir).resolve(fileName);
+            if (Files.exists(oldFilePath)) {
+                Files.delete(oldFilePath);
+            }
+        } catch (IOException e) {
+            // Log l'erreur mais ne pas faire échouer l'upload
+            System.err.println("Erreur lors de la suppression de l'ancienne image: " + e.getMessage());
+        }
     }
 
 }

@@ -76,8 +76,9 @@ public class ArticleService {
                     User user;
                     try {
                         user = userService.getUserById(article.getUserId());
-                        UserProfileDTO userProfileDTO = new UserProfileDTO(user.getId(), user.getNom(), user.getPrenom(), user.getUsername(),
-                         user.getPhoneNumber(), user.getLocation(), user.getWebsite() , user.getProfilePicture(), user.getBio());
+                        UserProfileDTO userProfileDTO = new UserProfileDTO(user.getId(), user.getNom(), user.getPrenom(), user.getEmail(), user.getUsername(),
+                         user.getPhoneNumber(), user.getLocation(), user.getWebsite() , user.getProfilePicture(), user.getBio(), user.getContentCount(), user.getFollowersCount(), 
+                         user.getFollowingCount(), user.getLikesReceived());
                         posteDTO.setUser(userProfileDTO);
                         PostInteractionDTO interaction = new PostInteractionDTO();
                         posteDTO.setCreatedAt(Utilities.getElapsedTime(article.getDatePublication()));

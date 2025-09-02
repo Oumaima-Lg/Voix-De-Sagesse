@@ -1,5 +1,9 @@
 package com.voixdesagesse.VoixDeSagesse.service;
 
+import java.io.IOException;
+
+import org.springframework.web.multipart.MultipartFile;
+
 import com.voixdesagesse.VoixDeSagesse.dto.LoginDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.ResponseDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
@@ -35,5 +39,10 @@ public interface UserService {
     public void incrementLikesReceived(Long userId);
 
     public void decrementLikesReceived(Long userId);
+
+    public UserProfileDTO getUserProfileById(long userId) throws ArticlaException;
+    
+    public String saveProfilePicture(MultipartFile file, Long userId) throws IOException;
+    
 
 }

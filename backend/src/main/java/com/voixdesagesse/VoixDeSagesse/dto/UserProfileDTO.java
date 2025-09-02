@@ -12,6 +12,7 @@ public class UserProfileDTO {
     private Long id;
     private String nom;
     private String prenom;
+    private String email;
     private String username;
     private String phoneNumber;
     private String location;
@@ -20,10 +21,10 @@ public class UserProfileDTO {
     @Size(max = 500, message = "{user.bio.exceeded}" )
     private String bio;
 
-    // private Long contentCount;
-    // private Long followersCount;
-    // private Long followingCount;
-    // private Long likesReceived;
+    private Long contentCount;
+    private Long followersCount;
+    private Long followingCount;
+    private Long likesReceived;
     
     
 }
