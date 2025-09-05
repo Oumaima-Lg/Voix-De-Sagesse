@@ -23,24 +23,7 @@ public class CustomUserDetails implements UserDetails {
     private String username;
     private String password;
     private AccountType accountType;
-
- 
-
     private Collection<? extends GrantedAuthority> authorities;
 
-    // @Override
-    // public Collection<? extends GrantedAuthority> getAuthorities() {
-    //     throw new UnsupportedOperationException("Not supported yet.");
-    // }
-
-    // @Override
-    // public String getPassword() {
-    //     throw new UnsupportedOperationException("Not supported yet.");
-    // }
-
-    // @Override
-    // public String getUsername() {
-    //     throw new UnsupportedOperationException("Not supported yet.");
-    // }
     
 }

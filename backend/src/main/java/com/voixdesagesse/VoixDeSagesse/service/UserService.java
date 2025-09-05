@@ -1,6 +1,8 @@
 package com.voixdesagesse.VoixDeSagesse.service;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,6 +45,34 @@ public interface UserService {
     public UserProfileDTO getUserProfileById(long userId) throws ArticlaException;
     
     public String saveProfilePicture(MultipartFile file, Long userId) throws IOException;
+
+    public void incrementContentCount(Long userId);
     
+    public void decrementContentCount(Long userId);
+
+    // Nouvelles méthodes pour le système de suivi
+    public void followUser(Long currentUserId, Long targetUserId);
+
+    public void unfollowUser(Long currentUserId, Long targetUserId);
+
+    public boolean isFollowing(Long currentUserId, Long targetUserId);
+    
+    // Méthodes internes (appelées par followUser/unfollowUser)
+    public void addFollowing(Long currentUserId, Long targetUserId);
+
+    public void removeFollowing(Long currentUserId, Long targetUserId);
+    
+    public void incrementFollowingCount(Long userId);
+    
+    public void decrementFollowingCount(Long userId);
+    
+    public void incrementFollowersCount(Long userId);
+    
+    public void decrementFollowersCount(Long userId);
+
+    public  List<User> findAllFollowingUsersById(Set<Long> followingIds);
+
+    public List<User> findByFollowingIdContaining(Long userId);
+
 
 }

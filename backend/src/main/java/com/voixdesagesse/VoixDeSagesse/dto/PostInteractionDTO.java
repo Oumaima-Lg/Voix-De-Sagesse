@@ -10,6 +10,4 @@ import lombok.NoArgsConstructor;
 public class PostInteractionDTO {
     private boolean isLiked;
     private boolean isFollowing;
-    // private int likesCount;
-    // private int commentsCount;
 }

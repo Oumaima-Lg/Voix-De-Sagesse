@@ -5,8 +5,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,8 +17,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +36,7 @@ import com.voixdesagesse.VoixDeSagesse.dto.LoginDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.ResponseDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserProfileDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserRegistrationDTO;
+import com.voixdesagesse.VoixDeSagesse.entity.User;
 import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
 import com.voixdesagesse.VoixDeSagesse.service.UserService;
 
@@ -38,7 +44,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
-
 
 @RestController
 @CrossOrigin
@@ -88,6 +93,94 @@ public class UserController {
             throws ArticlaException {
         userService.verifyOtp(email, otp);
         return new ResponseEntity<>(new ResponseDTO("OTP has been verified."), HttpStatus.OK);
+    }
+
+    // ✅ Méthode utilitaire pour récupérer l'utilisateur connecté
+    private User getCurrentUser() throws ArticlaException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserEmail = authentication.getName();
+
+        return userService.getUserByEmail(currentUserEmail).toEntity();
+    }
+
+    // ✅ Endpoints simplifiés avec la méthode utilitaire
+    @PostMapping("/follow/{targetUserId}")
+    public ResponseEntity<?> followUser(@PathVariable Long targetUserId) throws ArticlaException {
+        try {
+            User currentUser = getCurrentUser();
+            userService.followUser(currentUser.getId(), targetUserId);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Utilisateur suivi avec succès",
+                    "success", true,
+                    "isFollowing", true));
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "error", e.getMessage(),
+                    "success", false));
+        }
+    }
+
+    @DeleteMapping("/unfollow/{targetUserId}")
+    public ResponseEntity<?> unfollowUser(@PathVariable Long targetUserId) throws ArticlaException {
+        try {
+            User currentUser = getCurrentUser();
+            userService.unfollowUser(currentUser.getId(), targetUserId);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Vous ne suivez plus cet utilisateur",
+                    "success", true,
+                    "isFollowing", false));
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "error", e.getMessage(),
+                    "success", false));
+        }
+    }
+
+    @GetMapping("/is-following/{targetUserId}")
+    public ResponseEntity<?> isFollowingUser(@PathVariable Long targetUserId)  throws ArticlaException  {
+            User currentUser = getCurrentUser();
+            boolean isFollowing = userService.isFollowing(currentUser.getId(), targetUserId);
+
+            return ResponseEntity.ok(Map.of(
+                    "isFollowing", isFollowing,
+                    "success", true));
+    }
+
+    @GetMapping("/following")
+    public ResponseEntity<?> getFollowingUsers() throws ArticlaException {
+        User currentUser = getCurrentUser();
+        Set<Long> followingIds = currentUser.getFollowingId();
+        List<User> followingUsers = userService.findAllFollowingUsersById(followingIds);
+
+        List<UserProfileDTO> followingDTO = followingUsers.stream()
+                .map(User::toProfileDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(Map.of(
+                "following", followingDTO,
+                "count", followingDTO.size(),
+                "success", true));
+    }
+
+    @GetMapping("/my-followers")
+    public ResponseEntity<?> getMyFollowers() throws ArticlaException {
+        
+        User currentUser = getCurrentUser();
+        List<User> followers = userService.findByFollowingIdContaining(currentUser.getId());
+
+        List<UserProfileDTO> followersDTO = followers.stream()
+                .map(User::toProfileDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(Map.of(
+                "followers", followersDTO,
+                "count", followersDTO.size(),
+                "success", true));
+
     }
 
     @PutMapping("/updateProfile")

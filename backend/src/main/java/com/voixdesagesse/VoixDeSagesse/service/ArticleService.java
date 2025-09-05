@@ -29,6 +29,8 @@ public class ArticleService {
     @Autowired
     private UserService userService;
 
+    // Méthode pour créer un article de sagesse avec incrémentation
+    @Transactional
     public Article createSagesseArticle(SagesseDTO sagesseDTO) throws ArticlaException {
         Article article = sagesseDTO.toEntity();
         article.setId(Utilities.getNextSequence("articles"));
@@ -37,16 +39,51 @@ public class ArticleService {
         article.setComments(0L);
         article.setShares(0L);
         article.setType(ArticleType.SAGESSE);
-        return articleRepository.save(article);
+        
+        // Sauvegarder l'article
+        Article savedArticle = articleRepository.save(article);
+        
+        // Incrémenter le contentCount de l'utilisateur
+        userService.incrementContentCount(article.getUserId());
+        
+        return savedArticle;
     }
 
+     //  Méthode pour créer un article d'histoire avec incrémentation
+    @Transactional
     public Article createHistoireArticle(HistoireDTO histoireDTO) throws ArticlaException {
         Article article = histoireDTO.toEntity();
         article.setId(Utilities.getNextSequence("articles"));
         article.setDatePublication(LocalDateTime.now());
         article.setLikes(0L);
+        article.setComments(0L);
+        article.setShares(0L);
         article.setType(ArticleType.HISTOIRE);
-        return articleRepository.save(article);
+        
+        // Sauvegarder l'article
+        Article savedArticle = articleRepository.save(article);
+        
+        //  Incrémenter le contentCount de l'utilisateur
+        userService.incrementContentCount(article.getUserId());
+        
+        return savedArticle;
+    }
+
+    //  Méthode pour supprimer un article avec décrémentation (optionnel)
+    @Transactional
+    public void deleteArticle(Long articleId, Long currentUserId) {
+        Article article = articleRepository.findById(articleId)
+            .orElseThrow(() -> new RuntimeException("Article not found"));
+
+        // Vérifier que l'utilisateur est le propriétaire
+        if (article.getUserId() != currentUserId) {
+            throw new RuntimeException("Vous n'êtes pas autorisé à supprimer cet article");
+        }
+
+        articleRepository.deleteById(articleId);
+        
+        // ✅ Décrémenter le contentCount de l'utilisateur
+        userService.decrementContentCount(currentUserId);
     }
 
     // // Trouver un article par son ID

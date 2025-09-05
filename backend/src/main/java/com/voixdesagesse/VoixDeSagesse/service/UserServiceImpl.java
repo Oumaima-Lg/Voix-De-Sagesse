@@ -6,9 +6,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -173,6 +175,125 @@ public class UserServiceImpl implements UserService {
     public void decrementLikesReceived(Long userId) {
         userRepository.decrementLikesReceived(userId);
     }
+
+    @Override
+    @Transactional
+    public void incrementContentCount(Long userId) {
+        userRepository.incrementContentCount(userId);
+    }
+
+    @Override
+    @Transactional
+    public void decrementContentCount(Long userId) {
+        userRepository.decrementContentCount(userId);
+    }
+
+    // ✅ Nouvelles méthodes pour le système de suivi
+
+    @Override
+    @Transactional
+    public void followUser(Long currentUserId, Long targetUserId) {
+        // Vérifier que l'utilisateur ne se suit pas lui-même
+        if (currentUserId.equals(targetUserId)) {
+            throw new RuntimeException("Vous ne pouvez pas vous suivre vous-même");
+        }
+
+        // Vérifier que les deux utilisateurs existent
+        if (!userRepository.existsById(currentUserId)) {
+            throw new RuntimeException("Utilisateur actuel introuvable");
+        }
+        if (!userRepository.existsById(targetUserId)) {
+            throw new RuntimeException("Utilisateur cible introuvable");
+        }
+
+        // Vérifier si déjà suivi
+        if (isFollowing(currentUserId, targetUserId)) {
+            throw new RuntimeException("Vous suivez déjà cet utilisateur");
+        }
+
+        // Effectuer le suivi
+        addFollowing(currentUserId, targetUserId);
+        incrementFollowingCount(currentUserId);
+        incrementFollowersCount(targetUserId);
+    }
+
+    @Override
+    @Transactional
+    public void unfollowUser(Long currentUserId, Long targetUserId) {
+        // Vérifier que l'utilisateur ne se désuit pas lui-même
+        if (currentUserId.equals(targetUserId)) {
+            throw new RuntimeException("Vous ne pouvez pas vous désabonner de vous-même");
+        }
+
+        // Vérifier si actuellement suivi
+        if (!isFollowing(currentUserId, targetUserId)) {
+            throw new RuntimeException("Vous ne suivez pas cet utilisateur");
+        }
+
+        // Effectuer le désuivi
+        removeFollowing(currentUserId, targetUserId);
+        decrementFollowingCount(currentUserId);
+        decrementFollowersCount(targetUserId);
+    }
+
+    @Override
+    public boolean isFollowing(Long currentUserId, Long targetUserId) {
+        return userRepository.isFollowing(currentUserId, targetUserId);
+    }
+
+    // Méthodes internes
+    @Override
+    @Transactional
+    public void addFollowing(Long currentUserId, Long targetUserId) {
+        userRepository.addFollowing(currentUserId, targetUserId);
+    }
+
+    @Override
+    @Transactional
+    public void removeFollowing(Long currentUserId, Long targetUserId) {
+        userRepository.removeFollowing(currentUserId, targetUserId);
+    }
+
+    @Override
+    @Transactional
+    public void incrementFollowingCount(Long userId) {
+        userRepository.incrementFollowingCount(userId);
+    }
+
+    @Override
+    @Transactional
+    public void decrementFollowingCount(Long userId) {
+        userRepository.decrementFollowingCount(userId);
+    }
+
+    @Override
+    @Transactional
+    public void incrementFollowersCount(Long userId) {
+        userRepository.incrementFollowersCount(userId);
+    }
+
+    @Override
+    @Transactional
+    public void decrementFollowersCount(Long userId) {
+        userRepository.decrementFollowersCount(userId);
+    }
+
+    @Override
+    public List<User> findAllFollowingUsersById(Set<Long> followingIds) {
+        List<User> followingUsers = new ArrayList<>();
+
+        if (followingIds != null && !followingIds.isEmpty()) {
+            followingUsers = userRepository.findAllById(followingIds);
+        }
+
+        return followingUsers;
+    }
+
+    @Override
+    public List<User> findByFollowingIdContaining(Long userId) {
+        return userRepository.findByFollowingIdContaining(userId);
+    }
+
 
     @Override
     public UserDTO getUserByEmail(String email) throws ArticlaException {

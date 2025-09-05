@@ -12,14 +12,8 @@ import lombok.NoArgsConstructor;
 public class  PosteDTO {
 
     Article article;
-    // String nom;
-    // String prenom;
-    // String username;
-    // String profilePicture;
     UserProfileDTO user;
     PostInteractionDTO interaction;
-    // boolean isLiked;
-    // boolean isFollowing;
     String createdAt;
 
 }
