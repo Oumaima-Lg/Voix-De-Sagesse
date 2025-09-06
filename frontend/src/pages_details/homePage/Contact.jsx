@@ -2,7 +2,7 @@ import React from 'react'
 import Form from '../../semiComponents/CardContact';
 import robot from '../../assets/robot.png';
 import { motion } from 'framer-motion';
-import { fadeIn } from '../../motions/variants';
+import { fadeIn } from '../../Motions/variants';
 
 // import Spline from '@splinetool/react-spline';
 
