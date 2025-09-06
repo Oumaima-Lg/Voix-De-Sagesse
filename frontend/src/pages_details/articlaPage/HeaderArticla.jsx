@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 
 import arrow from '../../assets/arrow.png';
 import { Link as LinkRouter, useNavigate } from "react-router-dom";
-import vector from '../../assets/vector.png';
+import vector from '../../assets/Vector.png';
 import oumi from '../../assets/oumi.png';
 import PermIdentityIcon from '@mui/icons-material/PermIdentity';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
