@@ -6,81 +6,18 @@ import { BiBook } from "react-icons/bi"
 import { LoadingOverlay } from "@mantine/core"
 import { useSelector } from "react-redux"
 import { DisplayPosts, likeArticle, unlikeArticle } from "../../services/ArticleService"
-import oumi from '../../assets/oumi.png';
-
-
-const mockpostes = [
-  {
-    id: 1,
-    type: "wisdom",
-    content: "La patience est amère, mais son fruit est doux.",
-    author: "Aristote",
-    source: "Philosophie grecque",
-    category: "Philosophie",
-    tags: ["patience", "sagesse", "philosophie"],
-    user: {
-      name: "Marie Dubois",
-      avatar: "/placeholder.svg?height=40&width=40",
-      username: "@marie_d",
-    },
-    likes: 24,
-    comments: 8,
-    shares: 3,
-    liked: false,
-    following: false,
-    createdAt: "2h",
-  },
-  {
-    id: 2,
-    type: "story",
-    title: "Ma première présentation en public",
-    content:
-      "Il y a deux ans, j'avais une peur bleue de parler en public. Mes mains tremblaient, ma voix se cassait... Mais j'ai décidé de m'inscrire à un club de prise de parole. La première fois, j'ai bégayé pendant 5 minutes sur un sujet que je maîtrisais parfaitement. Mais j'y suis retournée. Encore et encore. Aujourd'hui, je donne des conférences devant 200 personnes et j'adore ça !",
-    lesson: "La peur ne disparaît pas, on apprend juste à danser avec elle.",
-    category: "Inspirante",
-    tags: ["courage", "développement personnel", "peur"],
-    user: {
-      name: "Ahmed Benali",
-      avatar: "/placeholder.svg?height=40&width=40",
-      username: "@ahmed_b",
-    },
-    likes: 156,
-    comments: 23,
-    shares: 12,
-    liked: true,
-    following: true,
-    createdAt: "4h",
-  },
-  {
-    id: 3,
-    type: "wisdom",
-    content: "Un arbre qui tombe fait plus de bruit qu'une forêt qui pousse.",
-    author: "Proverbe africain",
-    source: "Sagesse populaire africaine",
-    category: "Sagesse populaire",
-    tags: ["nature", "croissance", "discrétion"],
-    user: {
-      name: "Fatima Kone",
-      avatar: "/placeholder.svg?height=40&width=40",
-      username: "@fatima_k",
-    },
-    likes: 89,
-    comments: 15,
-    shares: 7,
-    liked: false,
-    following: false,
-    createdAt: "1j",
-  },
-]
+import { followUser, unfollowUser, isFollowing } from "../../services/UserService" // ✅ Import des nouvelles fonctions
+import { errorNotification, successNotification } from "../../services/NotificationService" // ✅ Import pour les notifications
+import profileAvatar from "../../assets/profileAvatar.jpg"
 
 const posteFeed = () => {
   const navigate = useNavigate()
-  // const [postes, setpostes] = useState(mockpostes)
   const [commentInputs, setCommentInputs] = useState({})
   const [showDropdown, setShowDropdown] = useState(null)
   const user = useSelector((state) => state.user)
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [followLoading, setFollowLoading] = useState({}); // ✅ État pour les boutons de suivi
 
   useEffect(() => {
     setLoading(true);
@@ -110,7 +47,7 @@ const posteFeed = () => {
         await likeArticle(posteId, user.id);
       }
 
-      // mettre à jour l’état APRES confirmation du backend
+      // mettre à jour l'état APRES confirmation du backend
       setPosts((prev) =>
         prev.map((poste) =>
           poste.article.id === posteId
@@ -132,16 +69,55 @@ const posteFeed = () => {
       );
     } catch (err) {
       console.error(err);
+      errorNotification('Erreur', 'Impossible de mettre à jour le like');
     }
   };
 
+  // ✅ Nouvelle fonction pour gérer le suivi/désuivi
+  const handleFollow = async (targetUserId, isCurrentlyFollowing) => {
+    // Vérifier que ce n'est pas l'utilisateur lui-même
+    if (user.id === targetUserId) {
+      errorNotification('Erreur', 'Vous ne pouvez pas vous suivre vous-même');
+      return;
+    }
 
+    // Activer le loading pour ce bouton spécifique
+    setFollowLoading(prev => ({ ...prev, [targetUserId]: true }));
 
-  const handleFollow = (posteId) => {
-    setPosts((prev) =>
-      prev.map((poste) => (poste.article.id === posteId ? { ...poste, following: !poste.interaction.following } : poste)),
-    )
-  }
+    try {
+      if (isCurrentlyFollowing) {
+        // Désuivre l'utilisateur
+        await unfollowUser(targetUserId);
+        successNotification('Succès', 'Vous ne suivez plus cet utilisateur');
+      } else {
+        // Suivre l'utilisateur
+        await followUser(targetUserId);
+        successNotification('Succès', 'Vous suivez maintenant cet utilisateur');
+      }
+
+      // Mettre à jour l'état local
+      setPosts((prev) =>
+        prev.map((poste) =>
+          poste.user.id === targetUserId
+            ? {
+                ...poste,
+                interaction: {
+                  ...poste.interaction,
+                  following: !isCurrentlyFollowing,
+                },
+              }
+            : poste
+        )
+      );
+
+    } catch (err) {
+      console.error('Erreur lors du suivi:', err);
+      errorNotification('Erreur', err.response?.data?.error || 'Impossible de modifier le suivi');
+    } finally {
+      // Désactiver le loading
+      setFollowLoading(prev => ({ ...prev, [targetUserId]: false }));
+    }
+  };
 
   const handleCommentChange = (posteId, value) => {
     setCommentInputs((prev) => ({ ...prev, [posteId]: value }))
@@ -163,6 +139,7 @@ const posteFeed = () => {
         overlayProps={{ radius: 'sm', blur: 2 }}
         loaderProps={{ color: '#A09F87', type: 'bars' }}
       />
+      
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <button
@@ -188,11 +165,29 @@ const posteFeed = () => {
             <div className="p-6 pb-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full border-2 border-[#4C3163] bg-[#4C3163] flex items-center justify-center text-white font-semibold">
-                    {poste.user.profilePicture || (poste.user.nom + " " + poste.user.prenom)
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
+                  <div className="w-12 h-12 rounded-full border-2 border-[#4C3163] overflow-hidden">
+                    {poste.user.profilePicture ? (
+                      <img
+                        src={poste.user.profilePicture.startsWith('http') ?
+                          poste.user.profilePicture :
+                          `http://localhost:8080${poste.user.profilePicture}`}
+                        alt={`${poste.user.nom} ${poste.user.prenom}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextElementSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className="w-full h-full bg-[#4C3163] flex items-center justify-center text-white font-semibold text-sm"
+                      style={{ display: poste.user.profilePicture ? 'none' : 'flex' }}
+                    >
+                      {(poste.user.nom + " " + poste.user.prenom)
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
+                    </div>
                   </div>
                   <div>
                     <h3 className="text-white font-semibold">{poste.user.nom + " " + poste.user.prenom}</h3>
@@ -202,18 +197,28 @@ const posteFeed = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {user.id !== poste.user.id &&
+                  {user.id !== poste.user.id && (
                     <button
-                      onClick={() => handleFollow(poste.article.id)}
-                      className={`px-3 py-1 text-sm rounded transition-colors flex items-center gap-1 ${poste.interaction.following
-                        ? "bg-[#A09F87] text-[#171717] hover:bg-[#A09F87]/80"
-                        : "border border-[#A09F87] text-[#A09F87] hover:bg-[#A09F87] hover:text-[#171717]"
-                        }`}
+                      onClick={() => handleFollow(poste.user.id, poste.interaction.following)}
+                      disabled={followLoading[poste.user.id]} // ✅ Désactiver pendant le chargement
+                      className={`px-3 py-1 text-sm rounded transition-colors flex items-center gap-1 min-w-[80px] justify-center ${
+                        followLoading[poste.user.id]
+                          ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                          : poste.interaction.following
+                          ? "bg-[#A09F87] text-[#171717] hover:bg-[#A09F87]/80"
+                          : "border border-[#A09F87] text-[#A09F87] hover:bg-[#A09F87] hover:text-[#171717]"
+                      }`}
                     >
-                      {!poste.interaction.following && <UserPlus className="w-4 h-4" />}
-                      {poste.interaction.following ? "Suivi" : "Suivre"}
+                      {followLoading[poste.user.id] ? (
+                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <>
+                          {!poste.interaction.following && <UserPlus className="w-4 h-4" />}
+                          {poste.interaction.following ? "Suivi" : "Suivre"}
+                        </>
+                      )}
                     </button>
-                  }
+                  )}
                   <div className="relative">
                     <button
                       onClick={() => setShowDropdown(showDropdown === poste.article.id ? null : poste.article.id)}
@@ -284,8 +289,9 @@ const posteFeed = () => {
                 <div className="flex items-center gap-6">
                   <button
                     onClick={() => handleLike(poste.article.id)}
-                    className={`flex items-center gap-2 transition-colors ${poste.interaction.liked ? "text-red-500 hover:text-red-400" : "text-[#A09F87] hover:text-red-500"
-                      }`}
+                    className={`flex items-center gap-2 transition-colors ${
+                      poste.interaction.liked ? "text-red-500 hover:text-red-400" : "text-[#A09F87] hover:text-red-500"
+                    }`}
                   >
                     {poste.interaction.liked ? <FaHeart className="w-4 h-4" /> : <Heart className="w-4 h-4" />}
                     {poste.article.likes}
@@ -303,8 +309,25 @@ const posteFeed = () => {
 
               {/* Comment Input */}
               <div className="flex gap-3 pt-2 pb-6">
-                <div className="w-8 h-8 rounded-full bg-[#4C3163] flex items-center justify-center text-white text-xs font-semibold">
-                  {user.profilePicture ?  <img src={oumi} alt="" /> : <span>Vous</span> }
+                <div className="w-8 h-8 rounded-full overflow-hidden border border-[#4C3163]">
+                  {user.profilePicture ? (
+                    <img
+                      src={user.profilePicture.startsWith('http') ?
+                        user.profilePicture :
+                        `http://localhost:8080${user.profilePicture}`}
+                      alt="Votre avatar"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.src = profileAvatar;
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={profileAvatar}
+                      alt="Avatar par défaut"
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                 </div>
                 <div className="flex-1 flex gap-2">
                   <input

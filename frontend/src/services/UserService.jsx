@@ -2,7 +2,7 @@ import axios from "axios";
 
 import axiosInstance from "../Interceptor/AxiosInterceptor";
 
-const base_url = "http://localhost:8080/users/";
+const base_url = "https://articlabackend-production.up.railway.app/users/";
 
 const base_url2 = "/users/";
 
@@ -60,4 +60,35 @@ const uploadProfilePicture = async (formData) => {
     .catch(error => { throw error; });
 }
 
-export { registerUser, loginUser, sendOtp, verifyOtp, changePass, updateUserProfile, getUserProfile, uploadProfilePicture };
+// Dans votre service JavaScript
+const followUser = async (targetUserId) => {
+    return axiosInstance.post(`/users/follow/${targetUserId}`)
+        .then(res => res.data)
+        .catch(error => { throw error; });
+}
+
+const unfollowUser = async (targetUserId) => {
+    return axiosInstance.delete(`/users/unfollow/${targetUserId}`)
+        .then(res => res.data)
+        .catch(error => { throw error; });
+}
+
+const isFollowing = async (targetUserId) => {
+    return axiosInstance.get(`/users/is-following/${targetUserId}`)
+        .then(res => res.data)
+        .catch(error => { throw error; });
+}
+
+const getFollowing = async () => {
+    return axiosInstance.get(`/users/following`)
+        .then(res => res.data)
+        .catch(error => { throw error; });
+}
+
+const getFollowers = async (userId) => {
+    return axiosInstance.get(`/users/followers/${userId}`)
+        .then(res => res.data)
+        .catch(error => { throw error; });
+}
+
+export { registerUser, loginUser, sendOtp, verifyOtp, changePass, updateUserProfile, getUserProfile, uploadProfilePicture, followUser, unfollowUser, isFollowing, getFollowing, getFollowers };

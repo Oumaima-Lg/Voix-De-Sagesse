@@ -34,6 +34,7 @@ export function AppSpline() {
 const Home = () => {
     const [opened, { open, close }] = useDisclosure(false);
     const user = useSelector((state) => state.user);
+    
     return (
 
         <div className='flex sm:flex-row flex-col   mx-auto lg:pt-34 pt-22 min-h-screen bg-gradient-to-bl from-[#171717] from-55% to-[#4E3F59] to-100%'>
@@ -69,9 +70,7 @@ const Home = () => {
                 </div>
             </div>
 
-            <div className='sm:hidden fixed bottom-0 z-20 flex items-center justify-center rounded-se-full bg-gradient-to-tr from-[var(--color-end)] from-20%  to-[var(--color-start)] to-100%  p-2 pt-6 pr-8 cursor-pointer  inset-shadow-sm inset-shadow-white/40' >
-                <Button variant="subtle" size="compact-xs" onClick={open} className='sm:hidden size-0 '  >
-                </Button>
+            <div onClick={open} className='sm:hidden fixed bottom-0 z-20 flex items-center justify-center rounded-se-full bg-gradient-to-tr from-[var(--color-end)] from-20%  to-[var(--color-start)] to-100%  p-2 pt-6 pr-8 cursor-pointer  inset-shadow-sm inset-shadow-white/40' >
                 <div className='text-3xl text-[var(--color-start)] ' >
                     <BsLayoutSidebarInset />
                 </div>
@@ -113,9 +112,9 @@ const Home = () => {
                     </div>
                     <div className="flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu mb-6">
                         <IoCreateOutline className="text-5xl" />
-                        <div className="font-bold text-xl">
+                        <LinkRouter to="/articla/nouveauArticle" className="font-bold text-xl">
                             Nouveau <br /> Article
-                        </div>
+                        </LinkRouter>
                     </div>
                     <div className="flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu">
                         <PiArchiveLight className="text-5xl" />
@@ -141,9 +140,9 @@ const Home = () => {
                         <div>
                             <IoCreateOutline className='text-5xl' />
                         </div>
-                        <div className='font-bold text-xl '>
+                        <LinkRouter to="/articla/nouveauArticle" className="font-bold text-xl">
                             Nouveau <br /> Article
-                        </div>
+                        </LinkRouter>
                     </div>
                     <div className='flex flex-row items-center gap-3 cursor-pointer  hover:text-[#A09F87] hover:scale-105 transform-gpu' >
                         <div>
