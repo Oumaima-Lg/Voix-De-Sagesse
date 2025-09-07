@@ -2,8 +2,8 @@ import axios from 'axios';
 import { Navigate } from 'react-router-dom';
 
 const axiosInstance = axios.create({
-  // baseURL: "http://localhost:8080",
-  baseURL: "https://articlabackend-production.up.railway.app",
+  baseURL: "http://localhost:8080",
+  // baseURL: "https://articlabackend-production.up.railway.app",
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
