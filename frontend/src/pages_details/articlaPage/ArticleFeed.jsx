@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft, Heart, MessageCircle, Share2, UserPlus, MoreHorizontal } from "lucide-react"
-import { FaQuoteLeft, FaHeart } from "react-icons/fa"
+import { ArrowLeft, Heart, MessageCircle, Share2, UserPlus, MoreHorizontal, Bookmark } from "lucide-react"
+import { FaQuoteLeft, FaHeart, FaBookmark } from "react-icons/fa" // ✅ Ajout de FaBookmark
 import { BiBook } from "react-icons/bi"
 import { LoadingOverlay } from "@mantine/core"
 import { useSelector } from "react-redux"
 import { DisplayPosts, likeArticle, unlikeArticle } from "../../services/ArticleService"
-import { followUser, unfollowUser, isFollowing } from "../../services/UserService" // ✅ Import des nouvelles fonctions
-import { errorNotification, successNotification } from "../../services/NotificationService" // ✅ Import pour les notifications
+import { followUser, unfollowUser, saveArticle, unsaveArticle } from "../../services/UserService" 
+import { errorNotification, successNotification } from "../../services/NotificationService"
 import profileAvatar from "../../assets/profileAvatar.jpg"
+import { Link } from "react-router-dom";
 
 const posteFeed = () => {
   const navigate = useNavigate()
@@ -17,7 +18,11 @@ const posteFeed = () => {
   const user = useSelector((state) => state.user)
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [followLoading, setFollowLoading] = useState({}); // ✅ État pour les boutons de suivi
+  const [followLoading, setFollowLoading] = useState({});
+  const [saveLoading, setSaveLoading] = useState({}); // ✅ État pour les boutons de sauvegarde
+
+  // ✅ Ajout d'un état pour les likes en cours de traitement
+  const [likeLoading, setLikeLoading] = useState({});
 
   useEffect(() => {
     setLoading(true);
@@ -37,17 +42,32 @@ const posteFeed = () => {
     navigate("/articla")
   }
 
+  // ✅ Version corrigée de handleLike avec protection contre les double-clics
   const handleLike = async (posteId) => {
+    // Empêcher les clics multiples sur le même article
+    if (likeLoading[posteId]) {
+      return;
+    }
+
+    setLikeLoading(prev => ({ ...prev, [posteId]: true }));
+
     try {
       const poste = posts.find((p) => p.article.id === posteId);
 
-      if (poste.interaction.liked) {
+      if (!poste) {
+        throw new Error("Article non trouvé");
+      }
+
+      const isCurrentlyLiked = poste.interaction.liked;
+
+      // Appel API
+      if (isCurrentlyLiked) {
         await unlikeArticle(posteId, user.id);
       } else {
         await likeArticle(posteId, user.id);
       }
 
-      // mettre à jour l'état APRES confirmation du backend
+      // ✅ Mise à jour optimiste de l'état local seulement APRÈS succès de l'API
       setPosts((prev) =>
         prev.map((poste) =>
           poste.article.id === posteId
@@ -55,57 +75,56 @@ const posteFeed = () => {
               ...poste,
               interaction: {
                 ...poste.interaction,
-                liked: !poste.interaction.liked,
+                liked: !isCurrentlyLiked,
               },
               article: {
                 ...poste.article,
-                likes: poste.interaction.liked
-                  ? poste.article.likes - 1
+                likes: isCurrentlyLiked
+                  ? Math.max(0, poste.article.likes - 1) // Éviter les nombres négatifs
                   : poste.article.likes + 1,
               },
             }
             : poste
         )
       );
+
     } catch (err) {
-      console.error(err);
+      console.error('Erreur lors du like:', err);
       errorNotification('Erreur', 'Impossible de mettre à jour le like');
+    } finally {
+      // ✅ Délai minimum pour éviter les clics trop rapides
+      setTimeout(() => {
+        setLikeLoading(prev => ({ ...prev, [posteId]: false }));
+      }, 300);
     }
   };
 
-  // ✅ Nouvelle fonction pour gérer le suivi/désuivi
+
+
   const handleFollow = async (targetUserId, isCurrentlyFollowing) => {
-    // Vérifier que ce n'est pas l'utilisateur lui-même
     if (user.id === targetUserId) {
-      errorNotification('Erreur', 'Vous ne pouvez pas vous suivre vous-même');
       return;
     }
 
-    // Activer le loading pour ce bouton spécifique
     setFollowLoading(prev => ({ ...prev, [targetUserId]: true }));
 
     try {
       if (isCurrentlyFollowing) {
-        // Désuivre l'utilisateur
         await unfollowUser(targetUserId);
-        successNotification('Succès', 'Vous ne suivez plus cet utilisateur');
       } else {
-        // Suivre l'utilisateur
         await followUser(targetUserId);
-        successNotification('Succès', 'Vous suivez maintenant cet utilisateur');
       }
 
-      // Mettre à jour l'état local
       setPosts((prev) =>
         prev.map((poste) =>
           poste.user.id === targetUserId
             ? {
-                ...poste,
-                interaction: {
-                  ...poste.interaction,
-                  following: !isCurrentlyFollowing,
-                },
-              }
+              ...poste,
+              interaction: {
+                ...poste.interaction,
+                following: !isCurrentlyFollowing,
+              },
+            }
             : poste
         )
       );
@@ -114,8 +133,43 @@ const posteFeed = () => {
       console.error('Erreur lors du suivi:', err);
       errorNotification('Erreur', err.response?.data?.error || 'Impossible de modifier le suivi');
     } finally {
-      // Désactiver le loading
       setFollowLoading(prev => ({ ...prev, [targetUserId]: false }));
+    }
+  };
+
+  // ✅ Nouvelle fonction pour gérer la sauvegarde
+  const handleSave = async (articleId, isCurrentlySaved) => {
+    setSaveLoading(prev => ({ ...prev, [articleId]: true }));
+
+    try {
+      if (isCurrentlySaved) {
+        await unsaveArticle(articleId);
+        // successNotification('Succès', 'Article retiré des favoris');
+      } else {
+        await saveArticle(articleId);
+        // successNotification('Succès', 'Article ajouté aux favoris');
+      }
+
+      // Mettre à jour l'état local
+      setPosts((prev) =>
+        prev.map((poste) =>
+          poste.article.id === articleId
+            ? {
+              ...poste,
+              interaction: {
+                ...poste.interaction,
+                saved: !isCurrentlySaved,
+              },
+            }
+            : poste
+        )
+      );
+
+    } catch (err) {
+      console.error('Erreur lors de la sauvegarde:', err);
+      errorNotification('Erreur', err.response?.data?.error || 'Impossible de modifier la sauvegarde');
+    } finally {
+      setSaveLoading(prev => ({ ...prev, [articleId]: false }));
     }
   };
 
@@ -139,7 +193,7 @@ const posteFeed = () => {
         overlayProps={{ radius: 'sm', blur: 2 }}
         loaderProps={{ color: '#A09F87', type: 'bars' }}
       />
-      
+
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <button
@@ -166,28 +220,30 @@ const posteFeed = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full border-2 border-[#4C3163] overflow-hidden">
-                    {poste.user.profilePicture ? (
-                      <img
-                        src={poste.user.profilePicture.startsWith('http') ?
-                          poste.user.profilePicture :
-                          `http://localhost:8080${poste.user.profilePicture}`}
-                        alt={`${poste.user.nom} ${poste.user.prenom}`}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.nextElementSibling.style.display = 'flex';
-                        }}
-                      />
-                    ) : null}
-                    <div
-                      className="w-full h-full bg-[#4C3163] flex items-center justify-center text-white font-semibold text-sm"
-                      style={{ display: poste.user.profilePicture ? 'none' : 'flex' }}
-                    >
-                      {(poste.user.nom + " " + poste.user.prenom)
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </div>
+                    <Link to={`/articla/poste/profile/${poste.user.id}`}>
+                      {poste.user.profilePicture ? (
+                        <img
+                          src={poste.user.profilePicture.startsWith('http')
+                            ? poste.user.profilePicture
+                            : `http://localhost:8080${poste.user.profilePicture}`}
+                          alt={`${poste.user.nom} ${poste.user.prenom}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextElementSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        className="w-full h-full bg-[#4C3163] flex items-center justify-center text-white font-semibold text-sm"
+                        style={{ display: poste.user.profilePicture ? 'none' : 'flex' }}
+                      >
+                        {(poste.user.nom + " " + poste.user.prenom)
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </div>
+                    </Link>
                   </div>
                   <div>
                     <h3 className="text-white font-semibold">{poste.user.nom + " " + poste.user.prenom}</h3>
@@ -200,14 +256,13 @@ const posteFeed = () => {
                   {user.id !== poste.user.id && (
                     <button
                       onClick={() => handleFollow(poste.user.id, poste.interaction.following)}
-                      disabled={followLoading[poste.user.id]} // ✅ Désactiver pendant le chargement
-                      className={`px-3 py-1 text-sm rounded transition-colors flex items-center gap-1 min-w-[80px] justify-center ${
-                        followLoading[poste.user.id]
-                          ? "bg-gray-500 text-gray-300 cursor-not-allowed"
-                          : poste.interaction.following
+                      disabled={followLoading[poste.user.id]}
+                      className={`px-3 py-1 text-sm rounded transition-colors flex items-center gap-1 min-w-[80px] justify-center ${followLoading[poste.user.id]
+                        ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                        : poste.interaction.following
                           ? "bg-[#A09F87] text-[#171717] hover:bg-[#A09F87]/80"
                           : "border border-[#A09F87] text-[#A09F87] hover:bg-[#A09F87] hover:text-[#171717]"
-                      }`}
+                        }`}
                     >
                       {followLoading[poste.user.id] ? (
                         <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
@@ -219,28 +274,53 @@ const posteFeed = () => {
                       )}
                     </button>
                   )}
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowDropdown(showDropdown === poste.article.id ? null : poste.article.id)}
-                      className="text-[#A09F87] hover:text-white p-1"
-                    >
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
-                    {showDropdown === poste.article.id && (
-                      <div className="absolute right-0 mt-2 w-32 bg-[#202020] border border-[#4C3163] rounded shadow-lg z-10">
-                        <button className="w-full text-left px-3 py-2 text-white hover:bg-[#4C3163] text-sm">
-                          Signaler
-                        </button>
-                        <button className="w-full text-left px-3 py-2 text-white hover:bg-[#4C3163] text-sm">
-                          Masquer
-                        </button>
-                      </div>
+
+                  {/* ✅ Bouton de sauvegarde */}
+                  <button
+                    onClick={() => handleSave(poste.article.id, poste.interaction.saved)}
+                    disabled={saveLoading[poste.article.id]}
+                    className={`p-2 rounded transition-colors ${saveLoading[poste.article.id]
+                      ? "text-gray-500 cursor-not-allowed"
+                      : poste.interaction.saved
+                        ? "text-yellow-500 hover:text-yellow-400"
+                        : "text-[#A09F87] hover:text-yellow-500"
+                      }`}
+                    title={poste.interaction.saved ? "Retirer des favoris" : "Ajouter aux favoris"}
+                  >
+                    {saveLoading[poste.article.id] ? (
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                    ) : poste.interaction.saved ? (
+                      <FaBookmark className="w-4 h-4" />
+                    ) : (
+                      <Bookmark className="w-4 h-4" />
                     )}
-                  </div>
+                  </button>
+
+                  {user.id !== poste.user.id && (
+                    <div className="relative">
+                      <button
+                        onClick={() => setShowDropdown(showDropdown === poste.article.id ? null : poste.article.id)}
+                        className="text-[#A09F87] hover:text-white p-1"
+                      >
+                        <MoreHorizontal className="w-4 h-4" />
+                      </button>
+                      {showDropdown === poste.article.id && (
+                        <div className="absolute right-0 mt-2 w-32 bg-[#202020] border border-[#4C3163] rounded shadow-lg z-10">
+                          <button className="w-full text-left px-3 py-2 text-white hover:bg-[#4C3163] text-sm">
+                            Signaler
+                          </button>
+                          <button className="w-full text-left px-3 py-2 text-white hover:bg-[#4C3163] text-sm">
+                            Masquer
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
+            {/* Le reste du composant reste identique... */}
             {/* Content */}
             <div className="px-6 space-y-4">
               {/* poste Type Icon and Category */}
@@ -289,11 +369,21 @@ const posteFeed = () => {
                 <div className="flex items-center gap-6">
                   <button
                     onClick={() => handleLike(poste.article.id)}
-                    className={`flex items-center gap-2 transition-colors ${
-                      poste.interaction.liked ? "text-red-500 hover:text-red-400" : "text-[#A09F87] hover:text-red-500"
-                    }`}
+                    disabled={likeLoading[poste.article.id]}
+                    className={`flex items-center gap-2 transition-colors ${likeLoading[poste.article.id]
+                        ? "opacity-50 cursor-not-allowed"
+                        : poste.interaction.liked
+                          ? "text-red-500 hover:text-red-400"
+                          : "text-[#A09F87] hover:text-red-500"
+                      }`}
                   >
-                    {poste.interaction.liked ? <FaHeart className="w-4 h-4" /> : <Heart className="w-4 h-4" />}
+                    {likeLoading[poste.article.id] ? (
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                    ) : poste.interaction.liked ? (
+                      <FaHeart className="w-4 h-4" />
+                    ) : (
+                      <Heart className="w-4 h-4" />
+                    )}
                     {poste.article.likes}
                   </button>
                   <button className="flex items-center gap-2 text-[#A09F87] hover:text-white transition-colors">

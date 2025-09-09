@@ -6,7 +6,7 @@ import Cube from '../../semiComponents/Cube'
 import Article from '../../assets/Article.png'
 import nvArticle from '../../assets/nvArticle.png'
 import articlePerso from '../../assets/articlePerso.png'
-import { PiArticleLight } from "react-icons/pi";
+import { PiArticleLight, PiStarLight } from "react-icons/pi";
 import { IoCreateOutline } from "react-icons/io5";
 import { PiArchiveLight } from "react-icons/pi";
 import ShinyText from '../../blocks/TextAnimations/ShinyText/ShinyText';
@@ -34,18 +34,18 @@ export function AppSpline() {
 const Home = () => {
     const [opened, { open, close }] = useDisclosure(false);
     const user = useSelector((state) => state.user);
-    
+
     return (
 
         <div className='flex sm:flex-row flex-col   mx-auto lg:pt-34 pt-22 min-h-screen bg-gradient-to-bl from-[#171717] from-55% to-[#4E3F59] to-100%'>
             <div className=' w-xs pt-12 sm:block hidden'>
-                <div className=' border-x-3 border-b-3 px-4  border-[#202020]  md:h-3/4 h-2/3 md:w-3/4 w-2/3 bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100%  rounded-lg shadow-lg    text-white flex flex-col justify-between  py-20 '>
+                <div className=' border-x-3 border-b-3 px-4  border-[#202020]  md:h-3/4 h-2/3 md:w-3/4 w-2/3 bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100%  rounded-lg shadow-lg   text-white/85/85 flex flex-col justify-between  py-20 '>
 
                     <div className='flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu' >
                         <div>
                             <PiArticleLight className='md:text-5xl text-2xl' />
                         </div>
-                        <LinkRouter to='/articla/article' className='font-bold md:text-xl text-sm'>
+                        <LinkRouter to='/articla/article' className='font-medium md:text-xl text-sm'>
                             Article
                         </LinkRouter>
                     </div>
@@ -53,7 +53,7 @@ const Home = () => {
                         <div>
                             <IoCreateOutline className='md:text-5xl text-2xl' />
                         </div>
-                        <LinkRouter to="/articla/nouveauArticle" className="font-bold md:text-xl text-sm">
+                        <LinkRouter to="/articla/nouveauArticle" className="font-medium md:text-xl text-sm">
                             Nouveau <br /> Article
                         </LinkRouter>
                     </div>
@@ -61,11 +61,19 @@ const Home = () => {
                         <div>
                             <PiArchiveLight className='md:text-5xl text-2xl' />
                         </div>
-                        <div className='font-bold md:text-xl text-sm'>
-                            <LinkRouter to="/articla/favorite" className="font-bold md:text-xl text-sm">
+                        <div className='font-medium md:text-xl text-sm'>
+                            <LinkRouter to="/articla/my-posts" className="font-medium md:text-xl text-sm">
                                 Vos articles <br /> personnels
                             </LinkRouter>
                         </div>
+                    </div>
+                    <div className='flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu'>
+                        <div>
+                            <PiStarLight className='md:text-5xl text-2xl' />
+                        </div>
+                        <LinkRouter to="/articla/topArticla" className="font-medium md:text-xl text-sm">
+                           Top articles
+                        </LinkRouter>
                     </div>
                 </div>
             </div>
@@ -103,36 +111,44 @@ const Home = () => {
 
                 }}
             >
-                <div className="border-x-3 absolute bottom-0 left-0 border-b-3 py-30 px-4 size-full border-[#202020] bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% rounded-lg shadow-lg text-white flex flex-col justify-between items-start ">
+                <div className="border-x-3 absolute bottom-0 left-0 border-b-3 py-30 px-4 size-full border-[#202020] bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% rounded-lg shadow-lg text-white/85 flex flex-col justify-between items-start ">
                     <div className="flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu mb-6">
                         <PiArticleLight className="text-5xl" />
-                        <LinkRouter to="/articla/article" className="font-bold text-xl">
+                        <LinkRouter to="/articla/article" className="font-medium text-xl">
                             Article
                         </LinkRouter>
                     </div>
                     <div className="flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu mb-6">
                         <IoCreateOutline className="text-5xl" />
-                        <LinkRouter to="/articla/nouveauArticle" className="font-bold text-xl">
+                        <LinkRouter to="/articla/nouveauArticle" className="font-medium text-xl">
                             Nouveau <br /> Article
                         </LinkRouter>
                     </div>
                     <div className="flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu">
                         <PiArchiveLight className="text-5xl" />
-                        <div className="font-bold text-xl">
-                            Vos articles <br /> personnels
+                        <LinkRouter to="/articla/my-posts" className="font-medium text-xl">
+                                Vos articles <br /> personnels
+                         </LinkRouter>
+                    </div>
+                    <div className='flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu'>
+                        <div>
+                            <PiStarLight className='text-5xl' />
                         </div>
+                        <LinkRouter to="/articla/topArticla" className="font-medium text-xl">
+                           Top articles
+                        </LinkRouter>
                     </div>
                 </div>
             </Drawer>
 
             <div className='hidden fixed bottom-0 top-0 z-70 left-0 '>
-                <div className=' border-x-3 border-b-3 px-4 size-full  border-[#202020]  bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100%  rounded-lg shadow-lg   text-white flex flex-col justify-between items-start  py-50 '>
+                <div className=' border-x-3 border-b-3 px-4 size-full  border-[#202020]  bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100%  rounded-lg shadow-lg   text-white/85 flex flex-col justify-between items-start  py-50 '>
 
                     <div className='flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu' >
                         <div className=''>
                             <PiArticleLight className=' text-5xl ' />
                         </div>
-                        <LinkRouter to='/articla/article' className='font-bold text-xl'>
+                        <LinkRouter to='/articla/article' className='font-medium text-xl'>
                             Article
                         </LinkRouter>
                     </div>
@@ -140,7 +156,7 @@ const Home = () => {
                         <div>
                             <IoCreateOutline className='text-5xl' />
                         </div>
-                        <LinkRouter to="/articla/nouveauArticle" className="font-bold text-xl">
+                        <LinkRouter to="/articla/nouveauArticle" className="font-medium text-xl">
                             Nouveau <br /> Article
                         </LinkRouter>
                     </div>
@@ -148,9 +164,17 @@ const Home = () => {
                         <div>
                             <PiArchiveLight className='text-5xl' />
                         </div>
-                        <div className='font-bold text-xl'>
-                            Vos articles <br /> personnels
+                        <LinkRouter to="/articla/my-posts" className="font-medium text-xl">
+                                Vos articles <br /> personnels
+                         </LinkRouter>
+                    </div>
+                    <div className='flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu'>
+                        <div>
+                            <PiStarLight className='text-5xl' />
                         </div>
+                        <LinkRouter to="/articla/topArticla" className="font-medium text-xl">
+                           Top articles
+                        </LinkRouter>
                     </div>
                 </div>
             </div>
@@ -168,7 +192,7 @@ const Home = () => {
                         <div className='flex flex-col justify-center items-center lg:gap-10 gap-0 '>
                             <div className='flex 2xl:space-x-[-50px] gap-2'>
                                 <div className='bg-[#4C3163] size-6 self-end origin-center rotate-24 '></div>
-                                <div className='text-center text-wrap xl:w-xl  text-[#A09F87] charm xl:text-4xl text-2xl font-bold leading-relaxed mx-auto pr-6'>
+                                <div className='text-center text-wrap xl:w-xl  text-[#A09F87] charm xl:text-4xl text-2xl font-medium leading-relaxed mx-auto pr-6'>
                                     Dans cette vie, chacun porte ses imperfections, et c'est ce qui fait de nous des êtres humains
                                 </div>
                                 <div className='bg-[#4C3163] size-6 self-start origin-center rotate-24 '></div>

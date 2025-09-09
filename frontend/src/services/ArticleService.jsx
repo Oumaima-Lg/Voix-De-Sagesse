@@ -48,6 +48,32 @@ const unlikeArticle = async (id, currentUserId) => {
         .catch(error => { throw error; });
 }
 
+// ✅ Nouvelle fonction pour les articles sauvegardés avec userId
+const getSavedArticles = async (userId) => {
+    return axiosInstance.get(`${base_url}saved/${userId}`)
+        .then(res => res.data)
+        .catch(error => { throw error; });
+}
+
+// ✅ Nouvelles fonctions pour les postes personnels
+const getMyPosts = async (userId) => {
+    return axiosInstance.get(`${base_url}my-posts/${userId}`)
+        .then(res => res.data)
+        .catch(error => { throw error; });
+}
+
+const getUserPosts = async (userId) => {
+    return axiosInstance.get(`${base_url}user-posts/${userId}`)
+        .then(res => res.data)
+        .catch(error => { throw error; });
+}
+
+const deleteArticleWithUserId = async (articleId, userId) => {
+    return axiosInstance.delete(`${base_url}delete/${articleId}/${userId}`)
+        .then(res => res.data)
+        .catch(error => { throw error; });
+}
+
 export { 
     createSagesseArticle, 
     createHistoireArticle, 
@@ -55,5 +81,9 @@ export {
     DisplayPersoArticle, 
     DisplayPosts, 
     likeArticle, 
-    unlikeArticle 
+    unlikeArticle,
+    getSavedArticles,
+    getMyPosts,
+    getUserPosts,
+    deleteArticleWithUserId
 };

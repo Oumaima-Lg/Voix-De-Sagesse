@@ -92,4 +92,27 @@ const getFollowers = async (userId) => {
         .catch(error => { throw error; });
 }
 
-export { registerUser, loginUser, sendOtp, verifyOtp, changePass, updateUserProfile, getUserProfile, uploadProfilePicture, followUser, unfollowUser, isFollowing, getFollowing, getFollowers };
+
+// ✅ Nouvelles fonctions pour la sauvegarde d'articles
+const saveArticle = async (articleId) => {
+    return axiosInstance.post(`/users/save-article/${articleId}`)
+        .then(res => res.data)
+        .catch(error => { throw error; });
+}
+
+const unsaveArticle = async (articleId) => {
+    return axiosInstance.delete(`/users/unsave-article/${articleId}`)
+        .then(res => res.data)
+        .catch(error => { throw error; });
+}
+
+const isArticleSaved = async (articleId) => {
+    return axiosInstance.get(`/users/is-article-saved/${articleId}`)
+        .then(res => res.data)
+        .catch(error => { throw error; });
+}
+
+
+export { registerUser, loginUser, sendOtp, verifyOtp, changePass, updateUserProfile, 
+    getUserProfile, uploadProfilePicture, followUser, unfollowUser, isFollowing, 
+    getFollowing, getFollowers, saveArticle, unsaveArticle, isArticleSaved };

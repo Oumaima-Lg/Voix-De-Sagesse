@@ -34,6 +34,11 @@ const HeaderArticla = () => {
         setToggle(!toggle);
     }
 
+    const handleFavoris = () => {
+        navigate("/saved-articles");
+        setToggle(!toggle);
+    }
+
     return (
         <div>
             <header className='pt-4 fixed z-50 right-0 left-0 top-0 bg-black/1 backdrop-blur-2xl'>
@@ -76,7 +81,7 @@ const HeaderArticla = () => {
                                 <div className='text-xl'>
                                     <BookmarkBorderIcon fontSize='inherit' />
                                 </div>
-                                <div className='text-md font-medium'>Vos Favoris</div>
+                                <div className='text-md font-medium' onClick={handleFavoris}>Vos Favoris</div>
                             </div>
                             <div className='flex gap-2 items-center cursor-pointer  text-orange-600 hover:scale-105 transform-gpu hover:text-[#A09F87]'>
                                 <div className='pl-1 text-xl' >

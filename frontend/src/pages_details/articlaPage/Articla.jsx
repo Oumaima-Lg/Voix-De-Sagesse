@@ -4,6 +4,7 @@ import Home from './Home'
 import Article from './Article'
 import { useLocation } from 'react-router-dom'
 import Profile from './Profile'
+import ProfileAuthor from './ProfileAuthor'
 
 
 const Articla = () => {
@@ -13,12 +14,12 @@ const Articla = () => {
         switch(location.pathname) {
             case '/articla':
                 return <Home />
-            case '/articla/favorite':
+            case '/articla/topArticla':
                 return <Article />
-            case '/articla/nouveauArticle':
-                return <nvArticle />
             case '/articla/profile':
                 return <Profile />
+            case '/articla/poste/profile/:id':
+                return <ProfileAuthor />
             default:
                 return <Home />
         }
