@@ -83,4 +83,34 @@ public interface UserRepository extends MongoRepository<User, Long> {
 
     //  Trouver tous les utilisateurs qui suivent un utilisateur donné
     List<User> findByFollowingIdContaining(Long userId);
+
+
+    // ✅ Nouvelles méthodes pour la sauvegarde d'articles
+    @Query("{ '_id': ?0 }")
+    @Update("{ '$addToSet': { 'savedArticlesId': ?1 } }")
+    void addSavedArticle(Long userId, Long articleId);
+
+    @Query("{ '_id': ?0 }")
+    @Update("{ '$pull': { 'savedArticlesId': ?1 } }")
+    void removeSavedArticle(Long userId, Long articleId);
+
+    // Vérifier si un article est sauvegardé
+    @Query(value = "{ '_id': ?0, 'savedArticlesId': ?1 }", exists = true)
+    boolean isArticleSaved(Long userId, Long articleId);
+
+
+    // Retirer un article des likes de TOUS les utilisateurs
+    @Query("{ 'likedArticlesId': ?0 }")
+    @Update("{ '$pull': { 'likedArticlesId': ?0 } }")
+    void removeArticleFromAllUsersLikes(Long articleId);
+    
+    // Retirer un article des sauvegardes de TOUS les utilisateurs
+    @Query("{ 'savedArticlesId': ?0 }")
+    @Update("{ '$pull': { 'savedArticlesId': ?0 } }")
+    void removeArticleFromAllUsersSaved(Long articleId);
+    
+    // Décrémenter les likes reçus de l'auteur selon le nombre de likes de l'article
+    @Query("{ '_id': ?0 }")
+    @Update("{ '$inc': { 'likesReceived': ?1 } }")
+    void decrementLikesReceivedByAmount(Long userId, Long amount);
 }

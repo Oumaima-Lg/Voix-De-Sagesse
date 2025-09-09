@@ -279,4 +279,60 @@ public class UserController {
         }
     }
 
+    // ✅ Endpoint pour sauvegarder un article
+    @PostMapping("/save-article/{articleId}")
+    public ResponseEntity<?> saveArticle(@PathVariable Long articleId) throws ArticlaException {
+        try {
+            User currentUser = getCurrentUser();
+            userService.saveArticle(currentUser.getId(), articleId);
+            
+            return ResponseEntity.ok(Map.of(
+                "message", "Article sauvegardé avec succès",
+                "success", true,
+                "isSaved", true
+            ));
+            
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", e.getMessage(),
+                "success", false
+            ));
+        }
+    }
+
+    // ✅ Endpoint pour retirer un article des favoris
+    @DeleteMapping("/unsave-article/{articleId}")
+    public ResponseEntity<?> unsaveArticle(@PathVariable Long articleId) throws ArticlaException {
+        try {
+            User currentUser = getCurrentUser();
+            userService.unsaveArticle(currentUser.getId(), articleId);
+            
+            return ResponseEntity.ok(Map.of(
+                "message", "Article retiré des favoris",
+                "success", true,
+                "isSaved", false
+            ));
+            
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", e.getMessage(),
+                "success", false
+            ));
+        }
+    }
+
+    // ✅ Endpoint pour vérifier si un article est sauvegardé
+    @GetMapping("/is-article-saved/{articleId}")
+    public ResponseEntity<?> isArticleSaved(@PathVariable Long articleId) throws ArticlaException {
+            User currentUser = getCurrentUser();
+            boolean isSaved = userService.isArticleSaved(currentUser.getId(), articleId);
+            
+            return ResponseEntity.ok(Map.of(
+                "isSaved", isSaved,
+                "success", true
+            ));
+    }
+
+    
+
 }

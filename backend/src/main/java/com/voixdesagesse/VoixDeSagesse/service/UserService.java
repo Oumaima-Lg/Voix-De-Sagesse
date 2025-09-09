@@ -34,13 +34,13 @@ public interface UserService {
 
     public User getUserById(long userId) throws ArticlaException;
 
-    public void addLikedArticle(Long currentUserId, Long articleId);
+    public void addLikedArticle(Long currentUserId, Long articleId) throws ArticlaException;
 
-    public void removeLikedArticle(Long currentUserId, Long articleId);
+    public void removeLikedArticle(Long currentUserId, Long articleId) throws ArticlaException;
 
-    public void incrementLikesReceived(Long userId);
+    public void incrementLikesReceived(Long userId) throws ArticlaException;
 
-    public void decrementLikesReceived(Long userId);
+    public void decrementLikesReceived(Long userId) throws ArticlaException;
 
     public UserProfileDTO getUserProfileById(long userId) throws ArticlaException;
     
@@ -74,5 +74,19 @@ public interface UserService {
 
     public List<User> findByFollowingIdContaining(Long userId);
 
+    public void saveArticle(Long userId, Long articleId);
+
+    public void unsaveArticle(Long userId, Long articleId);
+
+    public boolean isArticleSaved(Long userId, Long articleId);
+
+    // ✅ Nouvelles méthodes pour le nettoyage lors de suppression
+    public void removeArticleFromAllUsersLikes(Long articleId);
+    
+    public void removeArticleFromAllUsersSaved(Long articleId);
+    
+    public void decrementLikesReceivedByAmount(Long userId, Long amount);
 
 }
+
+

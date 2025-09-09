@@ -72,6 +72,7 @@ public class UserServiceImpl implements UserService {
         user.setFollowingCount(0L);
         user.setLikedArticlesId(new HashSet<>());
         user.setFollowingId(new HashSet<>());
+        user.setSavedArticlesId(new HashSet<>());
         user = userRepository.save(user);
 
         return user.toRegisterDTO();
@@ -152,28 +153,79 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(userId).orElseThrow(() -> new ArticlaException("USER_NOT_FOUND"));
     }
 
-    @Override
     @Transactional
-    public void addLikedArticle(Long currentUserId, Long articleId) {
-        userRepository.addLikedArticle(currentUserId, articleId);
+    @Override
+    public synchronized void addLikedArticle(Long userId, Long articleId) throws ArticlaException {
+        User user = getUserById(userId);
+        Set<Long> likedArticles = user.getLikedArticlesId();
+
+        if (likedArticles == null) {
+            likedArticles = new HashSet<>();
+        }
+
+        // ✅ Vérifier si déjà présent (éviter les doublons)
+        if (likedArticles.contains(articleId)) {
+            throw new RuntimeException("Article déjà liké par cet utilisateur");
+        }
+
+        likedArticles.add(articleId);
+        user.setLikedArticlesId(likedArticles);
+        userRepository.save(user);
     }
 
-    @Override
     @Transactional
-    public void removeLikedArticle(Long currentUserId, Long articleId) {
-        userRepository.removeLikedArticle(currentUserId, articleId);
+    @Override
+    public synchronized void removeLikedArticle(Long userId, Long articleId) throws ArticlaException {
+        User user = getUserById(userId);
+        Set<Long> likedArticles = user.getLikedArticlesId();
+
+        if (likedArticles == null || !likedArticles.contains(articleId)) {
+            throw new RuntimeException("Article pas encore liké par cet utilisateur");
+        }
+
+        likedArticles.remove(articleId);
+        user.setLikedArticlesId(likedArticles);
+        userRepository.save(user);
     }
 
-    @Override
+    // ✅ CRITIQUE: Protéger incrementLikesReceived contre les race conditions
     @Transactional
-    public void incrementLikesReceived(Long userId) {
-        userRepository.incrementLikesReceived(userId);
+    @Override
+    public synchronized void incrementLikesReceived(Long userId) throws ArticlaException {
+        User user = getUserById(userId);
+
+        Long currentLikes = user.getLikesReceived();
+        if (currentLikes == null) {
+            currentLikes = 0L;
+        }
+
+        user.setLikesReceived(currentLikes + 1);
+        userRepository.save(user);
+
+        // ✅ Log pour debug
+        System.out.println("INCREMENT: User " + userId + " now has " + (currentLikes + 1) + " likes received");
     }
 
-    @Override
+    // ✅ CRITIQUE: Protéger decrementLikesReceived contre les race conditions
     @Transactional
-    public void decrementLikesReceived(Long userId) {
-        userRepository.decrementLikesReceived(userId);
+    @Override
+    public synchronized void decrementLikesReceived(Long userId) throws ArticlaException {
+        User user = getUserById(userId);
+
+        Long currentLikes = user.getLikesReceived();
+        if (currentLikes == null || currentLikes <= 0) {
+            // ✅ Éviter les valeurs négatives
+            user.setLikesReceived(0L);
+            userRepository.save(user);
+            System.out.println("DECREMENT: User " + userId + " likes already at 0, no change");
+            return;
+        }
+
+        user.setLikesReceived(currentLikes - 1);
+        userRepository.save(user);
+
+        // ✅ Log pour debug
+        System.out.println("DECREMENT: User " + userId + " now has " + (currentLikes - 1) + " likes received");
     }
 
     @Override
@@ -278,6 +330,53 @@ public class UserServiceImpl implements UserService {
         userRepository.decrementFollowersCount(userId);
     }
 
+    // // ✅ Autres méthodes similaires à protéger
+    // @Transactional
+    // public synchronized void incrementContentCount(Long userId) {
+    //     User user = getUserById(userId);
+    //     Long currentCount = user.getContentCount();
+    //     if (currentCount == null) {
+    //         currentCount = 0L;
+    //     }
+    //     user.setContentCount(currentCount + 1);
+    //     userRepository.save(user);
+    // }
+
+    // @Transactional
+    // public synchronized void decrementContentCount(Long userId) {
+    //     User user = getUserById(userId);
+    //     Long currentCount = user.getContentCount();
+    //     if (currentCount == null || currentCount <= 0) {
+    //         user.setContentCount(0L);
+    //     } else {
+    //         user.setContentCount(currentCount - 1);
+    //     }
+    //     userRepository.save(user);
+    // }
+
+    // @Transactional
+    // public synchronized void incrementFollowersCount(Long userId) {
+    //     User user = getUserById(userId);
+    //     Long currentCount = user.getFollowersCount();
+    //     if (currentCount == null) {
+    //         currentCount = 0L;
+    //     }
+    //     user.setFollowersCount(currentCount + 1);
+    //     userRepository.save(user);
+    // }
+
+    // @Transactional
+    // public synchronized void decrementFollowersCount(Long userId) {
+    //     User user = getUserById(userId);
+    //     Long currentCount = user.getFollowersCount();
+    //     if (currentCount == null || currentCount <= 0) {
+    //         user.setFollowersCount(0L);
+    //     } else {
+    //         user.setFollowersCount(currentCount - 1);
+    //     }
+    //     userRepository.save(user);
+    // }
+
     @Override
     public List<User> findAllFollowingUsersById(Set<Long> followingIds) {
         List<User> followingUsers = new ArrayList<>();
@@ -293,7 +392,6 @@ public class UserServiceImpl implements UserService {
     public List<User> findByFollowingIdContaining(Long userId) {
         return userRepository.findByFollowingIdContaining(userId);
     }
-
 
     @Override
     public UserDTO getUserByEmail(String email) throws ArticlaException {
@@ -355,6 +453,65 @@ public class UserServiceImpl implements UserService {
         } catch (IOException e) {
             // Log l'erreur mais ne pas faire échouer l'upload
             System.err.println("Erreur lors de la suppression de l'ancienne image: " + e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void saveArticle(Long userId, Long articleId) {
+        // Vérifier que l'utilisateur existe
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("Utilisateur introuvable");
+        }
+
+        // Vérifier que l'article existe (si vous avez ArticleRepository)
+        // if (!articleRepository.existsById(articleId)) {
+        // throw new RuntimeException("Article introuvable");
+        // }
+
+        // Vérifier si déjà sauvegardé
+        if (isArticleSaved(userId, articleId)) {
+            throw new RuntimeException("Article déjà sauvegardé");
+        }
+
+        userRepository.addSavedArticle(userId, articleId);
+    }
+
+    @Override
+    @Transactional
+    public void unsaveArticle(Long userId, Long articleId) {
+        // Vérifier si actuellement sauvegardé
+        if (!isArticleSaved(userId, articleId)) {
+            throw new RuntimeException("Article non sauvegardé");
+        }
+
+        userRepository.removeSavedArticle(userId, articleId);
+    }
+
+    @Override
+    public boolean isArticleSaved(Long userId, Long articleId) {
+        return userRepository.isArticleSaved(userId, articleId);
+    }
+
+    // ✅ Implémentation des nouvelles méthodes
+    @Override
+    @Transactional
+    public void removeArticleFromAllUsersLikes(Long articleId) {
+        userRepository.removeArticleFromAllUsersLikes(articleId);
+    }
+
+    @Override
+    @Transactional
+    public void removeArticleFromAllUsersSaved(Long articleId) {
+        userRepository.removeArticleFromAllUsersSaved(articleId);
+    }
+
+    @Override
+    @Transactional
+    public void decrementLikesReceivedByAmount(Long userId, Long amount) {
+        if (amount > 0) {
+            // Utiliser la valeur négative pour décrémenter
+            userRepository.decrementLikesReceivedByAmount(userId, -amount);
         }
     }
 

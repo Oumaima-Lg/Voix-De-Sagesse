@@ -1,11 +1,13 @@
 package com.voixdesagesse.VoixDeSagesse.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -66,9 +68,9 @@ public class ArticleController {
     }
 
    @PostMapping("/{id}/like")
-    public ResponseEntity<String> likeArticle(
+    public ResponseEntity<String> likeArticle (
             @PathVariable Long id,
-            @RequestParam Long currentUserId) {
+            @RequestParam Long currentUserId) throws ArticlaException {
 
         articleService.likeArticle(id, currentUserId);
         return ResponseEntity.ok("Article liked successfully");
@@ -77,10 +79,22 @@ public class ArticleController {
     @PostMapping("/{id}/unlike")
     public ResponseEntity<String> unlikeArticle(
             @PathVariable Long id,
-            @RequestParam Long currentUserId) {
+            @RequestParam Long currentUserId) throws ArticlaException {
 
         articleService.unlikeArticle(id, currentUserId);
         return ResponseEntity.ok("Article unliked successfully");
+    }
+
+
+    @GetMapping("/saved/{userId}")
+    public ResponseEntity<?> getSavedArticles(@PathVariable Long userId) throws ArticlaException {
+            List<PosteDTO> savedPosts = articleService.getSavedArticles(userId);
+            
+            return ResponseEntity.ok(Map.of(
+                "savedArticles", savedPosts,
+                "count", savedPosts.size(),
+                "success", true
+            ));
     }
 
     // // Récupérer un article par ID
@@ -116,4 +130,66 @@ public class ArticleController {
     // public List<Article> findArticlesByTitle(@RequestParam String title) {
     //     return articleService.findArticlesByTitle(title);
     // }
+
+    // ✅ Endpoint pour récupérer les postes personnels de l'utilisateur
+    @GetMapping("/my-posts/{userId}")
+    public ResponseEntity<?> getMyPosts(@PathVariable Long userId) {
+        try {
+            List<PosteDTO> myPosts = articleService.getMyPosts(userId);
+            
+            return ResponseEntity.ok(Map.of(
+                "myPosts", myPosts,
+                "count", myPosts.size(),
+                "success", true
+            ));
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "error", e.getMessage(),
+                "success", false
+            ));
+        }
+    }
+
+    // ✅ Endpoint pour récupérer les postes d'un utilisateur spécifique (pour le profil public)
+    @GetMapping("/user-posts/{userId}")
+    public ResponseEntity<?> getUserPosts(@PathVariable Long userId) {
+        try {
+            List<PosteDTO> userPosts = articleService.getUserPosts(userId);
+            
+            return ResponseEntity.ok(Map.of(
+                "userPosts", userPosts,
+                "count", userPosts.size(),
+                "success", true
+            ));
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "error", e.getMessage(),
+                "success", false
+            ));
+        }
+    }
+
+
+    // ✅ Endpoint alternatif avec userId en paramètre
+    @DeleteMapping("/delete/{articleId}/{userId}")
+    public ResponseEntity<?> deleteArticleWithUserId(@PathVariable Long articleId, @PathVariable Long userId) {
+        try {
+            articleService.deleteArticle(articleId, userId);
+            
+            return ResponseEntity.ok(Map.of(
+                "message", "Article supprimé avec succès",
+                "success", true,
+                "deletedArticleId", articleId
+            ));
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "error", "Erreur interne du serveur",
+                "success", false
+            ));
+        }
+    }
 }
+
