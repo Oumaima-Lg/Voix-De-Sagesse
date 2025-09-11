@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft, Heart, MessageCircle, Share2, UserPlus, MoreHorizontal, Bookmark } from "lucide-react"
+import { ArrowLeft, Heart, MessageCircle, Share2, UserPlus, MoreHorizontal, Bookmark, Trash2 } from "lucide-react"
 import { FaQuoteLeft, FaHeart, FaBookmark } from "react-icons/fa"
 import { BiBook } from "react-icons/bi"
 import { LoadingOverlay } from "@mantine/core"
 import { useSelector } from "react-redux"
 import { getSavedArticles, likeArticle, unlikeArticle } from "../../services/ArticleService"
 import { followUser, unfollowUser, unsaveArticle } from "../../services/UserService"
+import { addComment, getCommentsByArticle, deleteComment } from "../../services/CommentService" // ✅ Import CommentService
 import { errorNotification, successNotification } from "../../services/NotificationService"
 import profileAvatar from "../../assets/profileAvatar.jpg"
 import { Link } from "react-router-dom";
@@ -14,7 +15,11 @@ import { Link } from "react-router-dom";
 const SavedArticles = () => {
     const navigate = useNavigate()
     const [commentInputs, setCommentInputs] = useState({})
+    const [postComments, setPostComments] = useState({}) // ✅ État pour les commentaires de la DB
     const [showDropdown, setShowDropdown] = useState(null)
+    const [showComments, setShowComments] = useState({}) // ✅ État pour l'affichage des commentaires
+    const [commentLoading, setCommentLoading] = useState({}) // ✅ État pour le loading des commentaires
+    const [deleteCommentLoading, setDeleteCommentLoading] = useState({}) // ✅ État pour la suppression
     const user = useSelector((state) => state.user)
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -37,12 +42,121 @@ const SavedArticles = () => {
             });
     }, []);
 
+    // ✅ Fonction pour charger les commentaires
+    const loadComments = async (articleId) => {
+        try {
+            const response = await getCommentsByArticle(articleId)
+            setPostComments((prev) => ({
+                ...prev,
+                [articleId]: response.comments || [],
+            }))
+        } catch (err) {
+            console.error("Erreur lors du chargement des commentaires:", err)
+        }
+    }
+
+    // ✅ Fonction pour basculer l'affichage des commentaires
+    const toggleComments = async (articleId) => {
+        const isCurrentlyShown = showComments[articleId]
+
+        setShowComments((prev) => ({ ...prev, [articleId]: !isCurrentlyShown }))
+
+        // Si on affiche les commentaires et qu'ils ne sont pas encore chargés
+        if (!isCurrentlyShown && !postComments[articleId]) {
+            await loadComments(articleId)
+        }
+    }
+
+    // ✅ Fonction pour soumettre un commentaire
+    const handleCommentSubmit = async (articleId) => {
+        const content = commentInputs[articleId]
+        if (!content?.trim()) return
+
+        setCommentLoading((prev) => ({ ...prev, [articleId]: true }))
+
+        try {
+            const response = await addComment(articleId, content.trim())
+
+            // Recharger tous les commentaires après ajout
+            await loadComments(articleId)
+
+            // Mettre à jour le compteur de commentaires dans les posts
+            setPosts((prev) =>
+                prev.map((post) =>
+                    post.article.id === articleId
+                        ? {
+                            ...post,
+                            article: {
+                                ...post.article,
+                                comments: post.article.comments + 1,
+                            },
+                        }
+                        : post,
+                ),
+            )
+
+            // Vider le champ de saisie
+            setCommentInputs((prev) => ({ ...prev, [articleId]: "" }))
+
+            // S'assurer que les commentaires sont visibles
+            setShowComments((prev) => ({ ...prev, [articleId]: true }))
+
+            successNotification('Succès', 'Commentaire ajouté avec succès')
+            console.log("Commentaire ajouté et liste rechargée pour article:", articleId)
+        } catch (err) {
+            console.error("Erreur lors de l'ajout du commentaire:", err)
+            errorNotification('Erreur', err.response?.data?.error || 'Impossible d\'ajouter le commentaire')
+        } finally {
+            setCommentLoading((prev) => ({ ...prev, [articleId]: false }))
+        }
+    }
+
+    // ✅ Fonction pour supprimer un commentaire
+    const handleDeleteComment = async (commentId, articleId) => {
+        if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce commentaire ?")) {
+            return
+        }
+
+        setDeleteCommentLoading((prev) => ({ ...prev, [commentId]: true }))
+
+        try {
+            await deleteComment(commentId)
+
+            // Retirer le commentaire de la liste locale
+            setPostComments((prev) => ({
+                ...prev,
+                [articleId]: prev[articleId]?.filter((comment) => comment.id !== commentId) || [],
+            }))
+
+            // Mettre à jour le compteur dans les posts
+            setPosts((prev) =>
+                prev.map((post) =>
+                    post.article.id === articleId
+                        ? {
+                            ...post,
+                            article: {
+                                ...post.article,
+                                comments: Math.max(0, post.article.comments - 1),
+                            },
+                        }
+                        : post,
+                ),
+            )
+
+            successNotification('Succès', 'Commentaire supprimé avec succès')
+        } catch (err) {
+            console.error("Erreur lors de la suppression:", err)
+            errorNotification('Erreur', err.response?.data?.error || 'Impossible de supprimer le commentaire')
+        } finally {
+            setDeleteCommentLoading((prev) => ({ ...prev, [commentId]: false }))
+        }
+    }
+
     const handleBack = () => {
         navigate("/articla")
     }
 
     const handleLike = async (posteId) => {
-        // Empêcher les clics multiples sur le même article
         if (likeLoading[posteId]) {
             return;
         }
@@ -58,14 +172,12 @@ const SavedArticles = () => {
 
             const isCurrentlyLiked = poste.interaction.liked;
 
-            // Appel API
             if (isCurrentlyLiked) {
                 await unlikeArticle(posteId, user.id);
             } else {
                 await likeArticle(posteId, user.id);
             }
 
-            // ✅ Mise à jour optimiste de l'état local seulement APRÈS succès de l'API
             setPosts((prev) =>
                 prev.map((poste) =>
                     poste.article.id === posteId
@@ -78,7 +190,7 @@ const SavedArticles = () => {
                             article: {
                                 ...poste.article,
                                 likes: isCurrentlyLiked
-                                    ? Math.max(0, poste.article.likes - 1) // Éviter les nombres négatifs
+                                    ? Math.max(0, poste.article.likes - 1)
                                     : poste.article.likes + 1,
                             },
                         }
@@ -90,7 +202,6 @@ const SavedArticles = () => {
             console.error('Erreur lors du like:', err);
             errorNotification('Erreur', 'Impossible de mettre à jour le like');
         } finally {
-            // ✅ Délai minimum pour éviter les clics trop rapides
             setTimeout(() => {
                 setLikeLoading(prev => ({ ...prev, [posteId]: false }));
             }, 300);
@@ -138,11 +249,8 @@ const SavedArticles = () => {
 
         try {
             await unsaveArticle(articleId);
-            // successNotification('Succès', 'Article retiré des favoris');
-
-            // Retirer l'article de la liste
             setPosts((prev) => prev.filter((poste) => poste.article.id !== articleId));
-
+            successNotification('Succès', 'Article retiré des favoris');
         } catch (err) {
             console.error('Erreur lors de la suppression:', err);
             errorNotification('Erreur', err.response?.data?.error || 'Impossible de retirer l\'article des favoris');
@@ -153,14 +261,6 @@ const SavedArticles = () => {
 
     const handleCommentChange = (posteId, value) => {
         setCommentInputs((prev) => ({ ...prev, [posteId]: value }))
-    }
-
-    const handleCommentSubmit = (posteId) => {
-        const comment = commentInputs[posteId]
-        if (comment?.trim()) {
-            console.log("Comment submitted:", { posteId, comment })
-            setCommentInputs((prev) => ({ ...prev, [posteId]: "" }))
-        }
     }
 
     return (
@@ -240,7 +340,9 @@ const SavedArticles = () => {
                                             </Link>
                                         </div>
                                         <div>
-                                            <h3 className="text-white font-semibold">{poste.user.nom + " " + poste.user.prenom}</h3>
+                                            <h3 className="text-white font-semibold">
+                                                {user.id !== poste.user.id ? poste.user.nom + " " + poste.user.prenom : "Vous"}
+                                            </h3>
                                             <p className="text-[#A09F87] text-sm">
                                                 @{poste.user.username} • {poste.createdAt}
                                             </p>
@@ -305,9 +407,9 @@ const SavedArticles = () => {
                                 </div>
                             </div>
 
-                            {/* Content - Identique à ArticleFeed */}
+                            {/* Content */}
                             <div className="px-6 space-y-4">
-                                {/* poste Type Icon and Category */}
+                                {/* Type Icon and Category */}
                                 <div className="flex items-center gap-2 mb-3">
                                     {poste.article.type === "SAGESSE" ? (
                                         <FaQuoteLeft className="text-[#A09F87] text-lg" />
@@ -317,7 +419,7 @@ const SavedArticles = () => {
                                     <span className="text-[#A09F87] text-sm font-medium">{poste.article.category}</span>
                                 </div>
 
-                                {/* poste Content */}
+                                {/* Content */}
                                 {poste.article.type === "SAGESSE" ? (
                                     <div className="space-y-3">
                                         <blockquote className="text-white text-lg italic leading-relaxed border-l-4 border-[#A09F87] pl-4">
@@ -370,19 +472,95 @@ const SavedArticles = () => {
                                             )}
                                             {poste.article.likes}
                                         </button>
-                                        <button className="flex items-center gap-2 text-[#A09F87] hover:text-white transition-colors">
+                                        <button
+                                            onClick={() => toggleComments(poste.article.id)}
+                                            className="flex items-center gap-2 text-[#A09F87] hover:text-white transition-colors"
+                                        >
                                             <MessageCircle className="w-4 h-4" />
                                             {poste.article.comments}
                                         </button>
-                                        <button className="flex items-center gap-2 text-[#A09F87] hover:text-white transition-colors">
+                                        {/* <button className="flex items-center gap-2 text-[#A09F87] hover:text-white transition-colors">
                                             <Share2 className="w-4 h-4" />
                                             {poste.article.shares}
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </div>
 
-                                {/* Comment Input */}
-                                <div className="flex gap-3 pt-2 pb-6">
+                                {/* ✅ Section des commentaires */}
+                                {showComments[poste.article.id] && (
+                                    <div className="mt-4 border-t border-[#4C3163] pt-4">
+                                        <div
+                                            className={`space-y-3 ${postComments[poste.article.id]?.length > 2 ? "max-h-64 overflow-y-auto pr-2" : ""}`}
+                                        >
+                                            {postComments[poste.article.id]?.map((comment) => (
+                                                <div key={comment.id} className="flex gap-3">
+                                                    <div className="w-8 h-8 rounded-full overflow-hidden border border-[#4C3163] flex-shrink-0">
+                                                        {comment.user.profilePicture ? (
+                                                            <img
+                                                                src={
+                                                                    comment.user.profilePicture.startsWith("http")
+                                                                        ? comment.user.profilePicture
+                                                                        : `http://localhost:8080${comment.user.profilePicture}`
+                                                                }
+                                                                alt={`${comment.user.nom} ${comment.user.prenom}`}
+                                                                className="w-full h-full object-cover"
+                                                                onError={(e) => {
+                                                                    e.target.src = profileAvatar
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <img
+                                                                src={profileAvatar}
+                                                                alt="Avatar par défaut"
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1 bg-[#202020] rounded-lg p-3 relative">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className="text-white font-medium text-sm">
+                                                                {comment.user.nom} {comment.user.prenom}
+                                                            </span>
+                                                            <span className="text-[#A09F87] text-xs">@{comment.user.username}</span>
+                                                            <span className="text-gray-400 text-xs">• {comment.createdAt}</span>
+
+                                                            {/* Bouton de suppression pour les commentaires de l'utilisateur ou l'auteur de l'article */}
+                                                            {(comment.user.id === user.id || poste.user.id === user.id) && (
+                                                                <button
+                                                                    onClick={() => handleDeleteComment(comment.id, poste.article.id)}
+                                                                    disabled={deleteCommentLoading[comment.id]}
+                                                                    className="ml-auto p-1 text-gray-400 hover:text-red-500 transition-colors"
+                                                                    title="Supprimer le commentaire"
+                                                                >
+                                                                    {deleteCommentLoading[comment.id] ? (
+                                                                        <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin"></div>
+                                                                    ) : (
+                                                                        <Trash2 className="w-3 h-3" />
+                                                                    )}
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-gray-300 text-sm leading-relaxed">{comment.content}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+
+                                            {/* Message si aucun commentaire */}
+                                            {postComments[poste.article.id]?.length === 0 && (
+                                                <p className="text-gray-400 text-center py-4">Aucun commentaire pour le moment</p>
+                                            )}
+                                        </div>
+
+                                        {postComments[poste.article.id]?.length > 2 && (
+                                            <div className="text-center mt-2">
+                                                <p className="text-[#A09F87] text-xs">Faites défiler pour voir plus de commentaires</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* ✅ Champ de saisie des commentaires */}
+                                <div className="flex gap-3 pt-4 pb-6">
                                     <div className="w-8 h-8 rounded-full overflow-hidden border border-[#4C3163]">
                                         {user.profilePicture ? (
                                             <img
@@ -408,18 +586,30 @@ const SavedArticles = () => {
                                             value={commentInputs[poste.article.id] || ""}
                                             onChange={(e) => handleCommentChange(poste.article.id, e.target.value)}
                                             placeholder="Ajouter un commentaire..."
+                                            maxLength={500}
                                             className="flex-1 bg-[#202020] border border-[#4C3163] text-white placeholder:text-gray-400 focus:border-[#A09F87] px-3 py-2 rounded outline-none"
                                             onKeyPress={(e) => {
-                                                if (e.key === "Enter") {
+                                                if (e.key === "Enter" && !e.shiftKey) {
+                                                    e.preventDefault()
                                                     handleCommentSubmit(poste.article.id)
                                                 }
                                             }}
+                                            disabled={commentLoading[poste.article.id]}
                                         />
+
                                         <button
                                             onClick={() => handleCommentSubmit(poste.article.id)}
-                                            className="bg-[#A09F87] hover:bg-[#A09F87]/80 text-[#171717] px-4 py-2 rounded font-medium transition-colors"
+                                            disabled={!commentInputs[poste.article.id]?.trim() || commentLoading[poste.article.id]}
+                                            className={`px-4 py-2 rounded font-medium transition-colors ${!commentInputs[poste.article.id]?.trim() || commentLoading[poste.article.id]
+                                                ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                                                : "bg-[#A09F87] hover:bg-[#A09F87]/80 text-[#171717]"
+                                                }`}
                                         >
-                                            Publier
+                                            {commentLoading[poste.article.id] ? (
+                                                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                                            ) : (
+                                                "Publier"
+                                            )}
                                         </button>
                                     </div>
                                 </div>

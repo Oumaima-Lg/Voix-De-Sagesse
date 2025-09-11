@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useState } from 'react';
-import { registerUser } from '../../services/UserService';
+import { registerUser } from '../../services/AuthService';
 import { signupValidation } from '../../services/FormValidation';
 import { TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';

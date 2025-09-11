@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Button, Modal, PasswordInput, PinInput, TextInput } from '@mantine/core';
 import { useInterval } from '@mantine/hooks';
-import { changePass, sendOtp, verifyOtp } from '../../services/UserService';
+import { changePass, sendOtp, verifyOtp } from '../../services/AuthService';
 import { signupValidation } from '../../services/FormValidation';
 import { errorNotification, successNotification } from '../../services/NotificationService';
 

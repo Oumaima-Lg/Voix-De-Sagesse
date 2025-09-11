@@ -1,30 +1,67 @@
+// AxiosIntercepteur.jsx
 import axios from 'axios';
-import { Navigate } from 'react-router-dom';
-import { errorNotification } from '../services/NotificationService'; 
+import { errorNotification } from '../services/NotificationService';
+import { removeUser } from '../Slices/UserSlice';
+import { removeJwt } from '../Slices/JwtSlice';
+import store from '../store';
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:8080",
-  // baseURL: "https://articlabackend-production.up.railway.app",
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   }
 });
 
-// Intercepteur pour ajouter le token
+// ✅ Fonction pour nettoyer l'authentification (AMÉLIORÉE)
+const clearAuth = () => {
+  console.log('Axios interceptor - clearing auth due to error')
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  store.dispatch(removeUser());
+  store.dispatch(removeJwt());
+};
+
+// ✅ Fonction pour vérifier si la route est publique
+const isPublicRoute = (url) => {
+  const publicRoutes = [
+    '/auth/login',
+    '/users/auth/register',
+    '/users/verifyOtp/',
+    '/users/sendOtp/',
+    '/users/auth/changePass'
+  ];
+  return publicRoutes.some(route => url.includes(route));
+};
+
+// ✅ Intercepteur pour ajouter le token (AMÉLIORÉ)
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const userData = localStorage.getItem("user");
+
+    // ✅ Vérification de cohérence avant chaque requête
+    if (token && !userData) {
+      console.log('Token exists but no user data - clearing token')
+      localStorage.removeItem("token");
+      store.dispatch(removeJwt());
+    } else if (!token && userData) {
+      console.log('User data exists but no token - clearing user')
+      localStorage.removeItem("user");
+      store.dispatch(removeUser());
     }
-    
-    // Ne pas écraser le Content-Type si c'est déjà défini (important pour multipart/form-data)
+
+    // Ajouter le token seulement si présent et route non publique
+    const validToken = localStorage.getItem("token");
+    if (validToken && !isPublicRoute(config.url)) {
+      config.headers.Authorization = `Bearer ${validToken}`;
+    }
+
+    // Ne pas écraser le Content-Type si c'est déjà défini
     if (config.headers['Content-Type'] === 'multipart/form-data') {
-      // Laisser axios définir automatiquement le Content-Type avec boundary
       delete config.headers['Content-Type'];
     }
-    
+
     return config;
   },
   (error) => {
@@ -32,8 +69,7 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-
-// ✅ Intercepteur pour gérer les réponses et erreurs (CORRIGÉ)
+// AxiosIntercepteur.jsx - Section response interceptor mise à jour
 axiosInstance.interceptors.response.use(
   (response) => {
     return response;
@@ -43,22 +79,57 @@ axiosInstance.interceptors.response.use(
 
     if (response) {
       switch (response.status) {
-        case 404:
-          // ✅ Gestion spécifique des 404 API
-          if (config?.url?.includes('/api/') || config?.url?.includes('/users/') || config?.url?.includes('/articles/')) {
-            errorNotification('Ressource introuvable', 'L\'élément demandé n\'existe pas ou a été supprimé');
+        case 401:
+          if (!isPublicRoute(config.url)) {
+            // ✅ Messages différenciés selon le contexte
+            const token = localStorage.getItem('token')
+            const userData = localStorage.getItem('user')
+
+            let message = 'Session expirée, veuillez vous reconnecter'
+
+            if (!token && userData) {
+              message = 'Token manquant, veuillez vous reconnecter'
+            } else if (token && !userData) {
+              message = 'Données utilisateur manquantes, veuillez vous reconnecter'
+            }
+
+            // errorNotification('Session expirée', message);
+            clearAuth();
+
+            const currentPath = window.location.pathname;
+            if (!currentPath.startsWith('/auth/')) {
+              window.location.href = `/auth/login?message=${encodeURIComponent(message)}&redirect=${encodeURIComponent(currentPath)}`;
+            }
           }
           break;
 
-        case 401:
-          errorNotification('Non autorisé', 'Veuillez vous reconnecter');
-          localStorage.removeItem("token");
-          // ✅ Redirection correcte
-          window.location.href = '/login';
-          break;
-
+        // ... autres cas inchangés
         case 403:
           errorNotification('Accès refusé', 'Vous n\'avez pas les permissions nécessaires');
+          break;
+
+        case 401:
+          if (!isPublicRoute(config.url)) {
+            const token = localStorage.getItem('token')
+            const userData = localStorage.getItem('user')
+
+            // ✅ Message spécifique pour les erreurs d'authentification
+            let message = 'Session expirée, veuillez vous reconnecter'
+
+            if (!token && userData) {
+              message = 'Token manquant, reconnexion nécessaire'
+            } else if (token && !userData) {
+              message = 'Données utilisateur corrompues, reconnexion nécessaire'
+            }
+
+            errorNotification('Session expirée', message);
+            clearAuth();
+
+            const currentPath = window.location.pathname;
+            if (!currentPath.startsWith('/auth/')) {
+              window.location.href = `/auth/login?message=${encodeURIComponent(message)}&redirect=${encodeURIComponent(currentPath)}`;
+            }
+          }
           break;
 
         case 500:
@@ -66,14 +137,16 @@ axiosInstance.interceptors.response.use(
           break;
 
         default:
-          errorNotification('Erreur', response.data?.message || response.data?.error || 'Une erreur s\'est produite');
+          if (!isPublicRoute(config.url)) {
+            errorNotification('Erreur', response.data?.message || response.data?.error || 'Une erreur s\'est produite');
+          }
       }
     } else if (error.code === 'ECONNABORTED') {
       errorNotification('Timeout', 'La requête a pris trop de temps');
     } else {
       errorNotification('Erreur réseau', 'Impossible de contacter le serveur');
     }
-    
+
     return Promise.reject(error);
   }
 );

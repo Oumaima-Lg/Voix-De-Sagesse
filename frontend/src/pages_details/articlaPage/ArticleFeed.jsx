@@ -1,73 +1,173 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft, Heart, MessageCircle, Share2, UserPlus, MoreHorizontal, Bookmark } from "lucide-react"
-import { FaQuoteLeft, FaHeart, FaBookmark } from "react-icons/fa" // ✅ Ajout de FaBookmark
+import { ArrowLeft, Heart, MessageCircle, Share2, UserPlus, MoreHorizontal, Bookmark, Trash2 } from "lucide-react"
+import { FaQuoteLeft, FaHeart, FaBookmark } from "react-icons/fa"
 import { BiBook } from "react-icons/bi"
 import { LoadingOverlay } from "@mantine/core"
 import { useSelector } from "react-redux"
 import { DisplayPosts, likeArticle, unlikeArticle } from "../../services/ArticleService"
-import { followUser, unfollowUser, saveArticle, unsaveArticle } from "../../services/UserService" 
-import { errorNotification, successNotification } from "../../services/NotificationService"
+import { followUser, unfollowUser, saveArticle, unsaveArticle } from "../../services/UserService"
+import { addComment, getCommentsByArticle, deleteComment } from "../../services/CommentService"
 import profileAvatar from "../../assets/profileAvatar.jpg"
-import { Link } from "react-router-dom";
+import { Link } from "react-router-dom"
 
 const posteFeed = () => {
   const navigate = useNavigate()
   const [commentInputs, setCommentInputs] = useState({})
+  const [postComments, setPostComments] = useState({}) // ✅ État pour les commentaires de la DB
   const [showDropdown, setShowDropdown] = useState(null)
+  const [showComments, setShowComments] = useState({})
+  const [commentLoading, setCommentLoading] = useState({}) // ✅ État pour le loading des commentaires
+  const [deleteCommentLoading, setDeleteCommentLoading] = useState({}) // ✅ État pour la suppression
   const user = useSelector((state) => state.user)
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [followLoading, setFollowLoading] = useState({});
-  const [saveLoading, setSaveLoading] = useState({}); // ✅ État pour les boutons de sauvegarde
-
-  // ✅ Ajout d'un état pour les likes en cours de traitement
-  const [likeLoading, setLikeLoading] = useState({});
+  const [posts, setPosts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [followLoading, setFollowLoading] = useState({})
+  const [saveLoading, setSaveLoading] = useState({})
+  const [likeLoading, setLikeLoading] = useState({})
 
   useEffect(() => {
-    setLoading(true);
+    setLoading(true)
     DisplayPosts(user.id)
       .then((data) => {
-        console.log(data);
-        setPosts(data);
-        setLoading(false);
+        console.log(data)
+        setPosts(data)
+        setLoading(false)
       })
       .catch((err) => {
-        setLoading(false);
-        console.error(err);
-      });
-  }, []);
+        setLoading(false)
+        console.error(err)
+      })
+  }, [])
 
+  // ✅ Fonction pour charger les commentaires
+  const loadComments = async (articleId) => {
+    try {
+      const response = await getCommentsByArticle(articleId)
+      setPostComments((prev) => ({
+        ...prev,
+        [articleId]: response.comments || [],
+      }))
+    } catch (err) {
+      console.error("Erreur lors du chargement des commentaires:", err)
+    }
+  }
+
+  // ✅ Fonction pour basculer l'affichage des commentaires
+  const toggleComments = async (articleId) => {
+    const isCurrentlyShown = showComments[articleId]
+
+    setShowComments((prev) => ({ ...prev, [articleId]: !isCurrentlyShown }))
+
+    // Si on affiche les commentaires et qu'ils ne sont pas encore chargés
+    if (!isCurrentlyShown && !postComments[articleId]) {
+      await loadComments(articleId)
+    }
+  }
+
+  // ✅ Fonction pour soumettre un commentaire (VERSION ROBUSTE)
+  const handleCommentSubmit = async (articleId) => {
+    const content = commentInputs[articleId]
+    if (!content?.trim()) return
+
+    setCommentLoading((prev) => ({ ...prev, [articleId]: true }))
+
+    try {
+      const response = await addComment(articleId, content.trim())
+
+      // ✅ SOLUTION ROBUSTE : Toujours recharger tous les commentaires après ajout
+      await loadComments(articleId)
+
+      // Mettre à jour le compteur de commentaires dans les posts
+      setPosts((prev) =>
+        prev.map((post) =>
+          post.article.id === articleId
+            ? {
+              ...post,
+              article: {
+                ...post.article,
+                comments: post.article.comments + 1,
+              },
+            }
+            : post,
+        ),
+      )
+
+      // Vider le champ de saisie
+      setCommentInputs((prev) => ({ ...prev, [articleId]: "" }))
+
+      // S'assurer que les commentaires sont visibles
+      setShowComments((prev) => ({ ...prev, [articleId]: true }))
+
+      console.log("Commentaire ajouté et liste rechargée pour article:", articleId)
+    } catch (err) {
+      console.error("Erreur lors de l'ajout du commentaire:", err)
+    } finally {
+      setCommentLoading((prev) => ({ ...prev, [articleId]: false }))
+    }
+  }
+
+  // ✅ Fonction pour supprimer un commentaire
+  const handleDeleteComment = async (commentId, articleId) => {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce commentaire ?")) {
+      return
+    }
+
+    setDeleteCommentLoading((prev) => ({ ...prev, [commentId]: true }))
+
+    try {
+      const response = await deleteComment(commentId)
+      console.log("response OuLg : ", response)
+
+      // Retirer le commentaire de la liste locale
+      setPostComments((prev) => ({
+        ...prev,
+        [articleId]: prev[articleId]?.filter((comment) => comment.id !== commentId) || [],
+      }))
+
+      // Mettre à jour le compteur dans les posts
+      setPosts((prev) =>
+        prev.map((post) =>
+          post.article.id === articleId
+            ? {
+              ...post,
+              article: {
+                ...post.article,
+                comments: Math.max(0, post.article.comments - 1),
+              },
+            }
+            : post,
+        ),
+      )
+    } catch (err) {
+      console.error("Erreur lors de la suppression:", err)
+    } finally {
+      setDeleteCommentLoading((prev) => ({ ...prev, [commentId]: false }))
+    }
+  }
+
+  // Fonctions existantes (handleBack, handleLike, handleFollow, handleSave)...
   const handleBack = () => {
     navigate("/articla")
   }
 
-  // ✅ Version corrigée de handleLike avec protection contre les double-clics
   const handleLike = async (posteId) => {
-    // Empêcher les clics multiples sur le même article
-    if (likeLoading[posteId]) {
-      return;
-    }
+    if (likeLoading[posteId]) return
 
-    setLikeLoading(prev => ({ ...prev, [posteId]: true }));
+    setLikeLoading((prev) => ({ ...prev, [posteId]: true }))
 
     try {
-      const poste = posts.find((p) => p.article.id === posteId);
+      const poste = posts.find((p) => p.article.id === posteId)
+      if (!poste) throw new Error("Article non trouvé")
 
-      if (!poste) {
-        throw new Error("Article non trouvé");
-      }
+      const isCurrentlyLiked = poste.interaction.liked
 
-      const isCurrentlyLiked = poste.interaction.liked;
-
-      // Appel API
       if (isCurrentlyLiked) {
-        await unlikeArticle(posteId, user.id);
+        await unlikeArticle(posteId, user.id)
       } else {
-        await likeArticle(posteId, user.id);
+        await likeArticle(posteId, user.id)
       }
 
-      // ✅ Mise à jour optimiste de l'état local seulement APRÈS succès de l'API
       setPosts((prev) =>
         prev.map((poste) =>
           poste.article.id === posteId
@@ -79,40 +179,31 @@ const posteFeed = () => {
               },
               article: {
                 ...poste.article,
-                likes: isCurrentlyLiked
-                  ? Math.max(0, poste.article.likes - 1) // Éviter les nombres négatifs
-                  : poste.article.likes + 1,
+                likes: isCurrentlyLiked ? Math.max(0, poste.article.likes - 1) : poste.article.likes + 1,
               },
             }
-            : poste
-        )
-      );
-
+            : poste,
+        ),
+      )
     } catch (err) {
-      console.error('Erreur lors du like:', err);
-      errorNotification('Erreur', 'Impossible de mettre à jour le like');
+      console.error("Erreur lors du like:", err)
     } finally {
-      // ✅ Délai minimum pour éviter les clics trop rapides
       setTimeout(() => {
-        setLikeLoading(prev => ({ ...prev, [posteId]: false }));
-      }, 300);
+        setLikeLoading((prev) => ({ ...prev, [posteId]: false }))
+      }, 300)
     }
-  };
-
-
+  }
 
   const handleFollow = async (targetUserId, isCurrentlyFollowing) => {
-    if (user.id === targetUserId) {
-      return;
-    }
+    if (user.id === targetUserId) return
 
-    setFollowLoading(prev => ({ ...prev, [targetUserId]: true }));
+    setFollowLoading((prev) => ({ ...prev, [targetUserId]: true }))
 
     try {
       if (isCurrentlyFollowing) {
-        await unfollowUser(targetUserId);
+        await unfollowUser(targetUserId)
       } else {
-        await followUser(targetUserId);
+        await followUser(targetUserId)
       }
 
       setPosts((prev) =>
@@ -125,32 +216,27 @@ const posteFeed = () => {
                 following: !isCurrentlyFollowing,
               },
             }
-            : poste
-        )
-      );
-
+            : poste,
+        ),
+      )
     } catch (err) {
-      console.error('Erreur lors du suivi:', err);
-      errorNotification('Erreur', err.response?.data?.error || 'Impossible de modifier le suivi');
+      console.error("Erreur lors du suivi:", err)
+      errorNotification("Erreur", err.response?.data?.error || "Impossible de modifier le suivi")
     } finally {
-      setFollowLoading(prev => ({ ...prev, [targetUserId]: false }));
+      setFollowLoading((prev) => ({ ...prev, [targetUserId]: false }))
     }
-  };
+  }
 
-  // ✅ Nouvelle fonction pour gérer la sauvegarde
   const handleSave = async (articleId, isCurrentlySaved) => {
-    setSaveLoading(prev => ({ ...prev, [articleId]: true }));
+    setSaveLoading((prev) => ({ ...prev, [articleId]: true }))
 
     try {
       if (isCurrentlySaved) {
-        await unsaveArticle(articleId);
-        // successNotification('Succès', 'Article retiré des favoris');
+        await unsaveArticle(articleId)
       } else {
-        await saveArticle(articleId);
-        // successNotification('Succès', 'Article ajouté aux favoris');
+        await saveArticle(articleId)
       }
 
-      // Mettre à jour l'état local
       setPosts((prev) =>
         prev.map((poste) =>
           poste.article.id === articleId
@@ -161,28 +247,19 @@ const posteFeed = () => {
                 saved: !isCurrentlySaved,
               },
             }
-            : poste
-        )
-      );
-
+            : poste,
+        ),
+      )
     } catch (err) {
-      console.error('Erreur lors de la sauvegarde:', err);
-      errorNotification('Erreur', err.response?.data?.error || 'Impossible de modifier la sauvegarde');
+      console.error("Erreur lors de la sauvegarde:", err)
+      errorNotification("Erreur", err.response?.data?.error || "Impossible de modifier la sauvegarde")
     } finally {
-      setSaveLoading(prev => ({ ...prev, [articleId]: false }));
+      setSaveLoading((prev) => ({ ...prev, [articleId]: false }))
     }
-  };
+  }
 
   const handleCommentChange = (posteId, value) => {
     setCommentInputs((prev) => ({ ...prev, [posteId]: value }))
-  }
-
-  const handleCommentSubmit = (posteId) => {
-    const comment = commentInputs[posteId]
-    if (comment?.trim()) {
-      console.log("Comment submitted:", { posteId, comment })
-      setCommentInputs((prev) => ({ ...prev, [posteId]: "" }))
-    }
   }
 
   return (
@@ -190,11 +267,10 @@ const posteFeed = () => {
       <LoadingOverlay
         visible={loading}
         zIndex={1000}
-        overlayProps={{ radius: 'sm', blur: 2 }}
-        loaderProps={{ color: '#A09F87', type: 'bars' }}
+        overlayProps={{ radius: "sm", blur: 2 }}
+        loaderProps={{ color: "#A09F87", type: "bars" }}
       />
 
-      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <button
           onClick={handleBack}
@@ -208,14 +284,13 @@ const posteFeed = () => {
         <div></div>
       </div>
 
-      {/* postes Feed */}
       <div className="max-w-2xl mx-auto space-y-6">
         {posts.map((poste) => (
           <div
             key={poste.article.id}
             className="bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% border-[#202020] border-2 rounded-lg shadow-lg"
           >
-            {/* Header */}
+            {/* Header du poste */}
             <div className="p-6 pb-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -223,20 +298,22 @@ const posteFeed = () => {
                     <Link to={`/articla/poste/profile/${poste.user.id}`}>
                       {poste.user.profilePicture ? (
                         <img
-                          src={poste.user.profilePicture.startsWith('http')
-                            ? poste.user.profilePicture
-                            : `http://localhost:8080${poste.user.profilePicture}`}
+                          src={
+                            poste.user.profilePicture.startsWith("http")
+                              ? poste.user.profilePicture
+                              : `http://localhost:8080${poste.user.profilePicture}`
+                          }
                           alt={`${poste.user.nom} ${poste.user.prenom}`}
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextElementSibling.style.display = 'flex';
+                            e.target.style.display = "none"
+                            e.target.nextElementSibling.style.display = "flex"
                           }}
                         />
                       ) : null}
                       <div
                         className="w-full h-full bg-[#4C3163] flex items-center justify-center text-white font-semibold text-sm"
-                        style={{ display: poste.user.profilePicture ? 'none' : 'flex' }}
+                        style={{ display: poste.user.profilePicture ? "none" : "flex" }}
                       >
                         {(poste.user.nom + " " + poste.user.prenom)
                           .split(" ")
@@ -246,7 +323,9 @@ const posteFeed = () => {
                     </Link>
                   </div>
                   <div>
-                    <h3 className="text-white font-semibold">{poste.user.nom + " " + poste.user.prenom}</h3>
+                    <h3 className="text-white font-semibold">
+                      {user.id !== poste.user.id ? poste.user.nom + " " + poste.user.prenom : "Vous"}
+                    </h3>
                     <p className="text-[#A09F87] text-sm">
                       @{poste.user.username} • {poste.createdAt}
                     </p>
@@ -258,10 +337,10 @@ const posteFeed = () => {
                       onClick={() => handleFollow(poste.user.id, poste.interaction.following)}
                       disabled={followLoading[poste.user.id]}
                       className={`px-3 py-1 text-sm rounded transition-colors flex items-center gap-1 min-w-[80px] justify-center ${followLoading[poste.user.id]
-                        ? "bg-gray-500 text-gray-300 cursor-not-allowed"
-                        : poste.interaction.following
-                          ? "bg-[#A09F87] text-[#171717] hover:bg-[#A09F87]/80"
-                          : "border border-[#A09F87] text-[#A09F87] hover:bg-[#A09F87] hover:text-[#171717]"
+                          ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                          : poste.interaction.following
+                            ? "bg-[#A09F87] text-[#171717] hover:bg-[#A09F87]/80"
+                            : "border border-[#A09F87] text-[#A09F87] hover:bg-[#A09F87] hover:text-[#171717]"
                         }`}
                     >
                       {followLoading[poste.user.id] ? (
@@ -275,15 +354,14 @@ const posteFeed = () => {
                     </button>
                   )}
 
-                  {/* ✅ Bouton de sauvegarde */}
                   <button
                     onClick={() => handleSave(poste.article.id, poste.interaction.saved)}
                     disabled={saveLoading[poste.article.id]}
                     className={`p-2 rounded transition-colors ${saveLoading[poste.article.id]
-                      ? "text-gray-500 cursor-not-allowed"
-                      : poste.interaction.saved
-                        ? "text-yellow-500 hover:text-yellow-400"
-                        : "text-[#A09F87] hover:text-yellow-500"
+                        ? "text-gray-500 cursor-not-allowed"
+                        : poste.interaction.saved
+                          ? "text-yellow-500 hover:text-yellow-400"
+                          : "text-[#A09F87] hover:text-yellow-500"
                       }`}
                     title={poste.interaction.saved ? "Retirer des favoris" : "Ajouter aux favoris"}
                   >
@@ -320,10 +398,8 @@ const posteFeed = () => {
               </div>
             </div>
 
-            {/* Le reste du composant reste identique... */}
-            {/* Content */}
+            {/* Contenu du poste */}
             <div className="px-6 space-y-4">
-              {/* poste Type Icon and Category */}
               <div className="flex items-center gap-2 mb-3">
                 {poste.article.type === "SAGESSE" ? (
                   <FaQuoteLeft className="text-[#A09F87] text-lg" />
@@ -333,7 +409,6 @@ const posteFeed = () => {
                 <span className="text-[#A09F87] text-sm font-medium">{poste.article.category}</span>
               </div>
 
-              {/* poste Content */}
               {poste.article.type === "SAGESSE" ? (
                 <div className="space-y-3">
                   <blockquote className="text-white text-lg italic leading-relaxed border-l-4 border-[#A09F87] pl-4">
@@ -355,7 +430,6 @@ const posteFeed = () => {
                 </div>
               )}
 
-              {/* Tags */}
               <div className="flex flex-wrap gap-2">
                 {poste.article.tags.map((tag, index) => (
                   <span key={index} className="px-3 py-1 bg-[#4C3163] text-[#A09F87] text-xs rounded-full">
@@ -386,34 +460,112 @@ const posteFeed = () => {
                     )}
                     {poste.article.likes}
                   </button>
-                  <button className="flex items-center gap-2 text-[#A09F87] hover:text-white transition-colors">
+                  <button
+                    onClick={() => toggleComments(poste.article.id)}
+                    className="flex items-center gap-2 text-[#A09F87] hover:text-white transition-colors"
+                  >
                     <MessageCircle className="w-4 h-4" />
                     {poste.article.comments}
                   </button>
-                  <button className="flex items-center gap-2 text-[#A09F87] hover:text-white transition-colors">
+                  {/* <button className="flex items-center gap-2 text-[#A09F87] hover:text-white transition-colors">
                     <Share2 className="w-4 h-4" />
                     {poste.article.shares}
-                  </button>
+                  </button> */}
                 </div>
               </div>
 
-              {/* Comment Input */}
-              <div className="flex gap-3 pt-2 pb-6">
+              {/* ✅ Section des commentaires (mise à jour avec scroll) */}
+              {showComments[poste.article.id] && (
+                <div className="mt-4 border-t border-[#4C3163] pt-4">
+                  <div
+                    className={`space-y-3 ${postComments[poste.article.id]?.length > 2 ? "max-h-64 overflow-y-auto pr-2" : ""}`}
+                  >
+                    {postComments[poste.article.id]?.map((comment) => (
+                      <div key={comment.id} className="flex gap-3">
+                        <div className="w-8 h-8 rounded-full overflow-hidden border border-[#4C3163] flex-shrink-0">
+                          {comment.user.profilePicture ? (
+                            <img
+                              src={
+                                comment.user.profilePicture.startsWith("http")
+                                  ? comment.user.profilePicture
+                                  : `http://localhost:8080${comment.user.profilePicture}`
+                              }
+                              alt={`${comment.user.nom} ${comment.user.prenom}`}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.target.src = profileAvatar
+                              }}
+                            />
+                          ) : (
+                            <img
+                              src={profileAvatar || "/placeholder.svg"}
+                              alt="Avatar par défaut"
+                              className="w-full h-full object-cover"
+                            />
+                          )}
+                        </div>
+                        <div className="flex-1 bg-[#202020] rounded-lg p-3 relative">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-white font-medium text-sm">
+                              {comment.user.nom} {comment.user.prenom}
+                            </span>
+                            <span className="text-[#A09F87] text-xs">@{comment.user.username}</span>
+                            <span className="text-gray-400 text-xs">• {comment.createdAt}</span>
+
+                            {/* ✅ Bouton de suppression pour les commentaires de l'utilisateur */}
+                            {comment.user.id === user.id && (
+                              <button
+                                onClick={() => handleDeleteComment(comment.id, poste.article.id)}
+                                disabled={deleteCommentLoading[comment.id]}
+                                className="ml-auto p-1 text-gray-400 hover:text-red-500 transition-colors"
+                                title="Supprimer le commentaire"
+                              >
+                                {deleteCommentLoading[comment.id] ? (
+                                  <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin"></div>
+                                ) : (
+                                  <Trash2 className="w-3 h-3" />
+                                )}
+                              </button>
+                            )}
+                          </div>
+                          <p className="text-gray-300 text-sm leading-relaxed">{comment.content}</p>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Message si aucun commentaire */}
+                    {postComments[poste.article.id]?.length === 0 && (
+                      <p className="text-gray-400 text-center py-4">Aucun commentaire pour le moment</p>
+                    )}
+                  </div>
+
+                  {postComments[poste.article.id]?.length > 2 && (
+                    <div className="text-center mt-2">
+                      <p className="text-[#A09F87] text-xs">Faites défiler pour voir plus de commentaires</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ✅ Champ de saisie des commentaires (mise à jour) */}
+              <div className="flex gap-3 pt-4 pb-6">
                 <div className="w-8 h-8 rounded-full overflow-hidden border border-[#4C3163]">
                   {user.profilePicture ? (
                     <img
-                      src={user.profilePicture.startsWith('http') ?
-                        user.profilePicture :
-                        `http://localhost:8080${user.profilePicture}`}
+                      src={
+                        user.profilePicture.startsWith("http")
+                          ? user.profilePicture
+                          : `http://localhost:8080${user.profilePicture}`
+                      }
                       alt="Votre avatar"
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        e.target.src = profileAvatar;
+                        e.target.src = profileAvatar
                       }}
                     />
                   ) : (
                     <img
-                      src={profileAvatar}
+                      src={profileAvatar || "/placeholder.svg"}
                       alt="Avatar par défaut"
                       className="w-full h-full object-cover"
                     />
@@ -424,18 +576,29 @@ const posteFeed = () => {
                     value={commentInputs[poste.article.id] || ""}
                     onChange={(e) => handleCommentChange(poste.article.id, e.target.value)}
                     placeholder="Ajouter un commentaire..."
+                    maxLength={500}
                     className="flex-1 bg-[#202020] border border-[#4C3163] text-white placeholder:text-gray-400 focus:border-[#A09F87] px-3 py-2 rounded outline-none"
                     onKeyPress={(e) => {
-                      if (e.key === "Enter") {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault()
                         handleCommentSubmit(poste.article.id)
                       }
                     }}
+                    disabled={commentLoading[poste.article.id]}
                   />
                   <button
                     onClick={() => handleCommentSubmit(poste.article.id)}
-                    className="bg-[#A09F87] hover:bg-[#A09F87]/80 text-[#171717] px-4 py-2 rounded font-medium transition-colors"
+                    disabled={!commentInputs[poste.article.id]?.trim() || commentLoading[poste.article.id]}
+                    className={`px-4 py-2 rounded font-medium transition-colors ${!commentInputs[poste.article.id]?.trim() || commentLoading[poste.article.id]
+                        ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                        : "bg-[#A09F87] hover:bg-[#A09F87]/80 text-[#171717]"
+                      }`}
                   >
-                    Publier
+                    {commentLoading[poste.article.id] ? (
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      "Publier"
+                    )}
                   </button>
                 </div>
               </div>

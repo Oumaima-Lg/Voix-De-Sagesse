@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { removeUser } from '../../Slices/UserSlice';
 import MenuBar from "./MenuBar";
 import profileAvatar from "../../assets/profileAvatar.jpg"
+import { useAuth } from '../../services/useAuth';
 
 
 
@@ -20,15 +21,14 @@ const HeaderArticla = () => {
     const [toggle, setToggle] = useState(false);
     const dispatch = useDispatch();
     const user = useSelector((state) => state.user);
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        dispatch(removeUser());
-        // sessionStorage.clear(); // si vous stockez des données dans sessionStorage
-        // Optionnel : informer le serveur de la déconnexion
-        // axiosInstance.post('/auth/logout').catch(() => {}); 
+    const { logout } = useAuth();
 
-        navigate("/");
+     // ✅ Fonction de déconnexion avec message personnalisé
+    const handleLogout = () => {
+        setToggle(false); // Fermer le menu dropdown
+        logout('👋 Vous avez été déconnecté avec succès'); // ✅ Message personnalisé
     }
+
     const handleProfile = () => {
         navigate("/articla/profile");
         setToggle(!toggle);

@@ -5,37 +5,6 @@ import axiosInstance from "../Interceptor/AxiosInterceptor";
 // const base_url = "https://articlabackend-production.up.railway.app/users/";
 const base_url = "http://localhost:8080/users/";
 
-const base_url2 = "/users/";
-
-const registerUser = async (user) => {
-    return axios.post(`${base_url}auth/register`, user)
-        .then(res => res.data)
-        .catch(error => { throw error; });
-};
-
-const loginUser = async (user) => {
-    return axios.post(`${base_url}auth/login`, user)
-        .then(res => res.data)
-        .catch(error => { throw error; });
-};
-
-const sendOtp= async (email) => {
-    return axios.post(`${base_url}sendOtp/${email}`)
-    .then(result => result.data)
-    .catch(error =>{throw error;});
-}
-
-const verifyOtp= async (email, otp) => {
-    return axios.get(`${base_url}verifyOtp/${email}/${otp}`)
-    .then(result => result.data)
-    .catch(error =>{throw error;});
-}
-
-const changePass=async(email, motdepasse) => {
-    return axios.post(`${base_url}auth/changePass`, {email, motdepasse})
-    .then(result => result.data)
-    .catch(error =>{throw error;});
-}
 
 const updateUserProfile = async (userProfile) => {
     return axiosInstance.put(`${base_url}updateProfile`, userProfile)
@@ -113,6 +82,6 @@ const isArticleSaved = async (articleId) => {
 }
 
 
-export { registerUser, loginUser, sendOtp, verifyOtp, changePass, updateUserProfile, 
+export { updateUserProfile, 
     getUserProfile, uploadProfilePicture, followUser, unfollowUser, isFollowing, 
     getFollowing, getFollowers, saveArticle, unsaveArticle, isArticleSaved };

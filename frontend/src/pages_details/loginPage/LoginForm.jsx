@@ -1,8 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useState } from 'react';
-// import { loginUser } from '../../services/UserService';
-import { Link as LinkRouter } from "react-router-dom";
+import { Link as LinkRouter, useLocation } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 import { loginValidation } from '../../services/FormValidation';
 import { TextInput } from '@mantine/core';
@@ -17,13 +16,30 @@ import { LoadingOverlay, Button, Group, Box } from '@mantine/core';
 import { setJwt } from '../../Slices/JwtSlice';
 import { loginUser } from '../../services/AuthService';
 import { jwtDecode } from "jwt-decode";
-
-
+// ✅ Import du hook d'authentification
+import { useAuth } from '../../services/useAuth';
+import { useEffect } from 'react';
 
 const LoginForm = () => {
     const [loading, setLoading] = useState(false);
     const [visible, { toggle }] = useDisclosure(true);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const location = useLocation(); // ✅ Pour gérer les redirections
+    const { clearAuth } = useAuth(); // ✅ Hook pour nettoyer l'auth
+    const [urlMessage, setUrlMessage] = useState('');
+
+    // ✅ Effet pour récupérer le message depuis l'URL
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const message = params.get('message');
+        if (message) {
+            setUrlMessage(decodeURIComponent(message));
+            // Nettoyer l'URL après avoir récupéré le message
+            window.history.replaceState({}, '', location.pathname);
+        }
+    }, [location]);
+
     const form = {
         email: "",
         password: "",
@@ -32,55 +48,128 @@ const LoginForm = () => {
     const [data, setData] = useState(form);
     const [formError, setFormError] = useState(form);
     const [opened, { open, close }] = useDisclosure(false);
-    const navigate = useNavigate();
 
     const handleChange = (e) => {
-        // console.log(e.target);
         setFormError({ ...formError, [e.target.name]: "" });
         setData({ ...data, [e.target.name]: e.target.value });
     }
 
+    // ✅ Fonction handleSubmit mise à jour avec synchronisation complète
     const handleSubmit = (e) => {
+        e.preventDefault(); // Empêcher le comportement par défaut du formulaire
 
         let valid = true;
         let newFormError = {};
         for (let key in data) {
             newFormError[key] = loginValidation(key, data[key]);
-
             if (newFormError[key]) valid = false;
         }
         setFormError(newFormError);
-        e.preventDefault(); //  pour empêcher le comportement par défaut du formulaire
+
         console.log("data recu : ", data);
+
         if (valid) {
             setLoading(true);
-            loginUser(data).then((res) => {
-                // console.log(res);
-                // alert('Login réussie!');
-                successNotification('Success', 'Login réussie !');
 
-                setTimeout(() => {
+            loginUser(data)
+                .then((res) => {
+                    console.log('Login success response:', res);
+
+                    try {
+                        // ✅ ÉTAPE 1: Nettoyer toute donnée d'authentification existante
+                        clearAuth();
+
+                        // ✅ ÉTAPE 2: Décoder le JWT
+                        const decoded = jwtDecode(res.jwt);
+                        console.log('Decoded JWT:', decoded);
+
+                        // ✅ ÉTAPE 3: Préparer les données utilisateur
+                        const userData = {
+                            ...decoded,
+                            email: decoded.sub,
+                            // Ajouter d'autres champs si nécessaire depuis la réponse
+                            ...(res.user || {}) // Si le backend renvoie des infos user supplémentaires
+                        };
+
+                        // ✅ ÉTAPE 4: Sauvegarder dans localStorage ET Redux de manière synchrone
+                        localStorage.setItem('token', res.jwt);
+                        localStorage.setItem('user', JSON.stringify(userData));
+
+                        dispatch(setJwt(res.jwt));
+                        dispatch(setUser(userData));
+
+                        // ✅ ÉTAPE 5: Notification de succès
+                        successNotification('Succès', 'Connexion réussie !');
+
+                        // ✅ ÉTAPE 6: Redirection intelligente après un délai réduit
+                        setTimeout(() => {
+                            setLoading(false);
+
+                            // Récupérer l'URL de redirection
+                            const redirectParam = new URLSearchParams(location.search).get('redirect');
+                            const from = location.state?.from?.pathname;
+                            const redirectTo = redirectParam || from || '/articla';
+
+                            console.log('Redirecting to:', redirectTo);
+                            navigate(redirectTo, { replace: true });
+
+                        }, 2000); // ✅ Réduit de 4000 à 2000ms pour une meilleure UX
+
+                    } catch (error) {
+                        console.error('Error processing login response:', error);
+                        setLoading(false);
+                        clearAuth(); // Nettoyer en cas d'erreur
+                        errorNotification('Erreur', 'Problème lors du traitement de la connexion');
+                    }
+                })
+                .catch((err) => {
                     setLoading(false);
-                    dispatch(setJwt(res.jwt));
-                    const decoded = jwtDecode(res.jwt);
-                    dispatch(setUser({ ...decoded, email: decoded.sub }));
-                    navigate("/articla");
-                }, 4000)
-            }).catch((err) => {
-                setLoading(false);
-                console.log(err.response.data);
-                errorNotification('Failed', err.response.data.errorMessage);
-            });
+                    console.error('Login error:', err);
+
+                    // ✅ Gestion d'erreur améliorée
+                    const errorMessage = err.response?.data?.errorMessage ||
+                        err.response?.data?.message ||
+                        err.message ||
+                        'Erreur de connexion';
+
+                    errorNotification('Échec de la connexion', errorMessage);
+
+                    // ✅ Nettoyer toute donnée potentiellement corrompue
+                    clearAuth();
+                });
         }
+    }
+
+    // ✅ Fonction pour gérer la navigation vers register avec nettoyage
+    const handleNavigateToRegister = (e) => {
+        e.preventDefault();
+        setFormError(form);
+        setData(form);
+        clearAuth(); // S'assurer qu'il n'y a pas de données résiduelles
+        navigate("/auth/register");
     }
 
     return (
         <>
-
             <StyledWrapper>
-                <div className="mx-auto  p-14">
+                <div className="mx-auto p-14">
                     <div className='card mx-auto border-4 border-image-gradient sm:px-9 sm:py-4 px-4 py-2 flex flex-col md:gap-10 sm:gap-8 gap-6'>
                         <h4 className="text-gradient lg:text-4xl sm:text-3xl text-xl text-center lg:px-20 px-10 pt-2">Se Connecter</h4>
+
+                        {(urlMessage || location.state?.message) && (
+                            <div className={`text-center text-sm mb-4 p-3 rounded border ${location.state?.fromLogout || urlMessage.includes('déconnecté')
+                                    ? 'text-green-400 bg-green-400/10 border-green-400/20' // ✅ Vert pour déconnexion réussie
+                                    : 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20' // ✅ Jaune pour erreurs/session expirée
+                                }`}>
+                                <div className="flex items-center justify-center gap-2">
+                                    <span>
+                                        {location.state?.fromLogout || urlMessage.includes('déconnecté') ? '✅' : '⚠️'}
+                                    </span>
+                                    <span>{urlMessage || location.state?.message}</span>
+                                </div>
+                            </div>
+                        )}
+
                         <form className='flex flex-col md:gap-4 gap-2'>
                             <TextInput
                                 error={formError.email}
@@ -89,14 +178,17 @@ const LoginForm = () => {
                                 value={data.email}
                                 onChange={handleChange}
                                 name="email"
+                                disabled={loading} // ✅ Désactiver pendant le chargement
                             />
                             <TextInput
                                 error={formError.password}
                                 size='lg'
                                 placeholder="Mot de passe"
+                                type="password" // ✅ Type password pour la sécurité
                                 value={data.password}
                                 onChange={handleChange}
                                 name="password"
+                                disabled={loading} // ✅ Désactiver pendant le chargement
                             />
 
                             <div>
@@ -106,10 +198,31 @@ const LoginForm = () => {
                                     overlayProps={{ radius: 'sm', blur: 2 }}
                                     loaderProps={{ color: '#A09F87', type: 'bars' }}
                                 />
-                                <button className="btn btn-border-gradient text-amber-50! mb-6!" onClick={handleSubmit}>CONNEXION</button>
-                                <div onClick={open} className="block mb-6! border-b-1 max-w-max mx-auto cursor-pointer">Mot de passe oublié ?</div>
+
+                                <button
+                                    className="btn btn-border-gradient text-amber-50! mb-6!"
+                                    onClick={handleSubmit}
+                                    disabled={loading} // ✅ Désactiver pendant le chargement
+                                    type="submit" // ✅ Type submit pour le formulaire
+                                >
+                                    {loading ? 'CONNEXION...' : 'CONNEXION'}
+                                </button>
+
+                                <div
+                                    onClick={loading ? undefined : open} // ✅ Désactiver pendant le chargement
+                                    className={`block mb-6! border-b-1 max-w-max mx-auto ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                                >
+                                    Mot de passe oublié ?
+                                </div>
+
                                 <div className='h-0.5 bg-gradient-to-br from-[#4C3163] to-[#A09F87]' />
-                                <button className="btn btn-border-gradient text-amber-50! cursor-pointer" onClick={(e) => { e.preventDefault(); navigate("/auth/register"); setFormError(form); setData(form) }}  >
+
+                                <button
+                                    className="btn btn-border-gradient text-amber-50! cursor-pointer"
+                                    onClick={handleNavigateToRegister}
+                                    disabled={loading} // ✅ Désactiver pendant le chargement
+                                    type="button" // ✅ Type button pour éviter la soumission
+                                >
                                     Créer un nouveau compte
                                 </button>
                             </div>
@@ -121,7 +234,6 @@ const LoginForm = () => {
             <div>
                 <ResetPassword opened={opened} close={close} />
             </div>
-
         </>
     );
 }
@@ -135,13 +247,10 @@ const StyledWrapper = styled.div`
    text-align: center;
   }
 
-
   .input-icon {
    height: 1em;
    width: 1em;
-//    fill: #ffeba7;
   }
-
 
   /*Buttons*/
   .btn {
@@ -152,14 +261,16 @@ const StyledWrapper = styled.div`
    font-size: .8em;
    text-transform: uppercase;
    padding: 0.6em 1.2em;
-//    background-color: #ffeba7;
-//    color: #5e6681;
    box-shadow: 0 8px 24px 0 rgb(255 235 167 / 20%);
    transition: all .3s ease-in-out;
   }
 
+  .btn:disabled {
+   opacity: 0.6;
+   cursor: not-allowed;
+  }
+
   .btn-link {
-//    color: #f5f5f5;
    display: block;
    font-size: .75em;
    transition: color .3s ease-out;
@@ -171,14 +282,9 @@ const StyledWrapper = styled.div`
    transition: opacity .3s;
   }
 
-  .btn:hover {
-//    background-color: #5e6681;
-//    color: #ffeba7;
+  .btn:hover:not(:disabled) {
    box-shadow: 0 8px 24px 0 rgb(16 39 112 / 20%);
   }
-
-  .btn-link:hover {
-//    color: #ffeba7;
-  }`;
+`;
 
 export default LoginForm;
