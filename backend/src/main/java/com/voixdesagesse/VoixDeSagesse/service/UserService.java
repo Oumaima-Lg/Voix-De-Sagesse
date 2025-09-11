@@ -15,7 +15,6 @@ import com.voixdesagesse.VoixDeSagesse.entity.User;
 import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
 
 
-// @Service
 public interface UserService {
 
     public UserRegistrationDTO  registerUser(UserRegistrationDTO userDTO) throws ArticlaException;
@@ -50,14 +49,12 @@ public interface UserService {
     
     public void decrementContentCount(Long userId);
 
-    // Nouvelles méthodes pour le système de suivi
-    public void followUser(Long currentUserId, Long targetUserId);
+    public void followUser(Long currentUserId, Long targetUserId) throws ArticlaException;
 
-    public void unfollowUser(Long currentUserId, Long targetUserId);
+    public void unfollowUser(Long currentUserId, Long targetUserId) throws ArticlaException;
 
     public boolean isFollowing(Long currentUserId, Long targetUserId);
-    
-    // Méthodes internes (appelées par followUser/unfollowUser)
+
     public void addFollowing(Long currentUserId, Long targetUserId);
 
     public void removeFollowing(Long currentUserId, Long targetUserId);
@@ -74,13 +71,12 @@ public interface UserService {
 
     public List<User> findByFollowingIdContaining(Long userId);
 
-    public void saveArticle(Long userId, Long articleId);
+    public void saveArticle(Long userId, Long articleId) throws ArticlaException;
 
-    public void unsaveArticle(Long userId, Long articleId);
+    public void unsaveArticle(Long userId, Long articleId) throws ArticlaException;
 
     public boolean isArticleSaved(Long userId, Long articleId);
 
-    // ✅ Nouvelles méthodes pour le nettoyage lors de suppression
     public void removeArticleFromAllUsersLikes(Long articleId);
     
     public void removeArticleFromAllUsersSaved(Long articleId);

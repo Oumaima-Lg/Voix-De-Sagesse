@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -36,24 +35,21 @@ import com.voixdesagesse.VoixDeSagesse.repository.UserRepository;
 import com.voixdesagesse.VoixDeSagesse.utility.Utilities;
 
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service(value = "userService")
+@Slf4j
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     @Value("${file.upload-dir:uploads/profile-pictures}")
     private String uploadDir;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private OTPRepository otpRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JavaMailSender mailSender;
+    private final UserRepository userRepository;
+    private final OTPRepository otpRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JavaMailSender mailSender;
 
     @Override
     public UserRegistrationDTO registerUser(UserRegistrationDTO userDTO) throws ArticlaException {
@@ -141,7 +137,6 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ArticlaException("USER_NOT_FOUND"));
         user.setNom(profileDTO.getNom());
         user.setPrenom(profileDTO.getPrenom());
-        // save into a repo Image
         user.setProfilePicture(profileDTO.getProfilePicture());
         user.setBio(profileDTO.getBio());
         userRepository.save(user);
@@ -159,14 +154,11 @@ public class UserServiceImpl implements UserService {
         User user = getUserById(userId);
         Set<Long> likedArticles = user.getLikedArticlesId();
 
-        if (likedArticles == null) {
+        if (likedArticles == null)
             likedArticles = new HashSet<>();
-        }
 
-        // ✅ Vérifier si déjà présent (éviter les doublons)
-        if (likedArticles.contains(articleId)) {
-            throw new RuntimeException("Article déjà liké par cet utilisateur");
-        }
+        if (likedArticles.contains(articleId))
+            throw new ArticlaException("Article déjà liké par cet utilisateur");
 
         likedArticles.add(articleId);
         user.setLikedArticlesId(likedArticles);
@@ -180,7 +172,7 @@ public class UserServiceImpl implements UserService {
         Set<Long> likedArticles = user.getLikedArticlesId();
 
         if (likedArticles == null || !likedArticles.contains(articleId)) {
-            throw new RuntimeException("Article pas encore liké par cet utilisateur");
+            throw new ArticlaException("Article pas encore liké par cet utilisateur");
         }
 
         likedArticles.remove(articleId);
@@ -188,7 +180,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    // ✅ CRITIQUE: Protéger incrementLikesReceived contre les race conditions
+    
     @Transactional
     @Override
     public synchronized void incrementLikesReceived(Long userId) throws ArticlaException {
@@ -201,12 +193,10 @@ public class UserServiceImpl implements UserService {
 
         user.setLikesReceived(currentLikes + 1);
         userRepository.save(user);
-
-        // ✅ Log pour debug
-        System.out.println("INCREMENT: User " + userId + " now has " + (currentLikes + 1) + " likes received");
+        log.debug("INCREMENT: User " + userId + " now has " + (currentLikes + 1) + " likes received");
     }
 
-    // ✅ CRITIQUE: Protéger decrementLikesReceived contre les race conditions
+
     @Transactional
     @Override
     public synchronized void decrementLikesReceived(Long userId) throws ArticlaException {
@@ -214,18 +204,15 @@ public class UserServiceImpl implements UserService {
 
         Long currentLikes = user.getLikesReceived();
         if (currentLikes == null || currentLikes <= 0) {
-            // ✅ Éviter les valeurs négatives
             user.setLikesReceived(0L);
             userRepository.save(user);
-            System.out.println("DECREMENT: User " + userId + " likes already at 0, no change");
+            log.debug("DECREMENT: User " + userId + " likes already at 0, no change");
             return;
         }
 
         user.setLikesReceived(currentLikes - 1);
         userRepository.save(user);
-
-        // ✅ Log pour debug
-        System.out.println("DECREMENT: User " + userId + " now has " + (currentLikes - 1) + " likes received");
+        log.debug("DECREMENT: User " + userId + " now has " + (currentLikes - 1) + " likes received");
     }
 
     @Override
@@ -240,30 +227,23 @@ public class UserServiceImpl implements UserService {
         userRepository.decrementContentCount(userId);
     }
 
-    // ✅ Nouvelles méthodes pour le système de suivi
 
     @Override
     @Transactional
-    public void followUser(Long currentUserId, Long targetUserId) {
-        // Vérifier que l'utilisateur ne se suit pas lui-même
-        if (currentUserId.equals(targetUserId)) {
-            throw new RuntimeException("Vous ne pouvez pas vous suivre vous-même");
-        }
+    public void followUser(Long currentUserId, Long targetUserId) throws ArticlaException {
 
-        // Vérifier que les deux utilisateurs existent
-        if (!userRepository.existsById(currentUserId)) {
-            throw new RuntimeException("Utilisateur actuel introuvable");
-        }
-        if (!userRepository.existsById(targetUserId)) {
-            throw new RuntimeException("Utilisateur cible introuvable");
-        }
+        if (currentUserId.equals(targetUserId)) 
+            throw new ArticlaException("Vous ne pouvez pas vous suivre vous-même");
+        
+        if (!userRepository.existsById(currentUserId)) 
+            throw new ArticlaException("Utilisateur actuel introuvable");
+        
+        if (!userRepository.existsById(targetUserId))
+            throw new ArticlaException("Utilisateur cible introuvable");
 
-        // Vérifier si déjà suivi
-        if (isFollowing(currentUserId, targetUserId)) {
-            throw new RuntimeException("Vous suivez déjà cet utilisateur");
-        }
+        if (isFollowing(currentUserId, targetUserId))
+            throw new ArticlaException("Vous suivez déjà cet utilisateur");
 
-        // Effectuer le suivi
         addFollowing(currentUserId, targetUserId);
         incrementFollowingCount(currentUserId);
         incrementFollowersCount(targetUserId);
@@ -271,18 +251,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void unfollowUser(Long currentUserId, Long targetUserId) {
-        // Vérifier que l'utilisateur ne se désuit pas lui-même
-        if (currentUserId.equals(targetUserId)) {
-            throw new RuntimeException("Vous ne pouvez pas vous désabonner de vous-même");
-        }
+    public void unfollowUser(Long currentUserId, Long targetUserId) throws ArticlaException {
+        if (currentUserId.equals(targetUserId))
+            throw new ArticlaException("Vous ne pouvez pas vous désabonner de vous-même");
 
-        // Vérifier si actuellement suivi
-        if (!isFollowing(currentUserId, targetUserId)) {
-            throw new RuntimeException("Vous ne suivez pas cet utilisateur");
-        }
+        if (!isFollowing(currentUserId, targetUserId))
+            throw new ArticlaException("Vous ne suivez pas cet utilisateur");
 
-        // Effectuer le désuivi
         removeFollowing(currentUserId, targetUserId);
         decrementFollowingCount(currentUserId);
         decrementFollowersCount(targetUserId);
@@ -293,7 +268,6 @@ public class UserServiceImpl implements UserService {
         return userRepository.isFollowing(currentUserId, targetUserId);
     }
 
-    // Méthodes internes
     @Override
     @Transactional
     public void addFollowing(Long currentUserId, Long targetUserId) {
@@ -329,53 +303,6 @@ public class UserServiceImpl implements UserService {
     public void decrementFollowersCount(Long userId) {
         userRepository.decrementFollowersCount(userId);
     }
-
-    // // ✅ Autres méthodes similaires à protéger
-    // @Transactional
-    // public synchronized void incrementContentCount(Long userId) {
-    //     User user = getUserById(userId);
-    //     Long currentCount = user.getContentCount();
-    //     if (currentCount == null) {
-    //         currentCount = 0L;
-    //     }
-    //     user.setContentCount(currentCount + 1);
-    //     userRepository.save(user);
-    // }
-
-    // @Transactional
-    // public synchronized void decrementContentCount(Long userId) {
-    //     User user = getUserById(userId);
-    //     Long currentCount = user.getContentCount();
-    //     if (currentCount == null || currentCount <= 0) {
-    //         user.setContentCount(0L);
-    //     } else {
-    //         user.setContentCount(currentCount - 1);
-    //     }
-    //     userRepository.save(user);
-    // }
-
-    // @Transactional
-    // public synchronized void incrementFollowersCount(Long userId) {
-    //     User user = getUserById(userId);
-    //     Long currentCount = user.getFollowersCount();
-    //     if (currentCount == null) {
-    //         currentCount = 0L;
-    //     }
-    //     user.setFollowersCount(currentCount + 1);
-    //     userRepository.save(user);
-    // }
-
-    // @Transactional
-    // public synchronized void decrementFollowersCount(Long userId) {
-    //     User user = getUserById(userId);
-    //     Long currentCount = user.getFollowersCount();
-    //     if (currentCount == null || currentCount <= 0) {
-    //         user.setFollowersCount(0L);
-    //     } else {
-    //         user.setFollowersCount(currentCount - 1);
-    //     }
-    //     userRepository.save(user);
-    // }
 
     @Override
     public List<User> findAllFollowingUsersById(Set<Long> followingIds) {
@@ -452,39 +379,26 @@ public class UserServiceImpl implements UserService {
             }
         } catch (IOException e) {
             // Log l'erreur mais ne pas faire échouer l'upload
-            System.err.println("Erreur lors de la suppression de l'ancienne image: " + e.getMessage());
+            log.error("Erreur lors de la suppression de l'ancienne image: " + e.getMessage());
         }
     }
 
     @Override
     @Transactional
-    public void saveArticle(Long userId, Long articleId) {
-        // Vérifier que l'utilisateur existe
-        if (!userRepository.existsById(userId)) {
-            throw new RuntimeException("Utilisateur introuvable");
-        }
-
-        // Vérifier que l'article existe (si vous avez ArticleRepository)
-        // if (!articleRepository.existsById(articleId)) {
-        // throw new RuntimeException("Article introuvable");
-        // }
-
-        // Vérifier si déjà sauvegardé
-        if (isArticleSaved(userId, articleId)) {
-            throw new RuntimeException("Article déjà sauvegardé");
-        }
-
+    public void saveArticle(Long userId, Long articleId) throws ArticlaException {
+        if (!userRepository.existsById(userId))
+            throw new ArticlaException("USER_NOT_FOUND");
+        if (isArticleSaved(userId, articleId))
+            throw new ArticlaException("Article déjà sauvegardé");
         userRepository.addSavedArticle(userId, articleId);
     }
 
     @Override
     @Transactional
-    public void unsaveArticle(Long userId, Long articleId) {
-        // Vérifier si actuellement sauvegardé
+    public void unsaveArticle(Long userId, Long articleId) throws ArticlaException {
         if (!isArticleSaved(userId, articleId)) {
-            throw new RuntimeException("Article non sauvegardé");
+            throw new ArticlaException("Article non sauvegardé");
         }
-
         userRepository.removeSavedArticle(userId, articleId);
     }
 
@@ -493,7 +407,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.isArticleSaved(userId, articleId);
     }
 
-    // ✅ Implémentation des nouvelles méthodes
+
     @Override
     @Transactional
     public void removeArticleFromAllUsersLikes(Long articleId) {
@@ -510,7 +424,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void decrementLikesReceivedByAmount(Long userId, Long amount) {
         if (amount > 0) {
-            // Utiliser la valeur négative pour décrémenter
             userRepository.decrementLikesReceivedByAmount(userId, -amount);
         }
     }

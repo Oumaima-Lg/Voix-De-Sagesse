@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -44,58 +43,24 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @CrossOrigin
 @Validated
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
     @Value("${file.upload-dir:uploads/profile-pictures}")
     private String uploadDir;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
             "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp");
 
-    @PostMapping("/auth/register")
-    public ResponseEntity<UserRegistrationDTO> registerUser(@RequestBody @Valid UserRegistrationDTO registerDTO)
-            throws ArticlaException {
 
-        return new ResponseEntity<>(userService.registerUser(registerDTO), HttpStatus.CREATED);
-    }
-
-    // @PostMapping("/auth/login")
-    // public ResponseEntity<UserDTO> loginUser(@RequestBody @Valid LoginDTO
-    // loginDTO) throws ArticlaException {
-
-    // return new ResponseEntity<>(userService.loginUser(loginDTO), HttpStatus.OK);
-    // }
-
-    @PostMapping("/auth/changePass")
-    public ResponseEntity<ResponseDTO> changePassword(@RequestBody @Valid LoginDTO loginDTO) throws ArticlaException {
-
-        return new ResponseEntity<>(userService.changePassword(loginDTO), HttpStatus.OK);
-    }
-
-    @PostMapping("/sendOtp/{email}")
-    public ResponseEntity<ResponseDTO> sendOtp(@PathVariable @Email(message = "{user.email.invalid}") String email)
-            throws Exception {
-        userService.sendOtp(email);
-        return new ResponseEntity<>(new ResponseDTO("OTP sent successfully."), HttpStatus.OK);
-    }
-
-    @GetMapping("/verifyOtp/{email}/{otp}")
-    public ResponseEntity<ResponseDTO> verifyOtp(@PathVariable @Email(message = "{user.email.invalid}") String email,
-            @Pattern(regexp = "^[0-9]{6}$", message = "{otp.invalid}") @PathVariable String otp)
-            throws ArticlaException {
-        userService.verifyOtp(email, otp);
-        return new ResponseEntity<>(new ResponseDTO("OTP has been verified."), HttpStatus.OK);
-    }
-
-    // ✅ Méthode utilitaire pour récupérer l'utilisateur connecté
     private User getCurrentUser() throws ArticlaException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserEmail = authentication.getName();
@@ -103,10 +68,8 @@ public class UserController {
         return userService.getUserByEmail(currentUserEmail).toEntity();
     }
 
-    // ✅ Endpoints simplifiés avec la méthode utilitaire
     @PostMapping("/follow/{targetUserId}")
     public ResponseEntity<?> followUser(@PathVariable Long targetUserId) throws ArticlaException {
-        try {
             User currentUser = getCurrentUser();
             userService.followUser(currentUser.getId(), targetUserId);
 
@@ -114,17 +77,10 @@ public class UserController {
                     "message", "Utilisateur suivi avec succès",
                     "success", true,
                     "isFollowing", true));
-
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "error", e.getMessage(),
-                    "success", false));
-        }
     }
 
     @DeleteMapping("/unfollow/{targetUserId}")
     public ResponseEntity<?> unfollowUser(@PathVariable Long targetUserId) throws ArticlaException {
-        try {
             User currentUser = getCurrentUser();
             userService.unfollowUser(currentUser.getId(), targetUserId);
 
@@ -133,11 +89,6 @@ public class UserController {
                     "success", true,
                     "isFollowing", false));
 
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "error", e.getMessage(),
-                    "success", false));
-        }
     }
 
     @GetMapping("/is-following/{targetUserId}")
@@ -279,10 +230,9 @@ public class UserController {
         }
     }
 
-    // ✅ Endpoint pour sauvegarder un article
+
     @PostMapping("/save-article/{articleId}")
     public ResponseEntity<?> saveArticle(@PathVariable Long articleId) throws ArticlaException {
-        try {
             User currentUser = getCurrentUser();
             userService.saveArticle(currentUser.getId(), articleId);
             
@@ -290,20 +240,11 @@ public class UserController {
                 "message", "Article sauvegardé avec succès",
                 "success", true,
                 "isSaved", true
-            ));
-            
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "error", e.getMessage(),
-                "success", false
-            ));
-        }
+            )); 
     }
 
-    // ✅ Endpoint pour retirer un article des favoris
     @DeleteMapping("/unsave-article/{articleId}")
     public ResponseEntity<?> unsaveArticle(@PathVariable Long articleId) throws ArticlaException {
-        try {
             User currentUser = getCurrentUser();
             userService.unsaveArticle(currentUser.getId(), articleId);
             
@@ -312,16 +253,8 @@ public class UserController {
                 "success", true,
                 "isSaved", false
             ));
-            
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "error", e.getMessage(),
-                "success", false
-            ));
-        }
     }
 
-    // ✅ Endpoint pour vérifier si un article est sauvegardé
     @GetMapping("/is-article-saved/{articleId}")
     public ResponseEntity<?> isArticleSaved(@PathVariable Long articleId) throws ArticlaException {
             User currentUser = getCurrentUser();

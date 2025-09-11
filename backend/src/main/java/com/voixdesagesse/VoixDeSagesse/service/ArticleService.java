@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,23 +20,23 @@ import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
 import com.voixdesagesse.VoixDeSagesse.repository.ArticleRepository;
 import com.voixdesagesse.VoixDeSagesse.utility.Utilities;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ArticleService {
 
-    @Autowired
-    private ArticleRepository articleRepository;
+    private final ArticleRepository articleRepository;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    // ✅ Cache pour éviter les double-clics (en mémoire)
+    private final CommentService commentService;
+
     private final ConcurrentHashMap<String, Long> likeOperationCache = new ConcurrentHashMap<>();
 
 
-    // Méthode pour créer un article de sagesse avec incrémentation
     @Transactional
     public Article createSagesseArticle(SagesseDTO sagesseDTO) throws ArticlaException {
         Article article = sagesseDTO.toEntity();
@@ -48,16 +47,11 @@ public class ArticleService {
         article.setShares(0L);
         article.setType(ArticleType.SAGESSE);
         
-        // Sauvegarder l'article
         Article savedArticle = articleRepository.save(article);
-        
-        // Incrémenter le contentCount de l'utilisateur
         userService.incrementContentCount(article.getUserId());
-        
         return savedArticle;
     }
 
-     //  Méthode pour créer un article d'histoire avec incrémentation
     @Transactional
     public Article createHistoireArticle(HistoireDTO histoireDTO) throws ArticlaException {
         Article article = histoireDTO.toEntity();
@@ -68,14 +62,11 @@ public class ArticleService {
         article.setShares(0L);
         article.setType(ArticleType.HISTOIRE);
         
-        // Sauvegarder l'article
         Article savedArticle = articleRepository.save(article);
-        
-        //  Incrémenter le contentCount de l'utilisateur
         userService.incrementContentCount(article.getUserId());
-        
         return savedArticle;
     }
+    
     public List<Article> getAllArticles() {
         return articleRepository.findAll();
     }
@@ -84,14 +75,12 @@ public class ArticleService {
         return articleRepository.findByUserId(userId);
     }
 
-    
-    // ✅ Mise à jour de la méthode displayPosts pour inclure l'état saved
     public List<PosteDTO> displayPosts(long currentUserId) throws ArticlaException {
         List<Article> articles = articleRepository.findAll();
         User currentUser = userService.getUserById(currentUserId);
         Set<Long> likedArticles = currentUser.getLikedArticlesId();
         Set<Long> followingUsers = currentUser.getFollowingId();
-        Set<Long> savedArticles = currentUser.getSavedArticlesId(); // ✅ Ajout
+        Set<Long> savedArticles = currentUser.getSavedArticlesId(); 
 
         List<PosteDTO> posts = articles.stream()
                 .map(article -> {
@@ -105,22 +94,15 @@ public class ArticleService {
                             user.getWebsite(), user.getProfilePicture(), user.getBio(), user.getContentCount(), 
                             user.getFollowersCount(), user.getFollowingCount(), user.getLikesReceived());
                         posteDTO.setUser(userProfileDTO);
-                        
-                        PostInteractionDTO interaction = new PostInteractionDTO();
                         posteDTO.setCreatedAt(Utilities.getElapsedTime(article.getDatePublication()));
-                        
-                        // Vérifier si liké
+
+                        PostInteractionDTO interaction = new PostInteractionDTO();  
                         interaction.setLiked(likedArticles != null && likedArticles.contains(article.getId()));
-                        
-                        // Vérifier si on suit l'auteur
                         interaction.setFollowing(followingUsers != null && followingUsers.contains(user.getId()));
-                        
-                        // ✅ Vérifier si sauvegardé
                         interaction.setSaved(savedArticles != null && savedArticles.contains(article.getId()));
-                        
                         posteDTO.setInteraction(interaction);
                     } catch (ArticlaException ex) {
-                        System.out.println("Error fetching user: " + ex.getMessage());
+                        log.error("Error fetching user: " + ex.getMessage());
                     }
 
                     return posteDTO;
@@ -130,115 +112,11 @@ public class ArticleService {
         return posts;
     }
 
-    // ✅ Version corrigée de likeArticle avec protection contre les doublons
-    @Transactional
-    public synchronized void likeArticle(Long articleId, Long currentUserId) throws ArticlaException  {
-        String cacheKey = articleId + "-" + currentUserId;
-        
-        // ✅ Vérifier si une opération est déjà en cours
-        if (likeOperationCache.containsKey(cacheKey)) {
-            long lastOperation = likeOperationCache.get(cacheKey);
-            if (System.currentTimeMillis() - lastOperation < 1000) { // 1 seconde de délai
-                throw new RuntimeException("Opération trop rapide, veuillez patienter");
-            }
-        }
-        
-        // ✅ Marquer l'opération en cours
-        likeOperationCache.put(cacheKey, System.currentTimeMillis());
-        
-        try {
-            // ✅ Vérifier l'état actuel avant de faire quoi que ce soit
-            User currentUser = userService.getUserById(currentUserId);
-            Set<Long> likedArticles = currentUser.getLikedArticlesId();
-            
-            if (likedArticles != null && likedArticles.contains(articleId)) {
-                throw new RuntimeException("Article déjà liké");
-            }
-            
-            Article article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new RuntimeException("Article not found"));
-
-            Long authorId = article.getUserId();
-
-            // ✅ Opérations atomiques
-            articleRepository.incrementLikes(articleId);
-            userService.addLikedArticle(currentUserId, articleId);
-            userService.incrementLikesReceived(authorId);
-            
-        } finally {
-            // ✅ Nettoyer le cache après un délai
-            new Thread(() -> {
-                try {
-                    Thread.sleep(2000); // 2 secondes
-                    likeOperationCache.remove(cacheKey);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }).start();
-        }
-    }
-
-
-    // ✅ Version corrigée de unlikeArticle avec protection contre les doublons
-    @Transactional
-    public synchronized void unlikeArticle(Long articleId, Long currentUserId) throws ArticlaException {
-        String cacheKey = articleId + "-" + currentUserId + "-unlike";
-        
-        // ✅ Vérifier si une opération est déjà en cours
-        if (likeOperationCache.containsKey(cacheKey)) {
-            long lastOperation = likeOperationCache.get(cacheKey);
-            if (System.currentTimeMillis() - lastOperation < 1000) { // 1 seconde de délai
-                throw new RuntimeException("Opération trop rapide, veuillez patienter");
-            }
-        }
-        
-        // ✅ Marquer l'opération en cours
-        likeOperationCache.put(cacheKey, System.currentTimeMillis());
-        
-        try {
-            // ✅ Vérifier l'état actuel avant de faire quoi que ce soit
-            User currentUser = userService.getUserById(currentUserId);
-            Set<Long> likedArticles = currentUser.getLikedArticlesId();
-            
-            if (likedArticles == null || !likedArticles.contains(articleId)) {
-                throw new RuntimeException("Article pas encore liké");
-            }
-            
-            Article article =  articleRepository.findById(articleId)
-                .orElseThrow(() -> new RuntimeException("Article not found"));
-
-            Long authorId = article.getUserId();
-
-            // ✅ Opérations atomiques avec vérification
-            if (article.getLikes() > 0) {
-                articleRepository.decrementLikes(articleId);
-            }
-            userService.removeLikedArticle(currentUserId, articleId);
-            userService.decrementLikesReceived(authorId);
-            
-        } finally {
-            // ✅ Nettoyer le cache après un délai
-            new Thread(() -> {
-                try {
-                    Thread.sleep(2000); // 2 secondes
-                    likeOperationCache.remove(cacheKey);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }).start();
-        }
-    }
-
-
-
-    // ✅ Méthode pour récupérer les articles sauvegardés
     public List<PosteDTO> getSavedArticles(Long currentUserId) throws ArticlaException {
         User currentUser = userService.getUserById(currentUserId);
         Set<Long> likedArticles = currentUser.getLikedArticlesId();
         Set<Long> followingUsers = currentUser.getFollowingId();
         Set<Long> savedArticles = currentUser.getSavedArticlesId();
-
-        // Récupérer uniquement les articles sauvegardés
         List<Article> articles = articleRepository.findAllById(savedArticles);
 
         List<PosteDTO> posts = articles.stream()
@@ -253,40 +131,29 @@ public class ArticleService {
                             user.getWebsite(), user.getProfilePicture(), user.getBio(), user.getContentCount(), 
                             user.getFollowersCount(), user.getFollowingCount(), user.getLikesReceived());
                         posteDTO.setUser(userProfileDTO);
-                        
-                        PostInteractionDTO interaction = new PostInteractionDTO();
                         posteDTO.setCreatedAt(Utilities.getElapsedTime(article.getDatePublication()));
                         
-                        // Vérifier si liké
+                        PostInteractionDTO interaction = new PostInteractionDTO();
                         interaction.setLiked(likedArticles != null && likedArticles.contains(article.getId()));
-                        
-                        // Vérifier si on suit l'auteur
                         interaction.setFollowing(followingUsers != null && followingUsers.contains(user.getId()));
-                        
-                        // ✅ Vérifier si sauvegardé (toujours true pour cette liste)
                         interaction.setSaved(savedArticles != null && savedArticles.contains(article.getId()));
-                        
                         posteDTO.setInteraction(interaction);
                     } catch (ArticlaException ex) {
-                        System.out.println("Error fetching user: " + ex.getMessage());
+                        log.error("Error fetching user: " + ex.getMessage());
                     }
 
                     return posteDTO;
                 })
-                .sorted((p1, p2) -> p2.getArticle().getDatePublication().compareTo(p1.getArticle().getDatePublication())) // Trier par date décroissante
+                .sorted((p1, p2) -> p2.getArticle().getDatePublication().compareTo(p1.getArticle().getDatePublication())) // décr
                 .toList();
 
         return posts;
     }
 
-    // ✅ Méthode pour récupérer les postes personnels (avec toutes les interactions)
     public List<PosteDTO> getMyPosts(Long currentUserId) throws ArticlaException {
         User currentUser = userService.getUserById(currentUserId);
         Set<Long> likedArticles = currentUser.getLikedArticlesId();
-        Set<Long> followingUsers = currentUser.getFollowingId();
         Set<Long> savedArticles = currentUser.getSavedArticlesId();
-
-        // Récupérer uniquement les articles de l'utilisateur connecté
         List<Article> myArticles = articleRepository.findByUserIdOrderByDatePublicationDesc(currentUserId);
 
         List<PosteDTO> posts = myArticles.stream()
@@ -295,7 +162,6 @@ public class ArticleService {
                     posteDTO.setArticle(article);
                     
                     try {
-                        // L'utilisateur est l'auteur, donc on utilise currentUser
                         UserProfileDTO userProfileDTO = new UserProfileDTO(
                             currentUser.getId(), currentUser.getNom(), currentUser.getPrenom(), 
                             currentUser.getEmail(), currentUser.getUsername(), currentUser.getPhoneNumber(), 
@@ -304,18 +170,15 @@ public class ArticleService {
                             currentUser.getFollowingCount(), currentUser.getLikesReceived()
                         );
                         posteDTO.setUser(userProfileDTO);
-                        
-                        PostInteractionDTO interaction = new PostInteractionDTO();
                         posteDTO.setCreatedAt(Utilities.getElapsedTime(article.getDatePublication()));
                         
-                        // Vérifier les interactions (même sur ses propres posts)
+                        PostInteractionDTO interaction = new PostInteractionDTO();
                         interaction.setLiked(likedArticles != null && likedArticles.contains(article.getId()));
-                        interaction.setFollowing(false); // Toujours false car c'est ses propres posts
+                        interaction.setFollowing(false); 
                         interaction.setSaved(savedArticles != null && savedArticles.contains(article.getId()));
-                        
                         posteDTO.setInteraction(interaction);
                     } catch (Exception ex) {
-                        System.out.println("Error setting user data: " + ex.getMessage());
+                        log.error("Error setting user data: " + ex.getMessage());
                     }
 
                     return posteDTO;
@@ -324,85 +187,114 @@ public class ArticleService {
 
         return posts;
     }
-
-    // ✅ Méthode pour récupérer les postes d'un utilisateur spécifique (vue depuis un autre utilisateur)
-    public List<PosteDTO> getUserPosts(Long targetUserId, Long currentUserId) throws ArticlaException {
-        User currentUser = userService.getUserById(currentUserId);
-        User targetUser = userService.getUserById(targetUserId);
+     
+    @Transactional
+    public synchronized void likeArticle(Long articleId, Long currentUserId) throws ArticlaException  {
+        String cacheKey = articleId + "-" + currentUserId;
         
-        Set<Long> likedArticles = currentUser.getLikedArticlesId();
-        Set<Long> followingUsers = currentUser.getFollowingId();
-        Set<Long> savedArticles = currentUser.getSavedArticlesId();
+        if (likeOperationCache.containsKey(cacheKey)) {
+            long lastOperation = likeOperationCache.get(cacheKey);
+            if (System.currentTimeMillis() - lastOperation < 1000) { 
+                throw new ArticlaException("Opération trop rapide, veuillez patienter");
+            }
+        }
+        
+        likeOperationCache.put(cacheKey, System.currentTimeMillis());
+        
+        try {
+            User currentUser = userService.getUserById(currentUserId);
+            Set<Long> likedArticles = currentUser.getLikedArticlesId();
+            
+            if (likedArticles != null && likedArticles.contains(articleId))
+                throw new ArticlaException("Article déjà liké");
+            
+            Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new ArticlaException("Article not found"));
 
-        // Récupérer les articles de l'utilisateur cible
-        List<Article> userArticles = articleRepository.findByUserIdOrderByDatePublicationDesc(targetUserId);
+            Long authorId = article.getUserId();
 
-        List<PosteDTO> posts = userArticles.stream()
-                .map(article -> {
-                    PosteDTO posteDTO = new PosteDTO();
-                    posteDTO.setArticle(article);
-                    
-                    try {
-                        UserProfileDTO userProfileDTO = new UserProfileDTO(
-                            targetUser.getId(), targetUser.getNom(), targetUser.getPrenom(), 
-                            targetUser.getEmail(), targetUser.getUsername(), targetUser.getPhoneNumber(), 
-                            targetUser.getLocation(), targetUser.getWebsite(), targetUser.getProfilePicture(), 
-                            targetUser.getBio(), targetUser.getContentCount(), targetUser.getFollowersCount(), 
-                            targetUser.getFollowingCount(), targetUser.getLikesReceived()
-                        );
-                        posteDTO.setUser(userProfileDTO);
-                        
-                        PostInteractionDTO interaction = new PostInteractionDTO();
-                        posteDTO.setCreatedAt(Utilities.getElapsedTime(article.getDatePublication()));
-                        
-                        // Vérifier les interactions depuis la perspective de l'utilisateur connecté
-                        interaction.setLiked(likedArticles != null && likedArticles.contains(article.getId()));
-                        interaction.setFollowing(followingUsers != null && followingUsers.contains(targetUser.getId()));
-                        interaction.setSaved(savedArticles != null && savedArticles.contains(article.getId()));
-                        
-                        posteDTO.setInteraction(interaction);
-                    } catch (Exception ex) {
-                        System.out.println("Error setting user data: " + ex.getMessage());
-                    }
-
-                    return posteDTO;
-                })
-                .toList();
-
-        return posts;
+            articleRepository.incrementLikes(articleId);
+            userService.addLikedArticle(currentUserId, articleId);
+            userService.incrementLikesReceived(authorId);
+            
+        } finally {
+            new Thread(() -> {
+                try {
+                    Thread.sleep(2000); 
+                    likeOperationCache.remove(cacheKey);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }).start();
+        }
     }
 
-    // ✅ Surcharge pour compatibilité (quand on veut juste voir les posts publics)
-    public List<PosteDTO> getUserPosts(Long targetUserId) throws ArticlaException {
-        return getUserPosts(targetUserId, targetUserId); // Vue comme si c'était ses propres posts
+    @Transactional
+    public synchronized void unlikeArticle(Long articleId, Long currentUserId) throws ArticlaException {
+        String cacheKey = articleId + "-" + currentUserId + "-unlike";
+        
+        if (likeOperationCache.containsKey(cacheKey)) {
+            long lastOperation = likeOperationCache.get(cacheKey);
+            if (System.currentTimeMillis() - lastOperation < 1000) { 
+                throw new RuntimeException("Opération trop rapide, veuillez patienter");
+            }
+        }
+        
+        likeOperationCache.put(cacheKey, System.currentTimeMillis());
+        
+        try {
+          
+            User currentUser = userService.getUserById(currentUserId);
+            Set<Long> likedArticles = currentUser.getLikedArticlesId();
+            
+            if (likedArticles == null || !likedArticles.contains(articleId)) {
+                throw new RuntimeException("Article pas encore liké");
+            }
+            
+            Article article =  articleRepository.findById(articleId)
+                .orElseThrow(() -> new RuntimeException("Article not found"));
+
+            Long authorId = article.getUserId();
+
+            
+            if (article.getLikes() > 0) {
+                articleRepository.decrementLikes(articleId);
+            }
+            userService.removeLikedArticle(currentUserId, articleId);
+            userService.decrementLikesReceived(authorId);
+            
+        } finally {
+           
+            new Thread(() -> {
+                try {
+                    Thread.sleep(2000); // 2 secondes
+                    likeOperationCache.remove(cacheKey);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }).start();
+        }
     }
 
-    // ✅ Version alternative si vous voulez plus de contrôle
     @Transactional
     public void deleteArticle(Long articleId, Long currentUserId) throws ArticlaException {
-        // Vérifier que l'article existe et appartient à l'utilisateur
         Article article = articleRepository.findByIdAndUserId(articleId, currentUserId)
             .orElseThrow(() -> new ArticlaException("Article introuvable ou vous n'êtes pas autorisé à le supprimer"));
+
+        Long likesCount = article.getLikes();
+        Long commentsCount = article.getComments();
+        Long sharesCount = article.getShares();
         
-        // Statistiques pour le log
-        Long likesCount = article.getLikes() != null ? article.getLikes() : 0L;
-        Long commentsCount = article.getComments() != null ? article.getComments() : 0L;
-        Long sharesCount = article.getShares() != null ? article.getShares() : 0L;
-        
-        // Nettoyage des données liées
         userService.removeArticleFromAllUsersLikes(articleId);
         userService.removeArticleFromAllUsersSaved(articleId);
         
-        if (likesCount > 0) {
+        if (likesCount > 0)
             userService.decrementLikesReceivedByAmount(currentUserId, likesCount);
-        }
         
         userService.decrementContentCount(currentUserId);
-        
-        // Suppression de l'article
+        commentService.deleteAllCommentsByArticle(articleId);
         articleRepository.deleteById(articleId);
-        
-        // Log des statistiques
+
         log.info("Article supprimé - ID: %d, Likes: %d, Commentaires: %d, Partages: %d%n", 
                          articleId, likesCount, commentsCount, sharesCount);
     }

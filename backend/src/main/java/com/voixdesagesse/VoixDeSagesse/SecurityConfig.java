@@ -51,13 +51,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/auth/login", "/users/auth/register", "/users/verifyOtp/**", "/users/sendOtp/**", "/users/auth/changePass").permitAll()
-                        .requestMatchers("/uploads/profile-pictures/**").permitAll() // ✅ Plus spécifique
-                        .requestMatchers("/articles/**").authenticated()
+                        .requestMatchers("/auth/**")
+                        .permitAll()
+                        .requestMatchers("/uploads/profile-pictures/**").permitAll()
+                        .requestMatchers("/articles/**", "/comments/**", "/users/**")
+                        .authenticated()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

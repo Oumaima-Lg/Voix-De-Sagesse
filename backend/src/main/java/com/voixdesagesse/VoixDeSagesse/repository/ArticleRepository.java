@@ -15,23 +15,18 @@ public interface ArticleRepository extends MongoRepository<Article, Long> {
 
     public List<Article> findByUserId(long userId);
 
-    // Incrémenter les likes
     @Query("{ '_id': ?0 }")
     @Update("{ '$inc': { 'likes': 1 } }")
     void incrementLikes(Long id);
 
-    // Décrémenter les likes (en évitant les valeurs négatives)
     @Query("{ '_id': ?0, 'likes': { $gt: 0 } }")
     @Update("{ '$inc': { 'likes': -1 } }")
     void decrementLikes(Long id);
 
-    // ✅ Nouvelle méthode pour récupérer les articles d'un utilisateur triés par date
     List<Article> findByUserIdOrderByDatePublicationDesc(Long userId);
     
-    // ✅ Compter les articles d'un utilisateur (si pas déjà existant)
     Long countByUserId(Long userId);
     
-    // Vérifier l'existence et la propriété d'un article
     Optional<Article> findByIdAndUserId(Long articleId, Long userId);
     
 
