@@ -1,7 +1,7 @@
 import React from 'react'
-import Header from '../pages_details/homePage/Header'
-import Register from '../pages_details/registerPage/Register'
-import Fouter from '../pages_details/homePage/Fouter'
+import Header from '../homePage/Header'
+import Register from './Register'
+import Fouter from '../homePage/Fouter'
 
 const RegisterPage = () => {
     return (

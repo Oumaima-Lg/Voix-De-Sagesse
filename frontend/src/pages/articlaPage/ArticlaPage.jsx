@@ -1,6 +1,6 @@
 // ArticlaPage.jsx - Solution 2: Utiliser un wrapper avec z-index
 import React from 'react'
-import Articla from '../pages_details/articlaPage/Articla'
+import Articla from './Articla'
 
 const ArticlaPage = () => {
   return (

@@ -15,7 +15,7 @@ let fiches = [
     text_button: 'Sagesse'
   },
   {
-    title: 'Histoires personnelles',
+    title: 'Expériences personnelles',
     content: 'Partagez vos moments de vie, vos défis et vos triomphes. Racontez vos histoires inspirantes, drôles, émouvantes ou surprenantes, et laissez les autres découvrir les leçons que vous en avez tirées.',
     image: iconHistoire,
     text_button: 'Histoire'

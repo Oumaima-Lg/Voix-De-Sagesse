@@ -108,30 +108,6 @@ axiosInstance.interceptors.response.use(
           errorNotification('Accès refusé', 'Vous n\'avez pas les permissions nécessaires');
           break;
 
-        case 401:
-          if (!isPublicRoute(config.url)) {
-            const token = localStorage.getItem('token')
-            const userData = localStorage.getItem('user')
-
-            // ✅ Message spécifique pour les erreurs d'authentification
-            let message = 'Session expirée, veuillez vous reconnecter'
-
-            if (!token && userData) {
-              message = 'Token manquant, reconnexion nécessaire'
-            } else if (token && !userData) {
-              message = 'Données utilisateur corrompues, reconnexion nécessaire'
-            }
-
-            errorNotification('Session expirée', message);
-            clearAuth();
-
-            const currentPath = window.location.pathname;
-            if (!currentPath.startsWith('/auth/')) {
-              window.location.href = `/auth/login?message=${encodeURIComponent(message)}&redirect=${encodeURIComponent(currentPath)}`;
-            }
-          }
-          break;
-
         case 500:
           errorNotification('Erreur serveur', 'Une erreur interne s\'est produite');
           break;

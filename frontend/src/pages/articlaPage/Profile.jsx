@@ -18,9 +18,6 @@ const Profile = () => {
     const user = useSelector((state) => state.user)
     const dispatch = useDispatch()
 
-    // Référence pour l'input file
-    const fileInputRef = useRef(null);
-
     // État pour stocker les données du profil reçues du backend
     const [userProfile, setUserProfile] = useState(null);
 

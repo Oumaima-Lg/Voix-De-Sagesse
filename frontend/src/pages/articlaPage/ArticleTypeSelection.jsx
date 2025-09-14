@@ -39,7 +39,7 @@ const ArticleTypeSelection = () => {
             </h3>
             <p className="text-gray-300 mb-6 leading-relaxed">
               Partagez votre proverbe ou citation inspirante. Sagesse populaire, Inspiration, Philosophie, Vie
-              quotidienne, Citations célèbres
+              quotidienne, Citations célèbres.
             </p>
             <div className="flex flex-wrap gap-2 justify-center">
               <span className="px-3 py-1 bg-[#4C3163] text-white text-sm rounded-full">#Philosophie</span>
@@ -59,7 +59,7 @@ const ArticleTypeSelection = () => {
               <BiBook className="mx-auto" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-[#A09F87] transition-colors">
-              Histoires Personnelles
+              Expériences Personnelles
             </h3>
             <p className="text-gray-300 mb-6 leading-relaxed">
               Partagez vos moments de vie, vos défis et vos triomphes. Racontez vos histoires inspirantes, drôles,

@@ -7,7 +7,7 @@ import { Notifications } from '@mantine/notifications';
 import '@mantine/carousel/styles.css';
 import Store from './Store'
 import { Provider } from 'react-redux'
-import AppRoutes from './pages/AppRoutes';
+import AppRoutes from './pages/routes/AppRoutes';
 import { BrowserRouter } from 'react-router-dom';
 
 const App = () => {

@@ -115,7 +115,7 @@ const CreateArticleForm = () => {
             <div></div>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#A09F87] to-white">
-            {isWisdom ? "Nouvelle Sagesse Partagée" : "Nouvelle Histoire Personnelle"}
+            {isWisdom ? "Nouvelle Sagesse Partagée" : "Nouvelle Expériences Personnelle"}
           </h1>
         </div>
 
