@@ -55,7 +55,7 @@ const CreateArticleForm = () => {
 
         setTimeout(() => {
           navigate("/articla")
-        }, 4000)
+        }, 2000)
 
       }).catch((err) => {
         console.log(err);
@@ -78,7 +78,7 @@ const CreateArticleForm = () => {
 
         setTimeout(() => {
           navigate("/articla")
-        }, 4000)
+        }, 2000)
 
       }).catch((err) => {
         console.log(err);

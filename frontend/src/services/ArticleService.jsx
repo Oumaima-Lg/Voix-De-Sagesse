@@ -1,6 +1,6 @@
 import axiosInstance from "../Interceptor/AxiosInterceptor";
 
-const base_url = "/articles/"; // Utiliser un chemin relatif car baseURL est défini dans axiosInstance
+const base_url = "/articles/"; 
 
 const createSagesseArticle = async (articleSagesse) => {
     return axiosInstance.post(`${base_url}createSaggesseArticla`, articleSagesse)
@@ -48,14 +48,12 @@ const unlikeArticle = async (id, currentUserId) => {
         .catch(error => { throw error; });
 }
 
-// ✅ Nouvelle fonction pour les articles sauvegardés avec userId
 const getSavedArticles = async (userId) => {
     return axiosInstance.get(`${base_url}saved/${userId}`)
         .then(res => res.data)
         .catch(error => { throw error; });
 }
 
-// ✅ Nouvelles fonctions pour les postes personnels
 const getMyPosts = async (userId) => {
     return axiosInstance.get(`${base_url}my-posts/${userId}`)
         .then(res => res.data)
@@ -74,6 +72,18 @@ const deleteArticleWithUserId = async (articleId, userId) => {
         .catch(error => { throw error; });
 }
 
+const searchArticles = async (userId, searchParams) => {
+    return axiosInstance.get(`${base_url}search/${userId}`, {
+        params: {
+            searchText: searchParams.searchText || '',
+            type: searchParams.type || ''
+        }
+    })
+        .then(result => result.data)
+        .catch(error => { throw error; });
+}
+
+
 export { 
     createSagesseArticle, 
     createHistoireArticle, 
@@ -85,5 +95,6 @@ export {
     getSavedArticles,
     getMyPosts,
     getUserPosts,
-    deleteArticleWithUserId
+    deleteArticleWithUserId,
+    searchArticles
 };

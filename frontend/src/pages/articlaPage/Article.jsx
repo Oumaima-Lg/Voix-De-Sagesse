@@ -25,7 +25,7 @@ const Article = () => {
             <div className='flex flex-col gap-1 pt-10 '>
                 <div className='flex sm:flex-row flex-col justify-center items-center lg:space-x-0 md:space-x-[-50px] sm:space-x-[-80px] self-center'>
                     <div className=''> <LoaderPyramid /> </div>
-                    <div className='text-gradient sm:text-5xl text-3xl charm text-center leading-tight'>Histoires Personnelles</div>
+                    <div className='text-gradient sm:text-5xl text-3xl charm text-center leading-22'>Expériences Personnelles</div>
                     <div className=''> <LoaderPyramid /> </div>
                 </div>
                 <div>
@@ -37,7 +37,7 @@ const Article = () => {
             <div className='flex flex-col gap-1 pb-20 pt-10 '>
                 <div className='flex sm:flex-row flex-col justify-center items-center lg:space-x-0 md:space-x-[-50px] sm:space-x-[-80px] self-center'>
                     <div> <LoaderPyramid /> </div>
-                    <div className='text-gradient sm:text-5xl text-3xl charm text-center leading-22'>Sagesse Partagée</div>
+                    <div className='text-gradient sm:text-5xl text-3xl charm text-center leading-22'>Sagesses Partagées</div>
                     <div> <LoaderPyramid /> </div>
                 </div>
                 <div className='lg:px-40 sm:px-20 px-0'>

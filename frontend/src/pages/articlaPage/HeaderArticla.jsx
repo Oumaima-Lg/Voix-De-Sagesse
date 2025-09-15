@@ -26,7 +26,7 @@ const HeaderArticla = () => {
      // ✅ Fonction de déconnexion avec message personnalisé
     const handleLogout = () => {
         setToggle(false); // Fermer le menu dropdown
-        logout('👋 Vous avez été déconnecté avec succès'); // ✅ Message personnalisé
+        logout('Vous avez été déconnecté avec succès'); // ✅ Message personnalisé
     }
 
     const handleProfile = () => {

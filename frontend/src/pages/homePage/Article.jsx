@@ -15,7 +15,11 @@ const Article = () => {
         <div className='flex lg:flex-row flex-col gap-y-10 items-center'>
           <div className='flex-2'>
             <p className='text-white/80 lg:text-[25px] text-[18px] charm lg:leading-10 leading-8 lg:text-left text-center  lg:text-current '>
-              Chaque expérience que vous avez vécue, chaque moment difficile ou joyeux, chaque leçon tirée d'une épreuve ou d'une réussite, a le pouvoir d’inspirer et de renforcer ceux qui vous entourent. Parfois, une simple parole, un proverbe sage ou une histoire personnelle peut être le moteur dont quelqu'un a besoin pour aller de l'avant. Ouvrez votre cœur, partagez votre sagesse, et laissez vos expériences être un phare pour ceux qui cherchent des réponses, de l’espoir, ou même un peu de réconfort. Ensemble, nous pouvons créer une communauté où chaque histoire compte et chaque pensée enrichit notre voyage collectif. 🌟
+              Chaque expérience que vous avez vécue, chaque moment difficile ou joyeux, chaque leçon tirée d'une épreuve ou d'une réussite, a 
+              le pouvoir d’inspirer et de renforcer ceux qui vous entourent. Parfois, une simple parole, un proverbe sage ou une histoire personnelle
+               peut être le moteur dont quelqu'un a besoin pour aller de l'avant. Ouvrez votre cœur, partagez votre sagesse, et laissez vos expériences 
+               être un phare pour ceux qui cherchent des réponses, de l’espoir, ou même un peu de réconfort. Ensemble, nous pouvons créer une communauté 
+               où chaque histoire compte et chaque pensée enrichit notre voyage collectif. 🌟
             </p>
           </div>
           <div className='flex-1 flex flex-col justify-center items-center gap-y-3'>

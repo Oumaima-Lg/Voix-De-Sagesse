@@ -18,9 +18,7 @@ const getUserProfile = async (userId) => {
     .catch(error => { throw error; });
 }
 
-// Fonction corrigée pour l'upload de la photo de profil
 const uploadProfilePicture = async (formData) => {
-    // Créer une instance axios spécifique pour l'upload de fichiers
     return axiosInstance.post(`${base_url}upload-profile-picture`, formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
@@ -30,7 +28,6 @@ const uploadProfilePicture = async (formData) => {
     .catch(error => { throw error; });
 }
 
-// Dans votre service JavaScript
 const followUser = async (targetUserId) => {
     return axiosInstance.post(`/users/follow/${targetUserId}`)
         .then(res => res.data)
@@ -62,7 +59,6 @@ const getFollowers = async (userId) => {
 }
 
 
-// ✅ Nouvelles fonctions pour la sauvegarde d'articles
 const saveArticle = async (articleId) => {
     return axiosInstance.post(`/users/save-article/${articleId}`)
         .then(res => res.data)
