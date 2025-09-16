@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.Update;
 import org.springframework.stereotype.Repository;
 
+import com.voixdesagesse.VoixDeSagesse.dto.ArticleType;
 import com.voixdesagesse.VoixDeSagesse.entity.Article;
 
 @Repository
@@ -24,10 +25,32 @@ public interface ArticleRepository extends MongoRepository<Article, Long> {
     void decrementLikes(Long id);
 
     List<Article> findByUserIdOrderByDatePublicationDesc(Long userId);
-    
+
     Long countByUserId(Long userId);
-    
+
     Optional<Article> findByIdAndUserId(Long articleId, Long userId);
-    
+
+    @Query("{ $and: [ " +
+            "{ $or: [ " +
+            "  { 'content': { $regex: ?0, $options: 'i' } }, " +
+            "  { 'title': { $regex: ?0, $options: 'i' } }, " +
+            "  { 'lesson': { $regex: ?0, $options: 'i' } }, " +
+            "  { 'tags': { $regex: ?0, $options: 'i' } }, " +
+            "  { 'source': { $regex: ?0, $options: 'i' } } " +
+            "] }, " +
+            "{ 'type': ?1 } " +
+            "] }")
+    List<Article> findByContentContainingIgnoreCaseAndType(String searchText, ArticleType type);
+
+    @Query("{ $or: [ " +
+            "  { 'content': { $regex: ?0, $options: 'i' } }, " +
+            "  { 'title': { $regex: ?0, $options: 'i' } }, " +
+            "  { 'lesson': { $regex: ?0, $options: 'i' } }, " +
+            "  { 'tags': { $regex: ?0, $options: 'i' } }, " +
+            "  { 'source': { $regex: ?0, $options: 'i' } } " +
+            "] }")
+    List<Article> findByContentContainingIgnoreCase(String searchText);
+
+    List<Article> findByType(ArticleType type);
 
 }

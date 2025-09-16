@@ -18,7 +18,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Créer le répertoire s'il n'existe pas
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
             try {
@@ -27,8 +26,7 @@ public class WebConfig implements WebMvcConfigurer {
                 throw new RuntimeException("Impossible de créer le répertoire d'upload", e);
             }
         }
-
-        // ✅ CORRECTION : Mapper correctement le pattern d'URL
+        
         registry.addResourceHandler("/uploads/profile-pictures/**")
                 .addResourceLocations("file:" + uploadPath.toAbsolutePath() + "/")
                 .setCachePeriod(3600)

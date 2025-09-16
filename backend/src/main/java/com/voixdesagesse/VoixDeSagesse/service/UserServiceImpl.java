@@ -333,31 +333,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String saveProfilePicture(MultipartFile file, Long userId) throws IOException {
-        // Créer le dossier s'il n'existe pas
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
-        // Générer un nom unique pour le fichier
         String originalFilename = file.getOriginalFilename();
         String fileExtension = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf("."))
                 : ".jpg";
         String uniqueFileName = "profile_" + userId + "_" + System.currentTimeMillis() + fileExtension;
-
-        // Sauvegarder le fichier
         Path filePath = uploadPath.resolve(uniqueFileName);
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-        // Construire l'URL accessible
         String profilePictureUrl = "/uploads/profile-pictures/" + uniqueFileName;
 
-        // Mettre à jour l'utilisateur en base
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
 
-            // Supprimer l'ancienne image si elle existe
             if (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) {
                 deleteOldProfilePicture(user.getProfilePicture());
             }
@@ -371,14 +363,12 @@ public class UserServiceImpl implements UserService {
 
     private void deleteOldProfilePicture(String oldPictureUrl) {
         try {
-            // Extraire le nom de fichier de l'URL
             String fileName = oldPictureUrl.substring(oldPictureUrl.lastIndexOf("/") + 1);
             Path oldFilePath = Paths.get(uploadDir).resolve(fileName);
             if (Files.exists(oldFilePath)) {
                 Files.delete(oldFilePath);
             }
         } catch (IOException e) {
-            // Log l'erreur mais ne pas faire échouer l'upload
             log.error("Erreur lors de la suppression de l'ancienne image: " + e.getMessage());
         }
     }

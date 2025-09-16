@@ -3,7 +3,6 @@ package com.voixdesagesse.VoixDeSagesse.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.voixdesagesse.VoixDeSagesse.dto.CommentDTO;
 import com.voixdesagesse.VoixDeSagesse.entity.User;
 import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
-import com.voixdesagesse.VoixDeSagesse.repository.UserRepository;
 import com.voixdesagesse.VoixDeSagesse.service.CommentService;
+import com.voixdesagesse.VoixDeSagesse.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,17 +30,15 @@ public class CommentController {
     
     private final CommentService commentService;
     
-    private final UserRepository userRepository;
+     private final UserService userService;
     
-    private User getCurrentUser() {
+    private User getCurrentUser() throws ArticlaException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserEmail = authentication.getName();
-        
-        return userRepository.findByEmail(currentUserEmail)
-            .orElseThrow(() -> new RuntimeException("Utilisateur connecté introuvable"));
+
+        return userService.getUserByEmail(currentUserEmail).toEntity();
     }
     
-    // ✅ Ajouter un commentaire
     @PostMapping("/add/{articleId}")
     public ResponseEntity<?> addComment(@PathVariable Long articleId, @RequestBody Map<String, String> request) {
         try {
@@ -76,7 +73,6 @@ public class CommentController {
         }
     }
     
-    // ✅ Récupérer les commentaires d'un article
     @GetMapping("/article/{articleId}")
     public ResponseEntity<?> getCommentsByArticle(@PathVariable Long articleId) {
         try {
@@ -101,7 +97,7 @@ public class CommentController {
         }
     }
     
-    // ✅ Supprimer un commentaire
+
     @DeleteMapping("/delete/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long commentId) {
         try {
@@ -126,7 +122,7 @@ public class CommentController {
         }
     }
     
-    // ✅ Obtenir le nombre de commentaires d'un article
+
     @GetMapping("/count/{articleId}")
     public ResponseEntity<?> getCommentsCount(@PathVariable Long articleId) {
         try {

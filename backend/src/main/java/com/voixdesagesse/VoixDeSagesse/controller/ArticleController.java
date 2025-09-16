@@ -23,12 +23,12 @@ import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
 import com.voixdesagesse.VoixDeSagesse.service.ArticleService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-
-
+@Slf4j
 @CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
 @RequiredArgsConstructor
-@RestController 
+@RestController
 @RequestMapping("/articles")
 public class ArticleController {
 
@@ -59,8 +59,8 @@ public class ArticleController {
         return ResponseEntity.ok(articleService.displayPosts(currentUserId));
     }
 
-   @PostMapping("/{id}/like")
-    public ResponseEntity<String> likeArticle (
+    @PostMapping("/{id}/like")
+    public ResponseEntity<String> likeArticle(
             @PathVariable Long id,
             @RequestParam Long currentUserId) throws ArticlaException {
 
@@ -77,41 +77,53 @@ public class ArticleController {
         return ResponseEntity.ok("Article unliked successfully");
     }
 
-
     @GetMapping("/saved/{userId}")
     public ResponseEntity<?> getSavedArticles(@PathVariable Long userId) throws ArticlaException {
-            List<PosteDTO> savedPosts = articleService.getSavedArticles(userId);
-            
-            return ResponseEntity.ok(Map.of(
+        List<PosteDTO> savedPosts = articleService.getSavedArticles(userId);
+
+        return ResponseEntity.ok(Map.of(
                 "savedArticles", savedPosts,
                 "count", savedPosts.size(),
-                "success", true
-            ));
+                "success", true));
     }
-
 
     @GetMapping("/my-posts/{userId}")
     public ResponseEntity<?> getMyPosts(@PathVariable Long userId) throws ArticlaException {
 
-            List<PosteDTO> myPosts = articleService.getMyPosts(userId);
-            
-            return ResponseEntity.ok(Map.of(
+        List<PosteDTO> myPosts = articleService.getMyPosts(userId);
+
+        return ResponseEntity.ok(Map.of(
                 "myPosts", myPosts,
                 "count", myPosts.size(),
-                "success", true
-            ));
-       
+                "success", true));
+
     }
 
     @DeleteMapping("/delete/{articleId}/{userId}")
-    public ResponseEntity<?> deleteArticleWithUserId(@PathVariable Long articleId, @PathVariable Long userId) throws ArticlaException  {
-            articleService.deleteArticle(articleId, userId);
-            
-            return ResponseEntity.ok(Map.of(
+    public ResponseEntity<?> deleteArticleWithUserId(@PathVariable Long articleId, @PathVariable Long userId)
+            throws ArticlaException {
+        articleService.deleteArticle(articleId, userId);
+
+        return ResponseEntity.ok(Map.of(
                 "message", "Article supprimé avec succès",
                 "success", true,
-                "deletedArticleId", articleId
-            ));
+                "deletedArticleId", articleId));
+    }
+
+    @GetMapping("/search/{currentUserId}")
+    public ResponseEntity<?> searchArticles(
+            @PathVariable Long currentUserId,
+            @RequestParam(required = false) String searchText,
+            @RequestParam(required = false) String type) throws ArticlaException {
+        
+        try {
+            List<PosteDTO> searchResults = articleService.searchArticles(currentUserId, searchText, type);
+            
+            return ResponseEntity.ok(searchResults);
+        } catch (ArticlaException e) {
+            log.error("Erreur lors de la recherche d'articles: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Erreur lors de la recherche", "message", e.getMessage()));
+        }
     }
 }
-

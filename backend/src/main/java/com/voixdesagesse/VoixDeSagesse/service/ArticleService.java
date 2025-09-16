@@ -299,4 +299,60 @@ public class ArticleService {
                          articleId, likesCount, commentsCount, sharesCount);
     }
 
+    public List<PosteDTO> searchArticles(Long currentUserId, String searchText, String type) throws ArticlaException {
+        User currentUser = userService.getUserById(currentUserId);
+        Set<Long> likedArticles = currentUser.getLikedArticlesId();
+        Set<Long> followingUsers = currentUser.getFollowingId();
+        Set<Long> savedArticles = currentUser.getSavedArticlesId();
+        
+        List<Article> articles;
+        
+        if (searchText != null && !searchText.trim().isEmpty() && type != null && !type.trim().isEmpty()) {
+            ArticleType articleType = ArticleType.valueOf(type.toUpperCase());
+            articles = articleRepository.findByContentContainingIgnoreCaseAndType(searchText.trim(), articleType);
+        } else if (searchText != null && !searchText.trim().isEmpty()) {
+            articles = articleRepository.findByContentContainingIgnoreCase(searchText.trim());
+        } else if (type != null && !type.trim().isEmpty()) {
+            ArticleType articleType = ArticleType.valueOf(type.toUpperCase());
+            articles = articleRepository.findByType(articleType);
+        } else {
+            articles = articleRepository.findAll();
+        }
+        
+        List<PosteDTO> posts = articles.stream()
+                .map(article -> {
+                    PosteDTO posteDTO = new PosteDTO();
+                    posteDTO.setArticle(article);
+                    
+                    try {
+                        User user = userService.getUserById(article.getUserId());
+                        UserProfileDTO userProfileDTO = new UserProfileDTO(
+                            user.getId(), user.getNom(), user.getPrenom(), 
+                            user.getEmail(), user.getUsername(), user.getPhoneNumber(), 
+                            user.getLocation(), user.getWebsite(), user.getProfilePicture(), 
+                            user.getBio(), user.getContentCount(), user.getFollowersCount(), 
+                            user.getFollowingCount(), user.getLikesReceived()
+                        );
+                        posteDTO.setUser(userProfileDTO);
+                        posteDTO.setCreatedAt(Utilities.getElapsedTime(article.getDatePublication()));
+
+                        PostInteractionDTO interaction = new PostInteractionDTO();  
+                        interaction.setLiked(likedArticles != null && likedArticles.contains(article.getId()));
+                        interaction.setFollowing(followingUsers != null && followingUsers.contains(user.getId()));
+                        interaction.setSaved(savedArticles != null && savedArticles.contains(article.getId()));
+                        posteDTO.setInteraction(interaction);
+                    } catch (ArticlaException ex) {
+                        log.error("Error fetching user: " + ex.getMessage());
+                    }
+
+                    return posteDTO;
+                })
+                .sorted((p1, p2) -> p2.getArticle().getDatePublication().compareTo(p1.getArticle().getDatePublication())) 
+                .toList();
+
+        log.info("Recherche effectuée - Texte: '{}', Type: '{}', Résultats: {}", 
+                 searchText, type, posts.size());
+        
+        return posts;
+    }
 }

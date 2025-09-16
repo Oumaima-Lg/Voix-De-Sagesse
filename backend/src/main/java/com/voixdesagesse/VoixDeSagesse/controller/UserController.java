@@ -31,18 +31,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.voixdesagesse.VoixDeSagesse.dto.LoginDTO;
-import com.voixdesagesse.VoixDeSagesse.dto.ResponseDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserProfileDTO;
-import com.voixdesagesse.VoixDeSagesse.dto.UserRegistrationDTO;
 import com.voixdesagesse.VoixDeSagesse.entity.User;
 import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
 import com.voixdesagesse.VoixDeSagesse.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -151,39 +146,30 @@ public class UserController {
             @RequestParam("userId") Long userId, HttpServletRequest request) {
 
         try {
-            // Récupérer l'utilisateur depuis le token JWT si nécessaire
-            // String token = request.getHeader("Authorization");
-            // Long authenticatedUserId = jwtService.getUserIdFromToken(token);
-
-            // Valider le fichier
             if (file.isEmpty()) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "Aucun fichier sélectionné"));
             }
 
-            // Vérifier que c'est une image
             String contentType = file.getContentType();
             if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType.toLowerCase())) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "Type de fichier non autorisé. Formats acceptés : JPEG, PNG, GIF, WebP"));
             }
 
-            // Vérifier la taille (5MB max)
             if (file.getSize() > 5 * 1024 * 1024) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "La taille du fichier ne doit pas dépasser 5MB"));
             }
 
-            // Appeler le service pour sauvegarder l'image
             String profilePictureUrl = userService.saveProfilePicture(file, userId);
 
-            // Construire l'URL complète
             String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
             String fullUrl = baseUrl + profilePictureUrl;
 
             // Créer la réponse
             Map<String, Object> response = new HashMap<>();
-            response.put("profilePictureUrl", fullUrl); // URL complète
+            response.put("profilePictureUrl", fullUrl); 
             response.put("message", "Image uploadée avec succès");
             response.put("success", true);
 

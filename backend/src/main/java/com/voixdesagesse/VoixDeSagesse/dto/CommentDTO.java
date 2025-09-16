@@ -15,7 +15,7 @@ public class CommentDTO {
     private Long articleId;
     private UserProfileDTO user;
     private String content;
-    private String createdAt; // Format de temps relatif
+    private String createdAt; 
     private LocalDateTime dateCreation;
     
 }
