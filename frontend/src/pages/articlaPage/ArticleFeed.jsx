@@ -285,7 +285,6 @@ const posteFeed = () => {
         loaderProps={{ color: "#A09F87", type: "bars" }}
       />
 
-      {/* ✅ Bouton Scroll to Top */}
       <ScrollToTop />
 
       <div className="flex items-center justify-between mb-8">
@@ -301,13 +300,11 @@ const posteFeed = () => {
         <div></div>
       </div>
 
-      {/* Barre de recherche */}
       <SearchBar
         onSearch={handleSearch}
         currentFilters={searchFilters}
       />
 
-      {/* Indicateur de résultats de recherche */}
       {isSearchActive && (
         <div className="max-w-2xl mx-auto mb-4">
           <div className="bg-[#4C3163]/30 border border-[#4C3163] rounded-lg p-3">
@@ -322,7 +319,6 @@ const posteFeed = () => {
         </div>
       )}
 
-      {/* Loading pour la recherche */}
       {searchLoading && (
         <LoadingOverlay
           visible={true}
@@ -475,7 +471,7 @@ const posteFeed = () => {
                 {poste.article.type === "SAGESSE" ? (
                   <div className="space-y-3">
                     <blockquote className="text-white text-lg italic leading-relaxed border-l-4 border-[#A09F87] pl-4">
-                      "{poste.article.content}"
+                      "{poste.article.content} s"
                     </blockquote>
                     {poste.username && <p className="text-[#A09F87] text-right">— {poste.user.username}</p>}
                     {poste.article.source && <p className="text-gray-400 text-sm">{poste.article.source}</p>}
@@ -635,7 +631,7 @@ const posteFeed = () => {
                       placeholder="Ajouter un commentaire..."
                       maxLength={500}
                       className="flex-1 bg-[#202020] border border-[#4C3163] text-white placeholder:text-gray-400 focus:border-[#A09F87] px-3 py-2 rounded outline-none"
-                      onKeyPress={(e) => {
+                      onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault()
                           handleCommentSubmit(poste.article.id)

@@ -22,15 +22,18 @@ const SearchBar = ({ onSearch, onFilterChange, currentFilters }) => {
     })
   }
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSearch()
-    }
-  }
+  
+  const handleKeyDown = (e) => {
++    if (e.key === "Enter") {
++      e.preventDefault()
++      handleSearch()
++    }
++  }
+
+
 
   return (
     <div className="w-full max-w-2xl mx-auto mb-6">
-      {/* Barre de recherche principale */}
       <div className="relative">
         <div className="flex items-center bg-gradient-to-r from-[#202020] to-[#2a2a2a] border-2 border-[#4C3163] rounded-lg overflow-hidden shadow-lg">
           <div className="flex-1 flex items-center">
@@ -39,13 +42,12 @@ const SearchBar = ({ onSearch, onFilterChange, currentFilters }) => {
               type="text"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               placeholder="Rechercher dans les articles..."
               className="flex-1 bg-transparent text-white placeholder:text-gray-400 py-3 pr-4 outline-none"
             />
           </div>
           
-          {/* Bouton filtre */}
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`p-3 transition-colors border-l border-[#4C3163] ${
@@ -56,7 +58,6 @@ const SearchBar = ({ onSearch, onFilterChange, currentFilters }) => {
             <Filter className="w-5 h-5" />
           </button>
           
-          {/* Bouton recherche */}
           <button
             onClick={handleSearch}
             className="bg-[#A09F87] hover:bg-[#A09F87]/80 text-[#171717] px-6 py-3 font-medium transition-colors"
@@ -65,7 +66,6 @@ const SearchBar = ({ onSearch, onFilterChange, currentFilters }) => {
           </button>
         </div>
 
-        {/* Section des filtres */}
         {showFilters && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-[#202020] border-2 border-[#4C3163] rounded-lg p-4 shadow-xl z-10">
             <div className="flex items-center justify-between mb-3">
@@ -114,7 +114,6 @@ const SearchBar = ({ onSearch, onFilterChange, currentFilters }) => {
         )}
       </div>
 
-      {/* Affichage des filtres actifs */}
       {(searchText || selectedType) && (
         <div className="flex items-center gap-2 mt-3">
           <span className="text-[#A09F87] text-sm">Filtres actifs:</span>

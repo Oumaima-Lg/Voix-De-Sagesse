@@ -467,12 +467,9 @@ const AnimatedWrapper = styled.div`
 
 
 const AnimatedWrapper2 = styled.div`
-  opacity: 0;
-  transform: translateX(-100px);
-  animation: fadeInUp 2.6s ease forwards;
+  
 
-
- .card2 span {
+  .card span, .card2 span {
     color: #d1b82d;
     font-size: 1.2em;
   }
@@ -499,6 +496,13 @@ const AnimatedWrapper2 = styled.div`
     overflow: hidden;
     border-radius: 20px;
   }
+
+  .card p, .card2 p {
+    z-index: 1;
+  }
+
+  
+
 
 `;
 

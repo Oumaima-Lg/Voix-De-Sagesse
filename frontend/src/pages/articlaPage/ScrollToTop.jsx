@@ -4,7 +4,6 @@ import { ChevronUp } from 'lucide-react'
 const ScrollToTop = () => {
   const [isVisible, setIsVisible] = useState(false)
 
-  // Fonction pour vérifier la position de scroll
   const toggleVisibility = () => {
     if (window.pageYOffset > 300) {
       setIsVisible(true)
@@ -13,7 +12,6 @@ const ScrollToTop = () => {
     }
   }
 
-  // Fonction pour remonter en haut
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -37,11 +35,9 @@ const ScrollToTop = () => {
           title="Remonter en haut"
         >
           <ChevronUp className="w-6 h-6 transition-transform duration-300 group-hover:animate-bounce" />
-          
-          {/* Effet de brillance */}
+
           <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12"></div>
-          
-          {/* Anneau de pulse */}
+
           <div className="absolute inset-0 rounded-full border-2 border-[#A09F87]/30 animate-ping"></div>
         </button>
       )}

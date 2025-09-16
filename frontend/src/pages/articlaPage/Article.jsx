@@ -17,9 +17,10 @@ const Article = () => {
             <div>
                 <Input />
             </div>
-            <div className='flex items-center justify-center px-10 py-6 cursor-pointer text-white size-10 mt-20 sm:mt-auto  ml-6 bg-gradient-to-r from-[#4C3163] from-0% via-[#05071B] via-50% to-[#4C3163] to-100% border-1 border-[#000000] rounded-lg shadow-lg'>
+            {/* <div className='flex items-center justify-center px-10 py-6 cursor-pointer text-white size-10 mt-20 sm:mt-auto  ml-6 bg-gradient-to-r from-[#4C3163] from-0% via-[#05071B] via-50% to-[#4C3163] to-100% border-1 border-[#000000] rounded-lg shadow-lg'> */}
+            <div className='flex items-center justify-center px-10 py-6 size-10 mt-20 sm:mt-auto  ml-6   '>
                 <LinkRouter to='/articla'>
-                    <IoArrowBackCircleOutline className='text-4xl' />
+                    <IoArrowBackCircleOutline className='text-4xl text-white/40 cursor-pointer' />
                 </LinkRouter>
             </div>
             <div className='flex flex-col gap-1 pt-10 '>

@@ -5,8 +5,6 @@ import { Link as LinkRouter, useLocation } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 import { loginValidation } from '../../services/FormValidation';
 import { TextInput } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
-import { IconCheck, IconX } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import ResetPassword from './ResetPassword';
 import { errorNotification, successNotification } from '../../services/NotificationService';
@@ -16,7 +14,6 @@ import { LoadingOverlay, Button, Group, Box } from '@mantine/core';
 import { setJwt } from '../../Slices/JwtSlice';
 import { loginUser } from '../../services/AuthService';
 import { jwtDecode } from "jwt-decode";
-// ✅ Import du hook d'authentification
 import { useAuth } from '../../services/useAuth';
 import { useEffect } from 'react';
 
@@ -28,15 +25,23 @@ const LoginForm = () => {
     const location = useLocation(); // ✅ Pour gérer les redirections
     const { clearAuth } = useAuth(); // ✅ Hook pour nettoyer l'auth
     const [urlMessage, setUrlMessage] = useState('');
+    const [isFromLogout, setIsFromLogout] = useState(false);
 
-    // ✅ Effet pour récupérer le message depuis l'URL
+    // ✅ Effet pour récupérer le message et l'indicateur fromLogout depuis l'URL
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const message = params.get('message');
+        const fromLogoutParam = params.get('fromLogout');
+
         if (message) {
             setUrlMessage(decodeURIComponent(message));
             // Nettoyer l'URL après avoir récupéré le message
             window.history.replaceState({}, '', location.pathname);
+        }
+        if (fromLogoutParam === 'true') {
+            setIsFromLogout(true);
+        } else {
+            setIsFromLogout(false);
         }
     }, [location]);
 
@@ -156,16 +161,16 @@ const LoginForm = () => {
                     <div className='card mx-auto border-4 border-image-gradient sm:px-9 sm:py-4 px-4 py-2 flex flex-col md:gap-10 sm:gap-8 gap-6'>
                         <h4 className="text-gradient lg:text-4xl sm:text-3xl text-xl text-center lg:px-20 px-10 pt-2">Se Connecter</h4>
 
-                        {(urlMessage || location.state?.message) && (
-                            <div className={`text-center text-sm mb-4 p-3 rounded border ${location.state?.fromLogout || urlMessage.includes('déconnecté')
-                                    ? 'text-green-400 bg-green-400/10 border-green-400/20' // ✅ Vert pour déconnexion réussie
-                                    : 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20' // ✅ Jaune pour erreurs/session expirée
+                        {urlMessage && (
+                            <div className={`text-center text-sm mb-4 p-3 rounded border ${isFromLogout
+                                ? 'text-green-400 bg-green-400/10 border-green-400/20' // ✅ Vert pour déconnexion réussie
+                                : 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20' // ✅ Jaune pour erreurs/session expirée
                                 }`}>
                                 <div className="flex items-center justify-center gap-2">
                                     <span>
-                                        {location.state?.fromLogout || urlMessage.includes('déconnecté') ? '✅' : '⚠️'}
+                                        {isFromLogout ? '✅' : '⚠️'}
                                     </span>
-                                    <span>{urlMessage || location.state?.message}</span>
+                                    <span>{urlMessage}</span>
                                 </div>
                             </div>
                         )}
@@ -288,3 +293,4 @@ const StyledWrapper = styled.div`
 `;
 
 export default LoginForm;
+

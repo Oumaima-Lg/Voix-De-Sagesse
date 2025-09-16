@@ -75,7 +75,7 @@ const HeaderArticla = () => {
                                 <div className='text-xl'>
                                     <PermIdentityIcon fontSize='inherit' />
                                 </div>
-                                <button className='text-md font-medium' onClick={handleProfile}>Votre Profil</button>
+                                <div className='text-md font-medium ' onClick={handleProfile}>Votre Profil</div>
                             </div>
                             <div className='flex gap-2 items-center  cursor-pointer hover:scale-105 transform-gpu hover:text-[#A09F87]'>
                                 <div className='text-xl'>
@@ -87,7 +87,7 @@ const HeaderArticla = () => {
                                 <div className='pl-1 text-xl' >
                                     <LogoutIcon fontSize='inherit' />
                                 </div>
-                                <button className='text-md xs:font-medium font-normal' onClick={handleLogout}>Déconnexion</button>
+                                <div className='text-md xs:font-medium font-normal' onClick={handleLogout}>Déconnexion</div>
                             </div>
                         </div>
                     </div>
@@ -99,3 +99,4 @@ const HeaderArticla = () => {
 }
 
 export default HeaderArticla
+

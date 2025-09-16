@@ -5,6 +5,9 @@ import { removeUser } from '../Slices/UserSlice';
 import { removeJwt } from '../Slices/JwtSlice';
 import store from '../store';
 
+// Nous n'importons plus useAuth ici pour éviter les problèmes de hook dans un contexte non-React
+// et pour centraliser la logique de redirection dans useAuth.logout
+
 const axiosInstance = axios.create({
   baseURL: "http://localhost:8080",
   timeout: 10000,
@@ -12,15 +15,6 @@ const axiosInstance = axios.create({
     'Content-Type': 'application/json',
   }
 });
-
-// ✅ Fonction pour nettoyer l'authentification (AMÉLIORÉE)
-const clearAuth = () => {
-  console.log('Axios interceptor - clearing auth due to error')
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-  store.dispatch(removeUser());
-  store.dispatch(removeJwt());
-};
 
 // ✅ Fonction pour vérifier si la route est publique
 const isPublicRoute = (url) => {
@@ -41,12 +35,13 @@ axiosInstance.interceptors.request.use(
     const userData = localStorage.getItem("user");
 
     // ✅ Vérification de cohérence avant chaque requête
+    // Ces vérifications sont importantes pour maintenir la cohérence avant d'envoyer la requête
     if (token && !userData) {
-      console.log('Token exists but no user data - clearing token')
+      console.log('Token exists but no user data - clearing token');
       localStorage.removeItem("token");
       store.dispatch(removeJwt());
     } else if (!token && userData) {
-      console.log('User data exists but no token - clearing user')
+      console.log('User data exists but no token - clearing user');
       localStorage.removeItem("user");
       store.dispatch(removeUser());
     }
@@ -69,7 +64,6 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// AxiosIntercepteur.jsx - Section response interceptor mise à jour
 axiosInstance.interceptors.response.use(
   (response) => {
     return response;
@@ -79,31 +73,43 @@ axiosInstance.interceptors.response.use(
 
     if (response) {
       switch (response.status) {
+
         case 401:
           if (!isPublicRoute(config.url)) {
-            // ✅ Messages différenciés selon le contexte
-            const token = localStorage.getItem('token')
-            const userData = localStorage.getItem('user')
+            const token = localStorage.getItem('token');
+            const userData = localStorage.getItem('user');
 
-            let message = 'Session expirée, veuillez vous reconnecter'
+            // Si le token et les données utilisateur sont déjà absents, cela signifie
+            // qu'une déconnexion volontaire a probablement déjà eu lieu ou que l'état est déjà nettoyé.
+            // Dans ce cas, nous ne faisons rien pour éviter d'écraser le message de déconnexion.
+            if (!token && !userData) {
+              console.log('401 received but token and user already cleared. Assuming voluntary logout or already handled.');
+              return Promise.reject(error);
+            }
+
+            // Si nous arrivons ici, c'est un 401 inattendu (session expirée, token invalide, etc.)
+            // Nous nettoyons l'état et redirigeons avec un message d'expiration.
+            let message = 'Session expirée, veuillez vous reconnecter';
 
             if (!token && userData) {
-              message = 'Token manquant, veuillez vous reconnecter'
+              message = 'Token manquant, reconnexion nécessaire';
             } else if (token && !userData) {
-              message = 'Données utilisateur manquantes, veuillez vous reconnecter'
+              message = 'Données utilisateur corrompues, reconnexion nécessaire';
             }
 
-            // errorNotification('Session expirée', message);
-            clearAuth();
+            errorNotification('Session expirée', message);
+            
+            // Nettoyer l'état global via Redux et localStorage
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            store.dispatch(removeUser());
+            store.dispatch(removeJwt());
 
-            const currentPath = window.location.pathname;
-            if (!currentPath.startsWith('/auth/')) {
-              window.location.href = `/auth/login?message=${encodeURIComponent(message)}&redirect=${encodeURIComponent(currentPath)}`;
-            }
+            // Redirection complète pour réinitialiser l'application React
+            window.location.href = `/auth/login?message=${encodeURIComponent(message)}&redirect=${encodeURIComponent(window.location.pathname)}`;
           }
           break;
 
-        // ... autres cas inchangés
         case 403:
           errorNotification('Accès refusé', 'Vous n\'avez pas les permissions nécessaires');
           break;
@@ -114,7 +120,7 @@ axiosInstance.interceptors.response.use(
 
         default:
           if (!isPublicRoute(config.url)) {
-            errorNotification('Erreur', response.data?.message || response.data?.error || 'Une erreur s\'est produite');
+            errorNotification('Erreur', response.data?.errorMessage || response.data?.error || 'Une erreur s\'est produite');
           }
       }
     } else if (error.code === 'ECONNABORTED') {
@@ -128,3 +134,4 @@ axiosInstance.interceptors.response.use(
 );
 
 export default axiosInstance;
+

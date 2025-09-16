@@ -588,7 +588,7 @@ const SavedArticles = () => {
                                             placeholder="Ajouter un commentaire..."
                                             maxLength={500}
                                             className="flex-1 bg-[#202020] border border-[#4C3163] text-white placeholder:text-gray-400 focus:border-[#A09F87] px-3 py-2 rounded outline-none"
-                                            onKeyPress={(e) => {
+                                            onKeyDown={(e) => {
                                                 if (e.key === "Enter" && !e.shiftKey) {
                                                     e.preventDefault()
                                                     handleCommentSubmit(poste.article.id)
