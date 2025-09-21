@@ -5,8 +5,6 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,18 +29,12 @@ public class CommentController {
     private final CommentService commentService;
     
      private final UserService userService;
-    
-    private User getCurrentUser() throws ArticlaException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserEmail = authentication.getName();
 
-        return userService.getUserByEmail(currentUserEmail).toEntity();
-    }
     
     @PostMapping("/add/{articleId}")
     public ResponseEntity<?> addComment(@PathVariable Long articleId, @RequestBody Map<String, String> request) {
         try {
-            User currentUser = getCurrentUser();
+            User currentUser = userService.getCurrentUser();
             String content = request.get("content");
             
             if (content == null || content.trim().isEmpty()) {
@@ -101,7 +93,7 @@ public class CommentController {
     @DeleteMapping("/delete/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long commentId) {
         try {
-            User currentUser = getCurrentUser();
+            User currentUser = userService.getCurrentUser();
             commentService.deleteComment(commentId, currentUser.getId());
             
             return ResponseEntity.ok(Map.of(

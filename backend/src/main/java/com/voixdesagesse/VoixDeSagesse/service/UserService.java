@@ -15,7 +15,10 @@ import com.voixdesagesse.VoixDeSagesse.entity.User;
 import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
 
 
+
 public interface UserService {
+
+    public User getCurrentUser() throws ArticlaException;
 
     public UserRegistrationDTO  registerUser(UserRegistrationDTO userDTO) throws ArticlaException;
 
@@ -42,6 +45,8 @@ public interface UserService {
     public void decrementLikesReceived(Long userId) throws ArticlaException;
 
     public UserProfileDTO getUserProfileById(long userId) throws ArticlaException;
+
+    // public Resource getProfilePicture(String filename);
     
     public String saveProfilePicture(MultipartFile file, Long userId) throws IOException;
 

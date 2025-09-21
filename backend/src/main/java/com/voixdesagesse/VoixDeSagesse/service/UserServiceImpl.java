@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +52,14 @@ public class UserServiceImpl implements UserService {
     private final OTPRepository otpRepository;
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender mailSender;
+
+    @Override
+    public User getCurrentUser() throws ArticlaException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserEmail = authentication.getName();
+
+        return getUserByEmail(currentUserEmail).toEntity();
+    }
 
     @Override
     public UserRegistrationDTO registerUser(UserRegistrationDTO userDTO) throws ArticlaException {
@@ -180,7 +190,6 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    
     @Transactional
     @Override
     public synchronized void incrementLikesReceived(Long userId) throws ArticlaException {
@@ -195,7 +204,6 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         log.debug("INCREMENT: User " + userId + " now has " + (currentLikes + 1) + " likes received");
     }
-
 
     @Transactional
     @Override
@@ -227,17 +235,16 @@ public class UserServiceImpl implements UserService {
         userRepository.decrementContentCount(userId);
     }
 
-
     @Override
     @Transactional
     public void followUser(Long currentUserId, Long targetUserId) throws ArticlaException {
 
-        if (currentUserId.equals(targetUserId)) 
+        if (currentUserId.equals(targetUserId))
             throw new ArticlaException("Vous ne pouvez pas vous suivre vous-même");
-        
-        if (!userRepository.existsById(currentUserId)) 
+
+        if (!userRepository.existsById(currentUserId))
             throw new ArticlaException("Utilisateur actuel introuvable");
-        
+
         if (!userRepository.existsById(targetUserId))
             throw new ArticlaException("Utilisateur cible introuvable");
 
@@ -331,6 +338,21 @@ public class UserServiceImpl implements UserService {
         return user.toProfileDTO();
     }
 
+    // @Override
+    // public Resource getProfilePicture(@PathVariable String filename) {
+    //     Path uploadPath = Paths.get(uploadDir);
+    //     Path filePath = uploadPath.resolve(filename);
+
+    //     if (!filePath.normalize().startsWith(uploadPath.normalize())) {
+    //         return null;
+    //     }
+
+    //     Resource resource = new FileSystemResource(filePath);
+
+    //     return resource;
+
+    // }
+
     @Override
     public String saveProfilePicture(MultipartFile file, Long userId) throws IOException {
         Path uploadPath = Paths.get(uploadDir);
@@ -396,7 +418,6 @@ public class UserServiceImpl implements UserService {
     public boolean isArticleSaved(Long userId, Long articleId) {
         return userRepository.isArticleSaved(userId, articleId);
     }
-
 
     @Override
     @Transactional

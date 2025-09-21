@@ -16,8 +16,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -56,16 +54,9 @@ public class UserController {
             "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp");
 
 
-    private User getCurrentUser() throws ArticlaException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserEmail = authentication.getName();
-
-        return userService.getUserByEmail(currentUserEmail).toEntity();
-    }
-
     @PostMapping("/follow/{targetUserId}")
     public ResponseEntity<?> followUser(@PathVariable Long targetUserId) throws ArticlaException {
-            User currentUser = getCurrentUser();
+            User currentUser = userService.getCurrentUser();
             userService.followUser(currentUser.getId(), targetUserId);
 
             return ResponseEntity.ok(Map.of(
@@ -76,7 +67,7 @@ public class UserController {
 
     @DeleteMapping("/unfollow/{targetUserId}")
     public ResponseEntity<?> unfollowUser(@PathVariable Long targetUserId) throws ArticlaException {
-            User currentUser = getCurrentUser();
+            User currentUser = userService.getCurrentUser();
             userService.unfollowUser(currentUser.getId(), targetUserId);
 
             return ResponseEntity.ok(Map.of(
@@ -88,7 +79,7 @@ public class UserController {
 
     @GetMapping("/is-following/{targetUserId}")
     public ResponseEntity<?> isFollowingUser(@PathVariable Long targetUserId)  throws ArticlaException  {
-            User currentUser = getCurrentUser();
+            User currentUser = userService.getCurrentUser();
             boolean isFollowing = userService.isFollowing(currentUser.getId(), targetUserId);
 
             return ResponseEntity.ok(Map.of(
@@ -98,7 +89,7 @@ public class UserController {
 
     @GetMapping("/following")
     public ResponseEntity<?> getFollowingUsers() throws ArticlaException {
-        User currentUser = getCurrentUser();
+        User currentUser = userService.getCurrentUser();
         Set<Long> followingIds = currentUser.getFollowingId();
         List<User> followingUsers = userService.findAllFollowingUsersById(followingIds);
 
@@ -115,7 +106,7 @@ public class UserController {
     @GetMapping("/my-followers")
     public ResponseEntity<?> getMyFollowers() throws ArticlaException {
         
-        User currentUser = getCurrentUser();
+        User currentUser = userService.getCurrentUser();
         List<User> followers = userService.findByFollowingIdContaining(currentUser.getId());
 
         List<UserProfileDTO> followersDTO = followers.stream()
@@ -190,8 +181,7 @@ public class UserController {
         try {
             Path uploadPath = Paths.get(uploadDir);
             Path filePath = uploadPath.resolve(filename);
-
-            // Sécurité : vérifier que le fichier est dans le bon répertoire
+            
             if (!filePath.normalize().startsWith(uploadPath.normalize())) {
                 return ResponseEntity.badRequest().build();
             }
@@ -219,7 +209,7 @@ public class UserController {
 
     @PostMapping("/save-article/{articleId}")
     public ResponseEntity<?> saveArticle(@PathVariable Long articleId) throws ArticlaException {
-            User currentUser = getCurrentUser();
+            User currentUser = userService.getCurrentUser();
             userService.saveArticle(currentUser.getId(), articleId);
             
             return ResponseEntity.ok(Map.of(
@@ -231,7 +221,7 @@ public class UserController {
 
     @DeleteMapping("/unsave-article/{articleId}")
     public ResponseEntity<?> unsaveArticle(@PathVariable Long articleId) throws ArticlaException {
-            User currentUser = getCurrentUser();
+            User currentUser = userService.getCurrentUser();
             userService.unsaveArticle(currentUser.getId(), articleId);
             
             return ResponseEntity.ok(Map.of(
@@ -243,7 +233,7 @@ public class UserController {
 
     @GetMapping("/is-article-saved/{articleId}")
     public ResponseEntity<?> isArticleSaved(@PathVariable Long articleId) throws ArticlaException {
-            User currentUser = getCurrentUser();
+            User currentUser = userService.getCurrentUser();
             boolean isSaved = userService.isArticleSaved(currentUser.getId(), articleId);
             
             return ResponseEntity.ok(Map.of(
