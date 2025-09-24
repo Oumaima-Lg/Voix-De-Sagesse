@@ -11,7 +11,7 @@ const loginUser = async (user) => {
 };
 
 const registerUser = async (user) => {
-    return axios.post(`${base_url}auth/register`, user)
+    return axios.post(`${base_url}register`, user)
         .then(res => res.data)
         .catch(error => { throw error; });
 };

@@ -98,7 +98,7 @@ axiosInstance.interceptors.response.use(
             }
 
             errorNotification('Session expirée', message);
-            
+
             // Nettoyer l'état global via Redux et localStorage
             localStorage.removeItem('token');
             localStorage.removeItem('user');
@@ -109,10 +109,21 @@ axiosInstance.interceptors.response.use(
             window.location.href = `/auth/login?message=${encodeURIComponent(message)}&redirect=${encodeURIComponent(window.location.pathname)}`;
           }
           break;
-
+        
+        // Dans la section case 403:
         case 403:
           errorNotification('Accès refusé', 'Vous n\'avez pas les permissions nécessaires');
+
+          // Si l'utilisateur tentait d'accéder à une route admin mais n'est pas admin
+          if (config.url.includes('/admin/')) {
+            // Rediriger vers la page principale utilisateur
+            window.location.href = '/articla';
+          }
           break;
+
+        // case 403:
+        //   errorNotification('Accès refusé', 'Vous n\'avez pas les permissions nécessaires');
+        //   break;
 
         case 500:
           errorNotification('Erreur serveur', 'Une erreur interne s\'est produite');

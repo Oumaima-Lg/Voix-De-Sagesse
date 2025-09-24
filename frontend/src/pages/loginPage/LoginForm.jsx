@@ -92,6 +92,7 @@ const LoginForm = () => {
                         const userData = {
                             ...decoded,
                             email: decoded.sub,
+                            accountType: decoded.accountType,
                             // Ajouter d'autres champs si nécessaire depuis la réponse
                             ...(res.user || {}) // Si le backend renvoie des infos user supplémentaires
                         };
@@ -110,20 +111,27 @@ const LoginForm = () => {
                         setTimeout(() => {
                             setLoading(false);
 
-                            // Récupérer l'URL de redirection
-                            const redirectParam = new URLSearchParams(location.search).get('redirect');
-                            const from = location.state?.from?.pathname;
-                            const redirectTo = redirectParam || from || '/articla';
+                            // Déterminer la destination en fonction du rôle
+                            let redirectTo;
 
-                            console.log('Redirecting to:', redirectTo);
+                            // Si c'est un admin, rediriger vers le dashboard admin
+                            if (userData.accountType === 'ADMIN') {
+                                redirectTo = '/admin/dashboard';
+                                console.log('Redirecting admin user to:', redirectTo);
+                            } else {
+                                // Pour les utilisateurs normaux, utiliser la logique de redirection existante
+                                const redirectParam = new URLSearchParams(location.search).get('redirect');
+                                const from = location.state?.from?.pathname;
+                                redirectTo = redirectParam || from || '/articla';
+                                console.log('Redirecting regular user to:', redirectTo);
+                            }
+
                             navigate(redirectTo, { replace: true });
-
-                        }, 2000); // ✅ Réduit de 4000 à 2000ms pour une meilleure UX
-
+                        }, 2000);
                     } catch (error) {
                         console.error('Error processing login response:', error);
                         setLoading(false);
-                        clearAuth(); // Nettoyer en cas d'erreur
+                        clearAuth(); 
                         errorNotification('Erreur', 'Problème lors du traitement de la connexion');
                     }
                 })
@@ -138,8 +146,6 @@ const LoginForm = () => {
                         'Erreur de connexion';
 
                     errorNotification('Échec de la connexion', errorMessage);
-
-                    // ✅ Nettoyer toute donnée potentiellement corrompue
                     clearAuth();
                 });
         }

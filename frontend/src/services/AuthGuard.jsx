@@ -11,6 +11,11 @@ export const ProtectedRoute = ({ children }) => {
   const location = useLocation()
   
   const isAuthenticated = user && user.id && localStorage.getItem('token')
+  const isAdmin = isAuthenticated && user.accountType === 'ADMIN'
+
+  if(isAdmin) {
+    return <Navigate to="/admin/dashboard" replace />
+  }
   
   if (!isAuthenticated) {
     // ✅ Message différent selon le contexte
@@ -34,7 +39,12 @@ export const PublicRoute = ({ children }) => {
   const user = useSelector((state) => state.user)
   
   const isAuthenticated = user && user.id && localStorage.getItem('token')
-  
+  const isAdmin = isAuthenticated && user.accountType === 'ADMIN'
+
+  if(isAdmin) {
+    return <Navigate to="/admin/dashboard" replace />
+  }
+
   if (isAuthenticated) {
     return <Navigate to="/articla" replace />
   }

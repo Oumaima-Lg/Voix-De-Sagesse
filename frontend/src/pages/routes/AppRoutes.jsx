@@ -13,6 +13,9 @@ import SavedArticles from '../articlaPage/SavedArticles'
 import MyPosts from '../articlaPage/MyPosts'
 import NotFoundPage from './NotFoundPage'
 import { AuthChecker, PublicRoute, ProtectedRoute } from '../../services/AuthGuard'
+import { AdminRoute } from '../../services/AdminGuard'
+import AdminDashboard from '../adminPage/AdminDashboard' // À créer
+// import UserManagement from '../adminPage/UserManagement' // À créer
 
 
 const AppRoutes = () => {
@@ -80,6 +83,16 @@ const AppRoutes = () => {
                         <ArticlaPage />
                     </ProtectedRoute>
                 } />
+                <Route path="/admin/dashboard" element={
+                    <AdminRoute>
+                        <AdminDashboard />
+                    </AdminRoute>
+                } />
+                {/* <Route path="/admin/users" element={
+                    <AdminRoute>
+                        <UserManagement />
+                    </AdminRoute>
+                } /> */}
                 {/* <Route path="/articla" element={<ArticlaPage />} /> */}
                 {/* <Route path="/articla/topArticla" element={<ArticlaPage />} /> */}
                 {/* <Route path="/articla/article" element={<ArticleFeed />} /> */}

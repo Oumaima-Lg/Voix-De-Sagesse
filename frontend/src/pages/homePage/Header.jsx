@@ -20,7 +20,6 @@ const Header = ({isHidden}) => {
                 </div>
                 <div className='lg:flex items-center hidden'>
                     <nav className='flex gap-14 items-center'> 
-                        {/* connecter={props.connecter} accueil={props.accueil}  about={props.accueil} article={props.accueil} contact={props.accueil} */}
                         <HeaderNav isHidden={isHidden}  />
                     </nav>
                 </div>

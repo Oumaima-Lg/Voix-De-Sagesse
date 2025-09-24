@@ -22,13 +22,12 @@ const SearchBar = ({ onSearch, onFilterChange, currentFilters }) => {
     })
   }
 
-  
   const handleKeyDown = (e) => {
-+    if (e.key === "Enter") {
-+      e.preventDefault()
-+      handleSearch()
-+    }
-+  }
+    if (e.key === "Enter") {
+      e.preventDefault()
+      handleSearch()
+    }
+  }
 
 
 

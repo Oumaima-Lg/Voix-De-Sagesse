@@ -92,3 +92,521 @@
 }
 
 
+
+
+
+
+
+
+
+
+
+
+/* Styles personnalisés pour l'application React */
+/* .App {
+  text-align: left;
+} */
+
+/* Adding modern floating background animations */
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px) rotate(1deg);
+  }
+  50% {
+    transform: translateY(-10px) translateX(-5px) rotate(-0.5deg);
+  }
+  75% {
+    transform: translateY(-30px) translateX(15px) rotate(0.5deg);
+  }
+}
+
+@keyframes float-delayed {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-15px) translateX(-10px) rotate(-1deg);
+  }
+  66% {
+    transform: translateY(-25px) translateX(20px) rotate(1.5deg);
+  }
+}
+
+@keyframes float-reverse {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(20px) translateX(-15px) rotate(-1deg);
+  }
+}
+
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pulse-gentle {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes grid-move {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(50px, 50px);
+  }
+}
+
+@keyframes gradient-x {
+  0%,
+  100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Adding animation utility classes */
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 10s ease-in-out infinite 2s;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 7s ease-in-out infinite 1s;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 3s ease-in-out infinite;
+}
+
+.animate-grid-move {
+  animation: grid-move 20s linear infinite;
+}
+
+.animate-gradient-x {
+  animation: gradient-x 3s ease infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.4s ease-out forwards;
+}
+
+/* Adding new particle and shape animations for moving background elements */
+@keyframes bounce-slow {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes float-particle {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translateY(-15px) translateX(8px) rotate(90deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-8px) translateX(-12px) rotate(180deg);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translateY(-25px) translateX(5px) rotate(270deg);
+    opacity: 0.7;
+  }
+}
+
+@keyframes drift-left {
+  0% {
+    transform: translateX(0px) translateY(0px);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateX(-30px) translateY(-10px);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(-60px) translateY(0px);
+    opacity: 0.3;
+  }
+}
+
+@keyframes drift-right {
+  0% {
+    transform: translateX(0px) translateY(0px);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateX(40px) translateY(-15px);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(80px) translateY(0px);
+    opacity: 0.4;
+  }
+}
+
+@keyframes bounce-gentle {
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translateY(-12px) scale(1.1);
+    opacity: 0.5;
+  }
+}
+
+@keyframes rotate-slow {
+  0% {
+    transform: rotate(0deg) scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: rotate(180deg) scale(1.2);
+    opacity: 0.4;
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+    opacity: 0.2;
+  }
+}
+
+@keyframes float-shape {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+    opacity: 0.15;
+  }
+  33% {
+    transform: translateY(-20px) translateX(15px) rotate(120deg);
+    opacity: 0.3;
+  }
+  66% {
+    transform: translateY(-10px) translateX(-10px) rotate(240deg);
+    opacity: 0.25;
+  }
+}
+
+@keyframes pulse-shape {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.3) rotate(180deg);
+    opacity: 0.4;
+  }
+}
+
+@keyframes slide-horizontal {
+  0% {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-horizontal-reverse {
+  0% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.25;
+  }
+  100% {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+}
+
+@keyframes orbit-slow {
+  0% {
+    transform: rotate(0deg) translateX(50px) rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg) translateX(50px) rotate(-360deg);
+  }
+}
+
+@keyframes orbit-reverse {
+  0% {
+    transform: rotate(0deg) translateX(40px) rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg) translateX(40px) rotate(360deg);
+  }
+}
+
+@keyframes orbit-fast {
+  0% {
+    transform: rotate(0deg) translateX(60px) rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg) translateX(60px) rotate(-360deg);
+  }
+}
+
+/* Adding utility classes for new animations */
+.animate-bounce-slow {
+  animation: bounce-slow 3s ease-in-out infinite;
+}
+
+.animate-float-particle {
+  animation: float-particle 6s ease-in-out infinite;
+}
+
+.animate-drift-left {
+  animation: drift-left 8s linear infinite;
+}
+
+.animate-drift-right {
+  animation: drift-right 7s linear infinite;
+}
+
+.animate-bounce-gentle {
+  animation: bounce-gentle 4s ease-in-out infinite;
+}
+
+.animate-rotate-slow {
+  animation: rotate-slow 12s linear infinite;
+}
+
+.animate-float-shape {
+  animation: float-shape 9s ease-in-out infinite;
+}
+
+.animate-pulse-shape {
+  animation: pulse-shape 5s ease-in-out infinite;
+}
+
+.animate-slide-horizontal {
+  animation: slide-horizontal 6s linear infinite;
+}
+
+.animate-slide-horizontal-reverse {
+  animation: slide-horizontal-reverse 7s linear infinite;
+}
+
+.animate-orbit-slow {
+  animation: orbit-slow 20s linear infinite;
+}
+
+.animate-orbit-reverse {
+  animation: orbit-reverse 15s linear infinite;
+}
+
+.animate-orbit-fast {
+  animation: orbit-fast 10s linear infinite;
+}
+
+/* Animations personnalisées existantes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Styles pour les gradients */
+.gradient-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Styles pour les statistiques */
+.stats-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Styles pour la table */
+.table-row:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* Adding modern blur utilities */
+.blur-3xl {
+  filter: blur(64px);
+}
+
+/* Adding glassmorphism effects */
+.backdrop-blur-xl {
+  backdrop-filter: blur(24px);
+}
+
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+
+  /* Reducing animation intensity on mobile */
+  .animate-float-slow,
+  .animate-float-delayed,
+  .animate-float-reverse {
+    animation-duration: 12s;
+  }
+
+  .animate-bounce-slow,
+  .animate-float-particle,
+  .animate-bounce-gentle {
+    animation-duration: 6s;
+  }
+
+  .animate-drift-left,
+  .animate-drift-right {
+    animation-duration: 10s;
+  }
+
+  .animate-orbit-slow,
+  .animate-orbit-reverse,
+  .animate-orbit-fast {
+    animation-duration: 25s;
+  }
+
+  .blur-3xl {
+    filter: blur(32px);
+  }
+}
+
+/* Adding smooth scrolling and performance optimizations */
+* {
+  scroll-behavior: smooth;
+}
+
+.animate-float-slow,
+.animate-float-delayed,
+.animate-float-reverse,
+.animate-pulse-slow,
+.animate-pulse-gentle,
+.animate-bounce-slow,
+.animate-float-particle,
+.animate-drift-left,
+.animate-drift-right,
+.animate-bounce-gentle,
+.animate-rotate-slow,
+.animate-float-shape,
+.animate-pulse-shape,
+.animate-slide-horizontal,
+.animate-slide-horizontal-reverse,
+.animate-orbit-slow,
+.animate-orbit-reverse,
+.animate-orbit-fast {
+  will-change: transform, opacity;
+}
