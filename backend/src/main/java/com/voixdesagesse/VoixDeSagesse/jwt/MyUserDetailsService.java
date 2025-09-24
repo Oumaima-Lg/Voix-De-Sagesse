@@ -1,7 +1,5 @@
 package com.voixdesagesse.VoixDeSagesse.jwt;
 
-import java.util.ArrayList;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +34,7 @@ public class MyUserDetailsService implements UserDetailsService {
                 dto.getProfilePicture(),
                 dto.getEmail(), 
                 dto.getMotdepasse(),
-                dto.getAccountType(), 
-                new ArrayList<>()
+                dto.getAccountType()
             );
         } catch (ArticlaException e) {
             logger.error("Error loading user by email: {}", email, e);

@@ -1,5 +1,6 @@
 package com.voixdesagesse.VoixDeSagesse.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,16 +80,18 @@ public interface UserRepository extends MongoRepository<User, Long> {
     @Query(value = "{ '_id': ?0, 'savedArticlesId': ?1 }", exists = true)
     boolean isArticleSaved(Long userId, Long articleId);
 
-
     @Query("{ 'likedArticlesId': ?0 }")
     @Update("{ '$pull': { 'likedArticlesId': ?0 } }")
     void removeArticleFromAllUsersLikes(Long articleId);
-    
+
     @Query("{ 'savedArticlesId': ?0 }")
     @Update("{ '$pull': { 'savedArticlesId': ?0 } }")
     void removeArticleFromAllUsersSaved(Long articleId);
-    
+
     @Query("{ '_id': ?0 }")
     @Update("{ '$inc': { 'likesReceived': ?1 } }")
     void decrementLikesReceivedByAmount(Long userId, Long amount);
+
+    @Query(value = "{ 'dateInscription': { $gte: ?0 } }", count = true)
+    long countByCreationDateAfter(LocalDateTime date);
 }

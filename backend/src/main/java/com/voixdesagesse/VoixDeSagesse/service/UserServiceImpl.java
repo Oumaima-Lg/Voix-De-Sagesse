@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -79,6 +78,7 @@ public class UserServiceImpl implements UserService {
         user.setLikedArticlesId(new HashSet<>());
         user.setFollowingId(new HashSet<>());
         user.setSavedArticlesId(new HashSet<>());
+        user.setDateInscription(LocalDateTime.now());
         user = userRepository.save(user);
 
         return user.toRegisterDTO();
@@ -338,21 +338,6 @@ public class UserServiceImpl implements UserService {
         return user.toProfileDTO();
     }
 
-    // @Override
-    // public Resource getProfilePicture(@PathVariable String filename) {
-    //     Path uploadPath = Paths.get(uploadDir);
-    //     Path filePath = uploadPath.resolve(filename);
-
-    //     if (!filePath.normalize().startsWith(uploadPath.normalize())) {
-    //         return null;
-    //     }
-
-    //     Resource resource = new FileSystemResource(filePath);
-
-    //     return resource;
-
-    // }
-
     @Override
     public String saveProfilePicture(MultipartFile file, Long userId) throws IOException {
         Path uploadPath = Paths.get(uploadDir);
@@ -439,4 +424,9 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+
+
+    
+
+    
 }

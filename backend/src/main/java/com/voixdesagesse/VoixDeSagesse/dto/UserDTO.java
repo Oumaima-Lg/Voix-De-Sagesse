@@ -1,6 +1,7 @@
 package com.voixdesagesse.VoixDeSagesse.dto;
 
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import com.voixdesagesse.VoixDeSagesse.entity.User;
@@ -33,12 +34,13 @@ public class UserDTO {
     private Set<Long> likedArticlesId;
     private Set<Long> followingId;  
     private Set<Long> savedArticlesId;
+    private LocalDateTime dateInscription;
 
 
     public User toEntity() {
         return new User(this.id, this.nom, this.prenom, this.email, this.motdepasse, this.accountType, this.username,
          this.phoneNumber, this.location, this.website, this.profilePicture, this.bio, this.contentCount, 
-         this.followersCount, this.followingCount, this.likesReceived, this.likedArticlesId, this.followingId, this.savedArticlesId);
+         this.followersCount, this.followingCount, this.likesReceived, this.likedArticlesId, this.followingId, this.savedArticlesId, this.dateInscription);
     }
 
 }

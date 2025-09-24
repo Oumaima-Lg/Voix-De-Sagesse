@@ -49,16 +49,16 @@ public class SecurityConfig {
         return source;
     }
 
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/auth/**")
-                        .permitAll()
+                        .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/uploads/profile-pictures/**").permitAll()
-                        .requestMatchers("/articles/**", "/comments/**", "/users/**")
-                        .authenticated()
+                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/articles/**", "/comments/**", "/users/**").hasAuthority("ROLE_USER")
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

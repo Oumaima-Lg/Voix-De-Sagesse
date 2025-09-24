@@ -88,6 +88,7 @@ public interface UserService {
     
     public void decrementLikesReceivedByAmount(Long userId, Long amount);
 
+
 }
 
 

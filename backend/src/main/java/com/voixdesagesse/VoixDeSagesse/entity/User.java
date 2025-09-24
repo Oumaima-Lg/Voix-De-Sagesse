@@ -1,5 +1,6 @@
 package com.voixdesagesse.VoixDeSagesse.entity;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import org.springframework.data.annotation.Id;
@@ -45,6 +46,7 @@ public class User {
     private Set<Long> likedArticlesId; 
     private Set<Long> followingId; 
     private Set<Long> savedArticlesId;
+    private LocalDateTime dateInscription;
     
 
     public UserRegistrationDTO toRegisterDTO() {
@@ -54,7 +56,7 @@ public class User {
     public UserDTO toDTO() {
         return new UserDTO(this.id, this.nom, this.prenom, this.email, this.motdepasse, this.accountType, this.username, 
         this.phoneNumber, this.location, this.website, this.profilePicture,this.bio, this.contentCount, this.followersCount, 
-        this.followingCount, this.likesReceived, this.likedArticlesId, this.followingId, this.savedArticlesId);
+        this.followingCount, this.likesReceived, this.likedArticlesId, this.followingId, this.savedArticlesId, this.dateInscription);
     }
 
     public UserProfileDTO toProfileDTO() {
