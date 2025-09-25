@@ -466,7 +466,7 @@ const AdminDashboard = () => {
                                 {currentUsers.map((user, index) => (
                                     <tr
                                         key={user.id}
-                                        className={`group hover:bg-gradient-to-r hover:from-[#202020]/50 hover:to-[#4C3163]/50 transition-all duration-300 backdrop-blur-sm ${mounted ? "animate-slide-in-right" : "opacity-0"
+                                        className={`group  bg-[#202020] transition-all duration-300 backdrop-blur-sm ${mounted ? "animate-slide-in-right" : "opacity-0"
                                             }`}
                                         style={{
                                             animationDelay: `${0.8 + index * 0.1}s`,
@@ -490,7 +490,7 @@ const AdminDashboard = () => {
                                                     <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full border-2 border-[#171717] shadow-sm animate-pulse-gentle"></div>
                                                 </div>
                                                 <div className="ml-4">
-                                                    <div className="text-sm font-bold text-white group-hover:text-[#A09F87] transition-colors">
+                                                    <div className="text-sm font-bold text-white/70 group-hover:text-[#A09F87] transition-colors">
                                                         {user.prenom} {user.nom}
                                                     </div>
                                                     <div className="text-xs text-[#A09F87]/60 font-medium">ID: {user.id}</div>

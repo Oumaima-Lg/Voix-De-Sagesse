@@ -11,7 +11,8 @@ import { addComment, getCommentsByArticle, deleteComment } from "../../services/
 import profileAvatar from "../../assets/profileAvatar.jpg"
 import { Link } from "react-router-dom"
 import SearchBar from "./SearchBar"
-import ScrollToTop from "./ScrollToTop" 
+import ScrollToTop from "./ScrollToTop"
+import { reportArticle } from "../../services/SignalService"
 
 const posteFeed = () => {
   const navigate = useNavigate()
@@ -31,6 +32,9 @@ const posteFeed = () => {
   const [searchLoading, setSearchLoading] = useState(false)
   const [isSearchActive, setIsSearchActive] = useState(false)
   const [searchFilters, setSearchFilters] = useState({ searchText: "", type: "" })
+  const [showReportModal, setShowReportModal] = useState(null)
+  const [reportData, setReportData] = useState({ reason: "", description: "" })
+  const [reportLoading, setReportLoading] = useState(false)
 
   useEffect(() => {
     loadAllPosts()
@@ -53,7 +57,7 @@ const posteFeed = () => {
 
   const handleSearch = async (filters) => {
     setSearchFilters(filters)
-    
+
     if (!filters.searchText && !filters.type) {
       setPosts(allPosts)
       setIsSearchActive(false)
@@ -276,6 +280,34 @@ const posteFeed = () => {
     setCommentInputs((prev) => ({ ...prev, [posteId]: value }))
   }
 
+  const handleReport = async (articleId) => {
+    if (!reportData.reason.trim()) {
+      alert("Veuillez sélectionner une raison pour le signalement")
+      return
+    }
+
+    setReportLoading(true)
+    try {
+      await reportArticle({
+        reporterId: user.id,
+        articleId: articleId,
+        reason: reportData.reason,
+        description: reportData.description
+      })
+
+      setPosts(prev => prev.filter(post => post.article.id !== articleId))
+
+      setShowReportModal(null)
+      setReportData({ reason: "", description: "" })
+      alert("Article signalé avec succès")
+    } catch (error) {
+      console.error("Erreur lors du signalement:", error)
+      alert(error.response?.data || "Erreur lors du signalement")
+    } finally {
+      setReportLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen p-4 md:p-6 bg-gradient-to-bl from-[#171717] from-55% to-[#4E3F59] to-100%">
       <LoadingOverlay
@@ -396,10 +428,10 @@ const posteFeed = () => {
                         onClick={() => handleFollow(poste.user.id, poste.interaction.following)}
                         disabled={followLoading[poste.user.id]}
                         className={`px-3 py-1 text-sm rounded transition-colors flex items-center gap-1 min-w-[80px] justify-center ${followLoading[poste.user.id]
-                            ? "bg-gray-500 text-gray-300 cursor-not-allowed"
-                            : poste.interaction.following
-                              ? "bg-[#A09F87] text-[#171717] hover:bg-[#A09F87]/80"
-                              : "border border-[#A09F87] text-[#A09F87] hover:bg-[#A09F87] hover:text-[#171717]"
+                          ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                          : poste.interaction.following
+                            ? "bg-[#A09F87] text-[#171717] hover:bg-[#A09F87]/80"
+                            : "border border-[#A09F87] text-[#A09F87] hover:bg-[#A09F87] hover:text-[#171717]"
                           }`}
                       >
                         {followLoading[poste.user.id] ? (
@@ -417,10 +449,10 @@ const posteFeed = () => {
                       onClick={() => handleSave(poste.article.id, poste.interaction.saved)}
                       disabled={saveLoading[poste.article.id]}
                       className={`p-2 rounded transition-colors ${saveLoading[poste.article.id]
-                          ? "text-gray-500 cursor-not-allowed"
-                          : poste.interaction.saved
-                            ? "text-yellow-500 hover:text-yellow-400"
-                            : "text-[#A09F87] hover:text-yellow-500"
+                        ? "text-gray-500 cursor-not-allowed"
+                        : poste.interaction.saved
+                          ? "text-yellow-500 hover:text-yellow-400"
+                          : "text-[#A09F87] hover:text-yellow-500"
                         }`}
                       title={poste.interaction.saved ? "Retirer des favoris" : "Ajouter aux favoris"}
                     >
@@ -443,7 +475,13 @@ const posteFeed = () => {
                         </button>
                         {showDropdown === poste.article.id && (
                           <div className="absolute right-0 mt-2 w-32 bg-[#202020] border border-[#4C3163] rounded shadow-lg z-10">
-                            <button className="w-full text-left px-3 py-2 text-white hover:bg-[#4C3163] text-sm">
+                            <button
+                              onClick={() => {
+                                setShowReportModal(poste.article.id)
+                                setShowDropdown(null)
+                              }}
+                              className="w-full text-left px-3 py-2 text-white hover:bg-[#4C3163] text-sm"
+                            >
                               Signaler
                             </button>
                             <button className="w-full text-left px-3 py-2 text-white hover:bg-[#4C3163] text-sm">
@@ -504,10 +542,10 @@ const posteFeed = () => {
                       onClick={() => handleLike(poste.article.id)}
                       disabled={likeLoading[poste.article.id]}
                       className={`flex items-center gap-2 transition-colors ${likeLoading[poste.article.id]
-                          ? "opacity-50 cursor-not-allowed"
-                          : poste.interaction.liked
-                            ? "text-red-500 hover:text-red-400"
-                            : "text-[#A09F87] hover:text-red-500"
+                        ? "opacity-50 cursor-not-allowed"
+                        : poste.interaction.liked
+                          ? "text-red-500 hover:text-red-400"
+                          : "text-[#A09F87] hover:text-red-500"
                         }`}
                     >
                       {likeLoading[poste.article.id] ? (
@@ -643,8 +681,8 @@ const posteFeed = () => {
                       onClick={() => handleCommentSubmit(poste.article.id)}
                       disabled={!commentInputs[poste.article.id]?.trim() || commentLoading[poste.article.id]}
                       className={`px-4 py-2 rounded font-medium transition-colors ${!commentInputs[poste.article.id]?.trim() || commentLoading[poste.article.id]
-                          ? "bg-gray-500 text-gray-300 cursor-not-allowed"
-                          : "bg-[#A09F87] hover:bg-[#A09F87]/80 text-[#171717]"
+                        ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                        : "bg-[#A09F87] hover:bg-[#A09F87]/80 text-[#171717]"
                         }`}
                     >
                       {commentLoading[poste.article.id] ? (
@@ -660,6 +698,72 @@ const posteFeed = () => {
           ))
         )}
       </div>
+
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#202020] border border-[#4C3163] rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-white text-lg font-semibold mb-4">Signaler cet article</h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-[#A09F87] text-sm mb-2 block">Raison du signalement *</label>
+                <select
+                  value={reportData.reason}
+                  onChange={(e) => setReportData(prev => ({ ...prev, reason: e.target.value }))}
+                  className="w-full bg-[#171717] border border-[#4C3163] text-white p-2 rounded focus:border-[#A09F87] outline-none"
+                >
+                  <option value="">Sélectionner une raison</option>
+                  <option value="Contenu inapproprié">Contenu inapproprié</option>
+                  <option value="Spam">Spam</option>
+                  <option value="Harcèlement">Harcèlement</option>
+                  <option value="Fausses informations">Fausses informations</option>
+                  <option value="Violation de droits d'auteur">Violation de droits d'auteur</option>
+                  <option value="Autre">Autre</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[#A09F87] text-sm mb-2 block">Description (optionnel)</label>
+                <textarea
+                  value={reportData.description}
+                  onChange={(e) => setReportData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Décrivez le problème..."
+                  maxLength={500}
+                  rows={3}
+                  className="w-full bg-[#171717] border border-[#4C3163] text-white p-2 rounded focus:border-[#A09F87] outline-none resize-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowReportModal(null)
+                  setReportData({ reason: "", description: "" })
+                }}
+                disabled={reportLoading}
+                className="flex-1 px-4 py-2 border border-[#4C3163] text-[#A09F87] rounded hover:bg-[#4C3163] transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => handleReport(showReportModal)}
+                disabled={reportLoading || !reportData.reason.trim()}
+                className={`flex-1 px-4 py-2 rounded font-medium transition-colors ${reportLoading || !reportData.reason.trim()
+                    ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                    : "bg-red-600 hover:bg-red-700 text-white"
+                  }`}
+              >
+                {reportLoading ? (
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mx-auto"></div>
+                ) : (
+                  "Signaler"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
