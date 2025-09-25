@@ -385,7 +385,7 @@ const SavedArticles = () => {
                                             )}
                                         </button>
 
-                                        <div className="relative">
+                                        {/* <div className="relative">
                                             <button
                                                 onClick={() => setShowDropdown(showDropdown === poste.article.id ? null : poste.article.id)}
                                                 className="text-[#A09F87] hover:text-white p-1"
@@ -402,7 +402,7 @@ const SavedArticles = () => {
                                                     </button>
                                                 </div>
                                             )}
-                                        </div>
+                                        </div> */}
                                     </div>
                                 </div>
                             </div>

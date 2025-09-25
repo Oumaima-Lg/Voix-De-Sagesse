@@ -474,7 +474,7 @@ const posteFeed = () => {
                           <MoreHorizontal className="w-4 h-4" />
                         </button>
                         {showDropdown === poste.article.id && (
-                          <div className="absolute right-0 mt-2 w-32 bg-[#202020] border border-[#4C3163] rounded shadow-lg z-10">
+                          <div className="absolute right-0 top-8 mt-2 w-32 bg-[#202020] border border-[#4C3163] rounded shadow-lg z-10">
                             <button
                               onClick={() => {
                                 setShowReportModal(poste.article.id)
@@ -484,9 +484,9 @@ const posteFeed = () => {
                             >
                               Signaler
                             </button>
-                            <button className="w-full text-left px-3 py-2 text-white hover:bg-[#4C3163] text-sm">
+                            {/* <button className="w-full text-left px-3 py-2 text-white hover:bg-[#4C3163] text-sm">
                               Masquer
-                            </button>
+                            </button> */}
                           </div>
                         )}
                       </div>

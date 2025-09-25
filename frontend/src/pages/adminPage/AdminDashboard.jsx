@@ -3,6 +3,7 @@ import { useSelector } from "react-redux"
 import { useAuth } from "../../services/useAuth"
 import { getAllUsers, getDashboardStats } from "../../services/AdminService"
 import profileAvatar from "../../assets/profileAvatar.jpg"
+import Signals from "./Signals"
 import {
     Users,
     FileText,
@@ -21,6 +22,8 @@ import {
     Glasses,
     Feather,
     Atom,
+    AlertTriangle,
+    BarChart3,
 } from "lucide-react"
 
 import Spline from '@splinetool/react-spline';
@@ -43,11 +46,14 @@ const AdminDashboard = () => {
     const [isLoading, setIsLoading] = useState(true)
     const [showSpline, setShowSpline] = useState(true)
     const [splineProgress, setSplineProgress] = useState(0)
+    const [activeTab, setActiveTab] = useState("dashboard")
     const [dashboardStats, setDashboardStats] = useState({
         totalUsers: 0,
         totalArticles: 0,
         newUsersToday: 0,
         newArticlesToday: 0,
+        totalSignals: 0,
+        pendingSignals: 0,
     })
 
     // État pour les utilisateurs, initialisé comme tableau vide
@@ -58,7 +64,7 @@ const AdminDashboard = () => {
         {
             title: "Utilisateurs Total",
             value: dashboardStats.totalUsers.toLocaleString(),
-            change: "+12%", // On pourrait calculer cela en fonction des nouveaux utilisateurs
+            change: "+12%",
             trend: "up",
             icon: Users,
             color: "from-blue-500 via-purple-500 to-pink-500",
@@ -72,19 +78,19 @@ const AdminDashboard = () => {
             color: "from-green-500 to-emerald-500",
         },
         {
-            title: "Nouveaux Utilisateurs",
-            value: dashboardStats.newUsersToday,
-            change: "+5%",
+            title: "Signalements Total",
+            value: dashboardStats.totalSignals,
+            change: "+15%",
             trend: "up",
-            icon: UserPlus,
-            color: "from-orange-500 to-yellow-500",
+            icon: AlertTriangle,
+            color: "from-orange-500 to-red-500",
         },
         {
-            title: "Nouveaux Articles",
-            value: dashboardStats.newArticlesToday,
-            change: "+23%",
+            title: "Signalements en Attente",
+            value: dashboardStats.pendingSignals,
+            change: "+5%",
             trend: "up",
-            icon: FileText,
+            icon: BarChart3,
             color: "from-purple-500 to-indigo-500",
         },
     ]
@@ -93,7 +99,11 @@ const AdminDashboard = () => {
     const loadDashboardStats = async () => {
         try {
             const data = await getDashboardStats()
-            setDashboardStats(data)
+            setDashboardStats({
+                ...data,
+                totalSignals: 47, // Exemple de données
+                pendingSignals: 12, // Exemple de données
+            })
         } catch (error) {
             console.error("Erreur lors du chargement des statistiques:", error)
         }
@@ -122,7 +132,6 @@ const AdminDashboard = () => {
                 status: "Actif", // Par défaut, on considère tous les utilisateurs comme actifs
                 dateInscription: user.dateInscription, // Date d'inscription (à ajuster si disponible dans l'API)
                 profilePicture: user.profilePicture || null,
-                // avatar: user.profilePicture || profileAvatar,
             }))
             setUsers(formattedUsers)
         } catch (error) {
@@ -198,6 +207,11 @@ const AdminDashboard = () => {
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber)
 
+    // Navigation tabs
+    const tabs = [
+        { id: "dashboard", label: "Tableau de Bord", icon: BarChart3 },
+        { id: "signals", label: "Signalements", icon: AlertTriangle },
+    ]
 
     if (showSpline) {
         return (
@@ -229,7 +243,6 @@ const AdminDashboard = () => {
             </div>
         )
     }
-    // ...existing code...
 
     // Afficher un loader pendant le chargement des données
     if (isLoading) {
@@ -320,7 +333,7 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-            <header className="relative backdrop-blur-xl bg-[#171717]/80 shadow-lg border-b border-[#202020]/50 top-0 z-50">
+            <header className="relative backdrop-blur-xl bg-[#171717]/80 shadow-lg border-b border-[#202020]/50 top-0 ">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         <div className="flex items-center">
@@ -351,252 +364,279 @@ const AdminDashboard = () => {
                 </div>
             </header>
 
-
-
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    {stats.map((stat, index) => {
-                        const IconComponent = stat.icon
+            {/* Navigation Tabs */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+                <div className="flex space-x-1 mb-6">
+                    {tabs.map((tab) => {
+                        const IconComponent = tab.icon
                         return (
-                            <div
-                                key={index}
-                                className={`group relative backdrop-blur-xl bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% rounded-2xl shadow-xl border border-[#202020] p-6 hover:shadow-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 ${mounted ? "animate-slide-up" : "opacity-0"
-                                    }`}
-                                style={{
-                                    animationDelay: `${index * 0.15}s`,
-                                    animationFillMode: "both",
-                                }}
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 ${
+                                    activeTab === tab.id
+                                        ? "bg-gradient-to-r from-[#A09F87] to-[#4C3163] text-white shadow-lg"
+                                        : "text-[#A09F87] hover:bg-[#202020]/50 backdrop-blur-sm"
+                                }`}
                             >
-                                <div className="absolute inset-0 bg-gradient-to-br from-[#4C3163]/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                                <div className="relative flex items-center justify-between">
-                                    <div className="flex-1">
-                                        <p className="text-sm font-semibold text-[#A09F87]/80 mb-2 group-hover:text-[#A09F87] transition-colors">
-                                            {stat.title}
-                                        </p>
-                                        <p className="text-3xl font-bold text-white mb-2 group-hover:scale-105 transition-transform duration-300">
-                                            {stat.value}
-                                        </p>
-                                        <div className="flex items-center">
-                                            <span
-                                                className={`text-sm font-bold px-2 py-1 rounded-full ${stat.trend === "up" ? "text-emerald-300 bg-emerald-900/50" : "text-red-300 bg-red-900/50"
-                                                    }`}
-                                            >
-                                                {stat.change}
-                                            </span>
-                                            <span className="text-xs text-[#A09F87]/60 ml-2 font-medium">vs mois dernier</span>
-                                        </div>
-                                    </div>
-                                    <div className="w-14 h-14 bg-gradient-to-br from-[#A09F87] to-[#4C3163] rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 animate-pulse-gentle">
-                                        <IconComponent className="w-7 h-7 text-white" />
-                                    </div>
-                                </div>
-                            </div>
+                                <IconComponent className="w-5 h-5" />
+                                <span>{tab.label}</span>
+                                {tab.id === "signals" && dashboardStats.pendingSignals > 0 && (
+                                    <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
+                                        {dashboardStats.pendingSignals}
+                                    </span>
+                                )}
+                            </button>
                         )
                     })}
                 </div>
+            </div>
 
-                <div
-                    className={`relative backdrop-blur-xl bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% rounded-2xl shadow-2xl border border-[#202020] overflow-hidden ${mounted ? "animate-fade-in-up" : "opacity-0"
-                        }`}
-                    style={{ animationDelay: "0.6s", animationFillMode: "both" }}
-                >
-                    <div className="absolute inset-0 opacity-5">
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(160,159,135,0.2),transparent_50%)] animate-pulse-slow"></div>
-                    </div>
-
-                    <div className="relative px-6 py-5 border-b border-[#4C3163]/50 backdrop-blur-sm">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                            <h2 className="text-xl font-bold bg-gradient-to-r from-white to-[#A09F87] bg-clip-text text-transparent mb-4 sm:mb-0">
-                                Gestion des Utilisateurs
-                            </h2>
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                <div className="relative group">
-                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#A09F87]/90 w-4 h-4 group-focus-within:text-[#A09F87] transition-colors" />
-                                    <input
-                                        type="text"
-                                        placeholder="Rechercher un utilisateur..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-10 pr-4 py-2.5 border border-[#A09F87] rounded-xl focus:ring-2 focus:ring-[#A09F87]/50 focus:border-[#A09F87]/50 text-sm backdrop-blur-sm bg-[#202020]/50 text-white/70 placeholder-[#A09F87] transition-all duration-300 hover:bg-[#202020]/70 focus:bg-[#202020]/80"
-                                    />
-                                </div>
-                                <select
-                                    value={filterStatus}
-                                    onChange={(e) => setFilterStatus(e.target.value)}
-                                    className="px-4 py-2.5 border border-[#A09F87] rounded-xl focus:ring-2 focus:ring-[#A09F87]/50 focus:border-[#A09F87]/50 text-sm backdrop-blur-sm bg-[#202020]/50 text-white/80 transition-all duration-300 hover:bg-[#202020]/70 focus:bg-[#202020]/80"
+            {/* Content based on active tab */}
+            {activeTab === "signals" ? (
+                <Signals />
+            ) : (
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        {stats.map((stat, index) => {
+                            const IconComponent = stat.icon
+                            return (
+                                <div
+                                    key={index}
+                                    className={`group relative backdrop-blur-xl bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% rounded-2xl shadow-xl border border-[#202020] p-6 hover:shadow-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 ${mounted ? "animate-slide-up" : "opacity-0"
+                                        }`}
+                                    style={{
+                                        animationDelay: `${index * 0.15}s`,
+                                        animationFillMode: "both",
+                                    }}
                                 >
-                                    <option value="tous">Tous les statuts</option>
-                                    <option value="actif">Actif</option>
-                                    <option value="inactif">Inactif</option>
-                                </select>
-                                <button className="px-6 py-2.5 bg-gradient-to-r from-[#A09F87] to-[#4C3163] text-white rounded-xl hover:from-[#A09F87]/80 hover:to-[#4C3163]/80 transition-all duration-300 text-sm font-medium flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95">
-                                    <UserPlus className="w-4 h-4" />
-                                    Ajouter
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                                    <div className="absolute inset-0 bg-gradient-to-br from-[#4C3163]/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-gradient-to-r from-[#202020]/80 to-[#4C3163]/80 backdrop-blur-sm">
-                                <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-[#A09F87] uppercase tracking-wider">
-                                        Utilisateur
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-[#A09F87] uppercase tracking-wider">
-                                        Contact
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-[#A09F87] uppercase tracking-wider">
-                                        Rôle
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-[#A09F87] uppercase tracking-wider">
-                                        Statut
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-[#A09F87] uppercase tracking-wider">
-                                        Date d'inscription
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-[#A09F87] uppercase tracking-wider">
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[#4C3163]/50">
-                                {currentUsers.map((user, index) => (
-                                    <tr
-                                        key={user.id}
-                                        className={`group  bg-[#202020] transition-all duration-300 backdrop-blur-sm ${mounted ? "animate-slide-in-right" : "opacity-0"
-                                            }`}
-                                        style={{
-                                            animationDelay: `${0.8 + index * 0.1}s`,
-                                            animationFillMode: "both",
-                                        }}
-                                    >
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="relative flex items-center justify-between">
+                                        <div className="flex-1">
+                                            <p className="text-sm font-semibold text-[#A09F87]/80 mb-2 group-hover:text-[#A09F87] transition-colors">
+                                                {stat.title}
+                                            </p>
+                                            <p className="text-3xl font-bold text-white mb-2 group-hover:scale-105 transition-transform duration-300">
+                                                {stat.value}
+                                            </p>
                                             <div className="flex items-center">
-                                                <div className="relative">
-                                                    <img
-                                                        className="h-12 w-12 rounded-full object-cover ring-2 ring-[#4C3163]/50 shadow-lg group-hover:ring-[#A09F87]/50 transition-all duration-300 group-hover:scale-110"
-                                                        src={
-                                                            user.profilePicture
-                                                                ? user.profilePicture.startsWith("http")
-                                                                    ? user.profilePicture
-                                                                    : `http://localhost:8080${user.profilePicture || "/placeholder.svg"}`
-                                                                : profileAvatar
-                                                        }
-                                                        alt={`${user.prenom} ${user.nom}`}
-                                                    />
-                                                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full border-2 border-[#171717] shadow-sm animate-pulse-gentle"></div>
-                                                </div>
-                                                <div className="ml-4">
-                                                    <div className="text-sm font-bold text-white/70 group-hover:text-[#A09F87] transition-colors">
-                                                        {user.prenom} {user.nom}
-                                                    </div>
-                                                    <div className="text-xs text-[#A09F87]/60 font-medium">ID: {user.id}</div>
-                                                </div>
+                                                <span
+                                                    className={`text-sm font-bold px-2 py-1 rounded-full ${stat.trend === "up" ? "text-emerald-300 bg-emerald-900/50" : "text-red-300 bg-red-900/50"
+                                                        }`}
+                                                >
+                                                    {stat.change}
+                                                </span>
+                                                <span className="text-xs text-[#A09F87]/60 ml-2 font-medium">vs mois dernier</span>
                                             </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-[#A09F87]/80 flex items-center group-hover:text-[#A09F87] transition-colors">
-                                                <Mail className="w-4 h-4 mr-2 text-[#A09F87]/60 group-hover:text-[#A09F87] transition-colors" />
-                                                {user.email}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span
-                                                className={`inline-flex px-3 py-1.5 text-xs font-bold rounded-full border backdrop-blur-sm ${getRoleColor(user.role)} group-hover:scale-105 transition-transform duration-300`}
-                                            >
-                                                {user.role}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span
-                                                className={`inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full border backdrop-blur-sm ${getStatusColor(user.status)} group-hover:scale-105 transition-transform duration-300`}
-                                            >
-                                                <div
-                                                    className={`w-2 h-2 rounded-full mr-2 ${user.status === "Actif" ? "bg-green-400 animate-pulse" : "bg-red-400"}`}
-                                                ></div>
-                                                {user.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#A09F87]/60">
-                                            <div className="flex items-center group-hover:text-[#A09F87] transition-colors">
-                                                <Calendar className="w-4 h-4 mr-2 text-[#A09F87]/60 group-hover:text-[#A09F87] transition-colors" />
-                                                {new Date(user.dateInscription).toLocaleDateString("fr-FR")}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <div className="flex items-center space-x-3">
-                                                <button className="p-2 text-[#A09F87] hover:text-[#A09F87]/80 hover:bg-[#A09F87]/20 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95">
-                                                    <Eye className="w-4 h-4" />
-                                                </button>
-                                                <button className="p-2 text-[#89759c] hover:text-[#89759c]/80 hover:bg-[#89759c]/20 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95">
-                                                    <Edit className="w-4 h-4" />
-                                                </button>
-                                                <button className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/30 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95">
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                        </div>
+                                        <div className="w-14 h-14 bg-gradient-to-br from-[#A09F87] to-[#4C3163] rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 animate-pulse-gentle">
+                                            <IconComponent className="w-7 h-7 text-white" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        })}
                     </div>
 
-                    {totalPages > 1 && (
-                        <div className="px-6 py-4 border-t border-[#4C3163]/50 backdrop-blur-sm bg-gradient-to-r from-[#202020]/50 to-[#4C3163]/50">
-                            <div className="flex items-center justify-between">
-                                <div className="text-sm text-[#A09F87] font-medium">
-                                    Affichage de {indexOfFirstUser + 1} à {Math.min(indexOfLastUser, filteredUsers.length)} sur{" "}
-                                    {filteredUsers.length} utilisateurs
-                                </div>
-                                <div className="flex space-x-2">
-                                    <button
-                                        onClick={() => paginate(currentPage - 1)}
-                                        disabled={currentPage === 1}
-                                        className="px-4 py-2 text-sm border border-[#4C3163]/50 rounded-xl hover:bg-[#202020]/70 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm bg-[#202020]/50 text-white transition-all duration-300 transform hover:scale-105 active:scale-95"
+                    <div
+                        className={`relative backdrop-blur-xl bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% rounded-2xl shadow-2xl border border-[#202020] overflow-hidden ${mounted ? "animate-fade-in-up" : "opacity-0"
+                            }`}
+                        style={{ animationDelay: "0.6s", animationFillMode: "both" }}
+                    >
+                        <div className="absolute inset-0 opacity-5">
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(160,159,135,0.2),transparent_50%)] animate-pulse-slow"></div>
+                        </div>
+
+                        <div className="relative px-6 py-5 border-b border-[#4C3163]/50 backdrop-blur-sm">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                <h2 className="text-xl font-bold bg-gradient-to-r from-white to-[#A09F87] bg-clip-text text-transparent mb-4 sm:mb-0">
+                                    Gestion des Utilisateurs
+                                </h2>
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <div className="relative group">
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#A09F87]/90 w-4 h-4 group-focus-within:text-[#A09F87] transition-colors" />
+                                        <input
+                                            type="text"
+                                            placeholder="Rechercher un utilisateur..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="pl-10 pr-4 py-2.5 border border-[#A09F87] rounded-xl focus:ring-2 focus:ring-[#A09F87]/50 focus:border-[#A09F87]/50 text-sm backdrop-blur-sm bg-[#202020]/50 text-white/70 placeholder-[#A09F87] transition-all duration-300 hover:bg-[#202020]/70 focus:bg-[#202020]/80"
+                                        />
+                                    </div>
+                                    <select
+                                        value={filterStatus}
+                                        onChange={(e) => setFilterStatus(e.target.value)}
+                                        className="px-4 py-2.5 border border-[#A09F87] rounded-xl focus:ring-2 focus:ring-[#A09F87]/50 focus:border-[#A09F87]/50 text-sm backdrop-blur-sm bg-[#202020]/50 text-white/80 transition-all duration-300 hover:bg-[#202020]/70 focus:bg-[#202020]/80"
                                     >
-                                        Précédent
-                                    </button>
-                                    {[...Array(totalPages)].map((_, index) => (
-                                        <button
-                                            key={index + 1}
-                                            onClick={() => paginate(index + 1)}
-                                            className={`px-4 py-2 text-sm border rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 ${currentPage === index + 1
-                                                ? "bg-gradient-to-r from-[#A09F87] to-[#4C3163] text-white border-[#A09F87] shadow-lg"
-                                                : "border-[#4C3163]/50 hover:bg-[#202020]/70 backdrop-blur-sm bg-[#202020]/50 text-white"
-                                                }`}
-                                        >
-                                            {index + 1}
-                                        </button>
-                                    ))}
-                                    <button
-                                        onClick={() => paginate(currentPage + 1)}
-                                        disabled={currentPage === totalPages}
-                                        className="px-4 py-2 text-sm border border-[#4C3163]/50 rounded-xl hover:bg-[#202020]/70 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm bg-[#202020]/50 text-white transition-all duration-300 transform hover:scale-105 active:scale-95"
-                                    >
-                                        Suivant
+                                        <option value="tous">Tous les statuts</option>
+                                        <option value="actif">Actif</option>
+                                        <option value="inactif">Inactif</option>
+                                    </select>
+                                    <button className="px-6 py-2.5 bg-gradient-to-r from-[#A09F87] to-[#4C3163] text-white rounded-xl hover:from-[#A09F87]/80 hover:to-[#4C3163]/80 transition-all duration-300 text-sm font-medium flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95">
+                                        <UserPlus className="w-4 h-4" />
+                                        Ajouter
                                     </button>
                                 </div>
                             </div>
                         </div>
-                    )}
 
-                    {filteredUsers.length === 0 && (
-                        <div className="text-center py-16 backdrop-blur-sm">
-                            <Users className="mx-auto h-16 w-16 text-[#A09F87]/50 animate-pulse" />
-                            <h3 className="mt-4 text-lg font-bold text-white">Aucun utilisateur trouvé</h3>
-                            <p className="mt-2 text-sm text-[#A09F87]/60">Essayez de modifier vos critères de recherche.</p>
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead className="bg-gradient-to-r from-[#202020]/80 to-[#4C3163]/80 backdrop-blur-sm">
+                                    <tr>
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A09F87] uppercase tracking-wider">
+                                            Utilisateur
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A09F87] uppercase tracking-wider">
+                                            Contact
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A09F87] uppercase tracking-wider">
+                                            Rôle
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A09F87] uppercase tracking-wider">
+                                            Statut
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A09F87] uppercase tracking-wider">
+                                            Date d'inscription
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A09F87] uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-[#4C3163]/50">
+                                    {currentUsers.map((user, index) => (
+                                        <tr
+                                            key={user.id}
+                                            className={`group  bg-[#202020] transition-all duration-300 backdrop-blur-sm ${mounted ? "animate-slide-in-right" : "opacity-0"
+                                                }`}
+                                            style={{
+                                                animationDelay: `${0.8 + index * 0.1}s`,
+                                                animationFillMode: "both",
+                                            }}
+                                        >
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center">
+                                                    <div className="relative">
+                                                        <img
+                                                            className="h-12 w-12 rounded-full object-cover ring-2 ring-[#4C3163]/50 shadow-lg group-hover:ring-[#A09F87]/50 transition-all duration-300 group-hover:scale-110"
+                                                            src={
+                                                                user.profilePicture
+                                                                    ? user.profilePicture.startsWith("http")
+                                                                        ? user.profilePicture
+                                                                        : `http://localhost:8080${user.profilePicture || "/placeholder.svg"}`
+                                                                    : profileAvatar
+                                                            }
+                                                            alt={`${user.prenom} ${user.nom}`}
+                                                        />
+                                                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full border-2 border-[#171717] shadow-sm animate-pulse-gentle"></div>
+                                                    </div>
+                                                    <div className="ml-4">
+                                                        <div className="text-sm font-bold text-white/70 group-hover:text-[#A09F87] transition-colors">
+                                                            {user.prenom} {user.nom}
+                                                        </div>
+                                                        <div className="text-xs text-[#A09F87]/60 font-medium">ID: {user.id}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-[#A09F87]/80 flex items-center group-hover:text-[#A09F87] transition-colors">
+                                                    <Mail className="w-4 h-4 mr-2 text-[#A09F87]/60 group-hover:text-[#A09F87] transition-colors" />
+                                                    {user.email}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span
+                                                    className={`inline-flex px-3 py-1.5 text-xs font-bold rounded-full border backdrop-blur-sm ${getRoleColor(user.role)} group-hover:scale-105 transition-transform duration-300`}
+                                                >
+                                                    {user.role}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span
+                                                    className={`inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full border backdrop-blur-sm ${getStatusColor(user.status)} group-hover:scale-105 transition-transform duration-300`}
+                                                >
+                                                    <div
+                                                        className={`w-2 h-2 rounded-full mr-2 ${user.status === "Actif" ? "bg-green-400 animate-pulse" : "bg-red-400"}`}
+                                                    ></div>
+                                                    {user.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#A09F87]/60">
+                                                <div className="flex items-center group-hover:text-[#A09F87] transition-colors">
+                                                    <Calendar className="w-4 h-4 mr-2 text-[#A09F87]/60 group-hover:text-[#A09F87] transition-colors" />
+                                                    {new Date(user.dateInscription).toLocaleDateString("fr-FR")}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <div className="flex items-center space-x-3">
+                                                    <button className="p-2 text-[#A09F87] hover:text-[#A09F87]/80 hover:bg-[#A09F87]/20 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95">
+                                                        <Eye className="w-4 h-4" />
+                                                    </button>
+                                                    <button className="p-2 text-[#89759c] hover:text-[#89759c]/80 hover:bg-[#89759c]/20 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95">
+                                                        <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <button className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/30 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95">
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                    )}
-                </div>
-            </main>
 
-            {/* <div className=' '>
-                <AppSpline />
-            </div> */}
+                        {totalPages > 1 && (
+                            <div className="px-6 py-4 border-t border-[#4C3163]/50 backdrop-blur-sm bg-gradient-to-r from-[#202020]/50 to-[#4C3163]/50">
+                                <div className="flex items-center justify-between">
+                                    <div className="text-sm text-[#A09F87] font-medium">
+                                        Affichage de {indexOfFirstUser + 1} à {Math.min(indexOfLastUser, filteredUsers.length)} sur{" "}
+                                        {filteredUsers.length} utilisateurs
+                                    </div>
+                                    <div className="flex space-x-2">
+                                        <button
+                                            onClick={() => paginate(currentPage - 1)}
+                                            disabled={currentPage === 1}
+                                            className="px-4 py-2 text-sm border border-[#4C3163]/50 rounded-xl hover:bg-[#202020]/70 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm bg-[#202020]/50 text-white transition-all duration-300 transform hover:scale-105 active:scale-95"
+                                        >
+                                            Précédent
+                                        </button>
+                                        {[...Array(totalPages)].map((_, index) => (
+                                            <button
+                                                key={index + 1}
+                                                onClick={() => paginate(index + 1)}
+                                                className={`px-4 py-2 text-sm border rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 ${currentPage === index + 1
+                                                    ? "bg-gradient-to-r from-[#A09F87] to-[#4C3163] text-white border-[#A09F87] shadow-lg"
+                                                    : "border-[#4C3163]/50 hover:bg-[#202020]/70 backdrop-blur-sm bg-[#202020]/50 text-white"
+                                                    }`}
+                                            >
+                                                {index + 1}
+                                            </button>
+                                        ))}
+                                        <button
+                                            onClick={() => paginate(currentPage + 1)}
+                                            disabled={currentPage === totalPages}
+                                            className="px-4 py-2 text-sm border border-[#4C3163]/50 rounded-xl hover:bg-[#202020]/70 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm bg-[#202020]/50 text-white transition-all duration-300 transform hover:scale-105 active:scale-95"
+                                        >
+                                            Suivant
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {filteredUsers.length === 0 && (
+                            <div className="text-center py-16 backdrop-blur-sm">
+                                <Users className="mx-auto h-16 w-16 text-[#A09F87]/50 animate-pulse" />
+                                <h3 className="mt-4 text-lg font-bold text-white">Aucun utilisateur trouvé</h3>
+                                <p className="mt-2 text-sm text-[#A09F87]/60">Essayez de modifier vos critères de recherche.</p>
+                            </div>
+                        )}
+                    </div>
+                </main>
+            )}
         </div>
     )
 }
