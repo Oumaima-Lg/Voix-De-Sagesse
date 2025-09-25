@@ -1,19 +1,15 @@
 package com.voixdesagesse.VoixDeSagesse.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.voixdesagesse.VoixDeSagesse.dto.SignalDTO;
+import com.voixdesagesse.VoixDeSagesse.dto.SignalStatus;
 import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
-import com.voixdesagesse.VoixDeSagesse.entity.User;
 import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
-import com.voixdesagesse.VoixDeSagesse.repository.ArticleRepository;
-import com.voixdesagesse.VoixDeSagesse.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,41 +19,34 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AdminService {
 
-    private final UserRepository userRepository;
-    private final ArticleRepository articleRepository;
+    private final UserService userService;
+    private final ArticleService articleService;
+    private final SignalService signalService;
 
     public List<UserDTO> getAllUsers() throws ArticlaException {
-        List<User> users = userRepository.findAll();
-        return users.stream()
-                .map(User::toDTO)
-                .collect(Collectors.toList());
+        return userService.getAllUsers();
     }
 
     public Map<String, Object> getDashboardStats() {
-        log.info("Récupération des statistiques du tableau de bord");
-
-        long totalUsers = userRepository.count();
-        long totalArticles = articleRepository.count();
-
-        long newUsersToday = getUsersCreatedToday();
-        long newArticlesToday = getArticlesCreatedToday();
-
         Map<String, Object> stats = new HashMap<>();
-        stats.put("totalUsers", totalUsers);
-        stats.put("totalArticles", totalArticles);
-        stats.put("newUsersToday", newUsersToday);
-        stats.put("newArticlesToday", newArticlesToday);
+
+        stats.put("totalUsers", userService.getTotalUsers());
+        stats.put("totalArticles", articleService.getTotalArticles());
+        stats.put("newUsersToday", userService.getNewUsersToday());
+        stats.put("newArticlesToday", articleService.getNewArticlesToday());
+
+        stats.put("totalSignals", signalService.getTotalSignals());
+        stats.put("pendingSignals", signalService.getPendingSignalsCount());
 
         return stats;
     }
 
-    private long getUsersCreatedToday() {
-        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-        return userRepository.countByCreationDateAfter(startOfDay);
+    public List<SignalDTO> getAllSignals() throws ArticlaException {
+        return signalService.getAllSignals();
     }
 
-    private long getArticlesCreatedToday() {
-        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-        return articleRepository.countByDatePublicationAfter(startOfDay);
+    public SignalDTO processSignal(Long signalId, SignalStatus status, String adminComment, Long adminId)
+            throws ArticlaException {
+        return signalService.processSignal(signalId, status, adminComment, adminId);
     }
 }

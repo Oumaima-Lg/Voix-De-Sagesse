@@ -94,4 +94,6 @@ public interface UserRepository extends MongoRepository<User, Long> {
 
     @Query(value = "{ 'dateInscription': { $gte: ?0 } }", count = true)
     long countByCreationDateAfter(LocalDateTime date);
+
+    long countByDateInscriptionBetween(LocalDateTime start, LocalDateTime end);
 }

@@ -3,8 +3,11 @@ package com.voixdesagesse.VoixDeSagesse.controller;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,15 +38,42 @@ public class ArticleController {
     private final ArticleService articleService;
 
     @PostMapping("/createSaggesseArticla")
-    public ResponseEntity<Article> createArticle(@RequestBody SagesseDTO sagesseDTO) throws ArticlaException {
-        return new ResponseEntity<>(articleService.createSagesseArticle(sagesseDTO), HttpStatus.CREATED);
+    public ResponseEntity<?> createSagesseArticle(@Valid @RequestBody SagesseDTO sagesseDTO, BindingResult result) {
+        try {
+            if (result.hasErrors()) {
+                StringBuilder errorMessage = new StringBuilder();
+                result.getFieldErrors().forEach(error -> 
+                    errorMessage.append(error.getField()).append(": ").append(error.getDefaultMessage()).append("; ")
+                );
+                return ResponseEntity.badRequest().body(Map.of("errorMessage", errorMessage.toString()));
+            }
+
+            Article article = articleService.createSagesseArticle(sagesseDTO);
+            return new ResponseEntity<>(article, HttpStatus.CREATED);
+        } catch (ArticlaException e) {
+            return ResponseEntity.badRequest().body(Map.of("errorMessage", e.getMessage()));
+        }
     }
 
     @PostMapping("/createHistoireArticla")
-    public ResponseEntity<Article> createArticle(@RequestBody HistoireDTO histoireDTO) throws ArticlaException {
-        return new ResponseEntity<>(articleService.createHistoireArticle(histoireDTO), HttpStatus.CREATED);
+    public ResponseEntity<?> createHistoireArticle(@Valid @RequestBody HistoireDTO histoireDTO, BindingResult result) {
+        try {
+            if (result.hasErrors()) {
+                StringBuilder errorMessage = new StringBuilder();
+                result.getFieldErrors().forEach(error -> 
+                    errorMessage.append(error.getField()).append(": ").append(error.getDefaultMessage()).append("; ")
+                );
+                return ResponseEntity.badRequest().body(Map.of("errorMessage", errorMessage.toString()));
+            }
+
+            Article article = articleService.createHistoireArticle(histoireDTO);
+            return new ResponseEntity<>(article, HttpStatus.CREATED);
+        } catch (ArticlaException e) {
+            return ResponseEntity.badRequest().body(Map.of("errorMessage", e.getMessage()));
+        }
     }
 
+    // ... rest of the controller methods remain the same
     @GetMapping
     public ResponseEntity<List<Article>> DisplayArticles() throws ArticlaException {
         return ResponseEntity.ok(articleService.getAllArticles());

@@ -374,4 +374,15 @@ public class ArticleService {
 
         return posts;
     }
+
+    public long getTotalArticles() {
+        return articleRepository.count();
+    }
+
+    public long getNewArticlesToday() {
+        LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1);
+        return articleRepository.countByDatePublicationBetween(startOfDay, endOfDay);
+    }
+
 }

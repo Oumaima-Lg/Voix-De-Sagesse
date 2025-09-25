@@ -30,12 +30,13 @@ public class SignalService {
     private final ArticleRepository articleRepository;
 
     @Transactional
-    public SignalDTO reportArticle(Long reporterId, Long articleId, String reason, String description) throws ArticlaException {
+    public SignalDTO reportArticle(Long reporterId, Long articleId, String reason, String description)
+            throws ArticlaException {
         // Vérifier si l'utilisateur et l'article existent
         User reporter = userService.getUserById(reporterId);
         Article article = articleRepository.findById(articleId)
-            .orElseThrow(() -> new ArticlaException("Article non trouvé"));
-        
+                .orElseThrow(() -> new ArticlaException("Article non trouvé"));
+
         User reportedUser = userService.getUserById(article.getUserId());
 
         // Vérifier si l'utilisateur n'a pas déjà signalé cet article
@@ -79,9 +80,10 @@ public class SignalService {
     }
 
     @Transactional
-    public SignalDTO processSignal(Long signalId, SignalStatus status, String adminComment, Long adminId) throws ArticlaException {
+    public SignalDTO processSignal(Long signalId, SignalStatus status, String adminComment, Long adminId)
+            throws ArticlaException {
         Signal signal = signalRepository.findById(signalId)
-            .orElseThrow(() -> new ArticlaException("Signal non trouvé"));
+                .orElseThrow(() -> new ArticlaException("Signal non trouvé"));
 
         signal.setStatus(status);
         signal.setAdminComment(adminComment);
@@ -113,10 +115,30 @@ public class SignalService {
         dto.setId(signal.getId());
         dto.setReporterId(signal.getReporterId());
         dto.setReporterName(reporter.getNom() + " " + reporter.getPrenom());
+        dto.setReporterEmail(reporter.getEmail());
         dto.setReportedUserId(signal.getReportedUserId());
         dto.setReportedUserName(reportedUser.getNom() + " " + reportedUser.getPrenom());
+        dto.setReportedUserEmail(reportedUser.getEmail());
         dto.setArticleId(signal.getArticleId());
-        dto.setArticleTitle(article != null ? article.getTitle() : "Article supprimé");
+        
+        if (article != null) {
+            dto.setArticleTitle(article.getTitle());
+            dto.setArticleContent(article.getContent());
+            dto.setArticleSource(article.getSource());
+            dto.setArticleLesson(article.getLesson());
+            dto.setArticleTags(article.getTags() != null ? String.join(", ", article.getTags()) : "");
+            dto.setArticleType(article.getType() != null ? article.getType().toString() : "");
+            dto.setArticleCategory(article.getCategory() != null ? article.getCategory().toString() : "");
+        } else {
+            dto.setArticleTitle("Article supprimé");
+            dto.setArticleContent("");
+            dto.setArticleSource("");
+            dto.setArticleLesson("");
+            dto.setArticleTags("");
+            dto.setArticleType("");
+            dto.setArticleCategory("");
+        }
+        
         dto.setReason(signal.getReason());
         dto.setDescription(signal.getDescription());
         dto.setStatus(signal.getStatus());
@@ -126,5 +148,20 @@ public class SignalService {
         dto.setAdminComment(signal.getAdminComment());
 
         return dto;
+    }
+
+    public long getTotalSignals() {
+        return signalRepository.count();
+    }
+
+    public long getPendingSignalsCount() {
+        return signalRepository.countByStatus(SignalStatus.PENDING);
+    }
+
+    public List<SignalDTO> getAllSignals() throws ArticlaException {
+        List<Signal> signals = signalRepository.findAllByOrderByCreatedAtDesc();
+        return signals.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 }

@@ -92,6 +92,11 @@ public interface UserService {
 
     public void removeReportedArticle(Long userId, Long articleId) throws ArticlaException;
 
+    public long getTotalUsers();
+
+    public long getNewUsersToday();
+
+    public List<UserDTO> getAllUsers() throws ArticlaException;
 
 }
 

@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -444,5 +446,25 @@ public class UserServiceImpl implements UserService {
             userRepository.save(user);
         }
     }
+
+    @Override
+    public long getTotalUsers() {
+        return userRepository.count();
+    }
+
+    @Override
+    public long getNewUsersToday() {
+        LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1);
+        return userRepository.countByDateInscriptionBetween(startOfDay, endOfDay);
+    }
+
+    @Override
+    public List<UserDTO> getAllUsers() throws ArticlaException {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(User::toDTO)
+                .collect(Collectors.toList());
+    }    
 
 }

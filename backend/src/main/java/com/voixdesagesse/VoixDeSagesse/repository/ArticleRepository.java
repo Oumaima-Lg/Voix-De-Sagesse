@@ -57,4 +57,5 @@ public interface ArticleRepository extends MongoRepository<Article, Long> {
         @Query(value = "{ 'datePublication': { $gte: ?0 } }", count = true)
         long countByDatePublicationAfter(LocalDateTime date);
 
+        Long countByDatePublicationBetween(LocalDateTime start, LocalDateTime end);
 }
