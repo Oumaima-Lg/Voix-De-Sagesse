@@ -46,6 +46,7 @@ public class User {
     private Set<Long> likedArticlesId; 
     private Set<Long> followingId; 
     private Set<Long> savedArticlesId;
+    private Set<Long> reportedArticlesId;
     private LocalDateTime dateInscription;
     
 
@@ -56,7 +57,7 @@ public class User {
     public UserDTO toDTO() {
         return new UserDTO(this.id, this.nom, this.prenom, this.email, this.motdepasse, this.accountType, this.username, 
         this.phoneNumber, this.location, this.website, this.profilePicture,this.bio, this.contentCount, this.followersCount, 
-        this.followingCount, this.likesReceived, this.likedArticlesId, this.followingId, this.savedArticlesId, this.dateInscription);
+        this.followingCount, this.likesReceived, this.likedArticlesId, this.followingId, this.savedArticlesId, this.reportedArticlesId, this.dateInscription);
     }
 
     public UserProfileDTO toProfileDTO() {

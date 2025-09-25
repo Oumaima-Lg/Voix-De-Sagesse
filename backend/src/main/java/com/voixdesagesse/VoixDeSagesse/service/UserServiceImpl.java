@@ -424,9 +424,25 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    @Transactional
+    public void addReportedArticle(Long userId, Long articleId) throws ArticlaException {
+        User user = getUserById(userId);
+        if (user.getReportedArticlesId() == null) {
+            user.setReportedArticlesId(new HashSet<>());
+        }
+        user.getReportedArticlesId().add(articleId);
+        userRepository.save(user);
+    }
 
+    @Override
+    @Transactional
+    public void removeReportedArticle(Long userId, Long articleId) throws ArticlaException {
+        User user = getUserById(userId);
+        if (user.getReportedArticlesId() != null) {
+            user.getReportedArticlesId().remove(articleId);
+            userRepository.save(user);
+        }
+    }
 
-    
-
-    
 }

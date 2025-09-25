@@ -58,7 +58,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/uploads/profile-pictures/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/articles/**", "/comments/**", "/users/**").hasAuthority("ROLE_USER")
+                        .requestMatchers("/articles/**", "/comments/**", "/users/**", "/signals/**").hasAuthority("ROLE_USER")
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

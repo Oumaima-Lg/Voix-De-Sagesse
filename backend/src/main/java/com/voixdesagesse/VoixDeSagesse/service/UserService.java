@@ -88,6 +88,10 @@ public interface UserService {
     
     public void decrementLikesReceivedByAmount(Long userId, Long amount);
 
+    public void addReportedArticle(Long userId, Long articleId) throws ArticlaException;
+
+    public void removeReportedArticle(Long userId, Long articleId) throws ArticlaException;
+
 
 }
 
