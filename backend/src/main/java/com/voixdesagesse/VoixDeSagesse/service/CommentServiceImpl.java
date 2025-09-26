@@ -3,6 +3,7 @@ package com.voixdesagesse.VoixDeSagesse.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +21,7 @@ import com.voixdesagesse.VoixDeSagesse.utility.Utilities;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Service
+@Service(value = "commentService")
 @Transactional
 @RequiredArgsConstructor
 @Slf4j

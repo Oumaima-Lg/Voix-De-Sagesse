@@ -1,7 +1,6 @@
 package com.voixdesagesse.VoixDeSagesse.dto;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

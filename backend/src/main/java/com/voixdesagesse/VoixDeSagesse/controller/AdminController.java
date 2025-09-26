@@ -63,7 +63,7 @@ public class AdminController {
             @PathVariable Long signalId,
             @RequestParam SignalStatus status,
             @RequestParam Long adminId,
-            @RequestParam(required = false) String adminComment) {
+            @RequestParam(required = false) String adminComment) throws Exception  {
         try {
             log.info("Admin processing signal: {}", signalId);
             SignalDTO processedSignal = adminService.processSignal(signalId, status, adminComment, adminId);

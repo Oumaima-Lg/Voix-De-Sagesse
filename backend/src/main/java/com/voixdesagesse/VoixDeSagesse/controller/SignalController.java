@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.voixdesagesse.VoixDeSagesse.dto.SignalDTO;
+import com.voixdesagesse.VoixDeSagesse.dto.SignalReportRequest;
 import com.voixdesagesse.VoixDeSagesse.dto.SignalStatus;
 import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
 import com.voixdesagesse.VoixDeSagesse.service.SignalService;
@@ -32,10 +33,10 @@ public class SignalController {
     public ResponseEntity<SignalDTO> reportArticle(@RequestBody SignalReportRequest request) {
         try {
             SignalDTO signal = signalService.reportArticle(
-                request.getReporterId(), 
-                request.getArticleId(), 
-                request.getReason(), 
-                request.getDescription()
+                request.reporterId(), 
+                request.articleId(), 
+                request.reason(), 
+                request.description()
             );
             return ResponseEntity.ok(signal);
         } catch (ArticlaException e) {
@@ -68,7 +69,7 @@ public class SignalController {
             @PathVariable Long signalId,
             @RequestParam SignalStatus status,
             @RequestParam Long adminId,
-            @RequestParam(required = false) String adminComment) {
+            @RequestParam(required = false) String adminComment) throws Exception {
         try {
             SignalDTO signal = signalService.processSignal(signalId, status, adminComment, adminId);
             return ResponseEntity.ok(signal);
@@ -77,24 +78,4 @@ public class SignalController {
         }
     }
 
-    // Classe interne pour la requête de signalement
-    public static class SignalReportRequest {
-        private Long reporterId;
-        private Long articleId;
-        private String reason;
-        private String description;
-
-        // Getters et setters
-        public Long getReporterId() { return reporterId; }
-        public void setReporterId(Long reporterId) { this.reporterId = reporterId; }
-        
-        public Long getArticleId() { return articleId; }
-        public void setArticleId(Long articleId) { this.articleId = articleId; }
-        
-        public String getReason() { return reason; }
-        public void setReason(String reason) { this.reason = reason; }
-        
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
-    }
 }

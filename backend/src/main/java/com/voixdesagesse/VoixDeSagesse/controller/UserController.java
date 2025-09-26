@@ -159,7 +159,6 @@ public class UserController {
             String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
             String fullUrl = baseUrl + profilePictureUrl;
 
-            // Créer la réponse
             Map<String, Object> response = new HashMap<>();
             response.put("profilePictureUrl", fullUrl);
             response.put("message", "Image uploadée avec succès");
@@ -244,13 +243,9 @@ public class UserController {
         try {
             User currentUser = userService.getCurrentUser();
 
-            // Vérification de sécurité supplémentaire si nécessaire
             log.info("Demande de suppression de compte pour l'utilisateur: {}", currentUser.getId());
-
-            // Supprimer le compte
             userService.deleteUserAccount(currentUser.getId());
 
-            // Retourner une réponse de succès
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "message", "Votre compte a été supprimé avec succès"));

@@ -73,7 +73,6 @@ public class ArticleController {
         }
     }
 
-    // ... rest of the controller methods remain the same
     @GetMapping
     public ResponseEntity<List<Article>> DisplayArticles() throws ArticlaException {
         return ResponseEntity.ok(articleService.getAllArticles());

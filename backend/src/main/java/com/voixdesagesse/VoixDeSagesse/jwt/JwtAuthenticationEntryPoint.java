@@ -14,18 +14,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 
-// @Component
-// public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
-//     @Override
-//     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-//         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//         PrintWriter writer=response.getWriter();
-//         writer.println("Access Denied !! "+ authException.getMessage());
-//     }
-// }   
-
-
 
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
@@ -36,18 +24,15 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response, 
                         AuthenticationException authException) throws IOException, ServletException {
         
-        // Log the unauthorized access attempt
         log.warn("Unauthorized access attempt to {} from IP: {} - Reason: {}", 
                 request.getRequestURI(), 
                 request.getRemoteAddr(),
                 authException.getMessage());
         
-        // Set response status and content type
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        
-        // Create a proper JSON error response
+
         String jsonResponse = String.format(
             "{\"error\": \"Unauthorized\", \"message\": \"%s\", \"status\": 401, \"timestamp\": \"%s\", \"path\": \"%s\"}", 
             authException.getMessage(),

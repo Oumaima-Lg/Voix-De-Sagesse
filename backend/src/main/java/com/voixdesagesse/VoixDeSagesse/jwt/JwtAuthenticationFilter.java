@@ -30,7 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private JwtHelper jwtHelper;
 
     @Autowired
-    @Lazy // Lazy loading pour éviter la dépendance circulaire
+    @Lazy 
     private UserDetailsService userDetailsService;
 
     @Override

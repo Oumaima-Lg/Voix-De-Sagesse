@@ -56,8 +56,7 @@ public class CustomErrorController implements ErrorController {
             
             return ResponseEntity.status(statusCode).body(errorDetails);
         }
-        
-        // Erreur par défaut
+
         errorDetails.put("error", "Erreur inconnue");
         errorDetails.put("message", "Une erreur inconnue s'est produite");
         errorDetails.put("status", 500);
