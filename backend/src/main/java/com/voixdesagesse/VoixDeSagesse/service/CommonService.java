@@ -38,14 +38,11 @@ public class CommonService {
         List<Comment> userComments = commentRepository.findByUserId(userId);
 
         for (Comment comment : userComments) {
-            // Décrémenter le compteur de commentaires de l'article
             Article article = articleRepository.findById(comment.getArticleId()).orElse(null);
             if (article != null) {
                 article.setComments(Math.max(0, article.getComments() - 1));
                 articleRepository.save(article);
             }
-
-            // Soft delete du commentaire
             comment.setIsDeleted(true);
             comment.setDateCreation(LocalDateTime.now());
         }

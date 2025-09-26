@@ -93,13 +93,10 @@ public class ArticleServiceImpl implements ArticleService {
         Set<Long> likedArticles = currentUser.getLikedArticlesId();
         Set<Long> followingUsers = currentUser.getFollowingId();
         Set<Long> savedArticles = currentUser.getSavedArticlesId();
-        Set<Long> reportedArticles = currentUser.getReportedArticlesId(); // Articles signalés
+        Set<Long> reportedArticles = currentUser.getReportedArticlesId(); 
 
         List<PosteDTO> posts = articles.stream()
-                .filter(article -> reportedArticles == null || !reportedArticles.contains(article.getId())) // Filtrer
-                                                                                                            // les
-                                                                                                            // articles
-                                                                                                            // signalés
+                .filter(article -> reportedArticles == null || !reportedArticles.contains(article.getId()))
                 .map(article -> {
                     PosteDTO posteDTO = new PosteDTO();
                     posteDTO.setArticle(article);
@@ -136,9 +133,8 @@ public class ArticleServiceImpl implements ArticleService {
         Set<Long> likedArticles = currentUser.getLikedArticlesId();
         Set<Long> followingUsers = currentUser.getFollowingId();
         Set<Long> savedArticles = currentUser.getSavedArticlesId();
-        Set<Long> reportedArticles = currentUser.getReportedArticlesId(); // Articles signalés
+        Set<Long> reportedArticles = currentUser.getReportedArticlesId();
 
-        // Filtrer les articles sauvegardés pour exclure ceux qui ont été signalés
         Set<Long> filteredSavedArticles = savedArticles.stream()
                 .filter(articleId -> reportedArticles == null || !reportedArticles.contains(articleId))
                 .collect(Collectors.toSet());
@@ -296,7 +292,7 @@ public class ArticleServiceImpl implements ArticleService {
 
             new Thread(() -> {
                 try {
-                    Thread.sleep(2000); // 2 secondes
+                    Thread.sleep(2000); 
                     likeOperationCache.remove(cacheKey);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();

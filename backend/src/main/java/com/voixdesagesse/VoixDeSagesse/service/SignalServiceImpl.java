@@ -40,19 +40,16 @@ public class SignalServiceImpl implements SignalService {
     @Transactional
     public SignalDTO reportArticle(Long reporterId, Long articleId, String reason, String description)
             throws ArticlaException {
-        // Vérifier si l'utilisateur et l'article existent
         User reporter = userService.getUserById(reporterId);
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new ArticlaException("Article non trouvé"));
 
         User reportedUser = userService.getUserById(article.getUserId());
 
-        // Vérifier si l'utilisateur n'a pas déjà signalé cet article
         if (signalRepository.existsByReporterIdAndArticleId(reporterId, articleId)) {
             throw new ArticlaException("Vous avez déjà signalé cet article");
         }
 
-        // Créer le signal
         Signal signal = new Signal();
         signal.setId(Utilities.getNextSequence("signals"));
         signal.setReporterId(reporterId);
@@ -65,7 +62,6 @@ public class SignalServiceImpl implements SignalService {
 
         Signal savedSignal = signalRepository.save(signal);
 
-        // Ajouter l'article à la liste des articles signalés de l'utilisateur
         userService.addReportedArticle(reporterId, articleId);
 
         log.info("Article signalé - Reporter: {}, Article: {}, Raison: {}", reporterId, articleId, reason);
@@ -104,7 +100,7 @@ public class SignalServiceImpl implements SignalService {
             String articleName = articleRepository.findById(signal.getArticleId())
                     .map(Article::getTitle)
                     .orElse("Inconnu");
-                    
+
             articleService.deleteArticle(signal.getArticleId(), signal.getReportedUserId());
             log.info("Article supprimé - ID: {}", signal.getArticleId());
             

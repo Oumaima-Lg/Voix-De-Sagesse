@@ -114,7 +114,6 @@ public class UserServiceImpl implements UserService {
         String genOtp = Utilities.generateOTP();
         OTP otp = new OTP(email, genOtp, LocalDateTime.now());
         otpRepository.save(otp);
-        // message.setText("Your Code is : " + genOtp, false);
         message.setText(Data.getMessageBody(genOtp, user.getNom(), user.getPrenom()), true);
         message.setFrom("laghjibioumaima2003@gmail.com");
         mailSender.send(mm);

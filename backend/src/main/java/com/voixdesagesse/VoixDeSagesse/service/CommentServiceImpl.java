@@ -35,14 +35,10 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentDTO addComment(Long articleId, Long userId, String content) throws ArticlaException {
-        // Vérifier que l'article existe
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new ArticlaException("Article introuvable"));
 
-        // Vérifier que l'utilisateur existe
         User user = userService.getUserById(userId);
-
-        // Valider le contenu
         if (content == null || content.trim().isEmpty()) {
             throw new ArticlaException("Le commentaire ne peut pas être vide");
         }
@@ -63,22 +59,18 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<CommentDTO> getCommentsByArticle(Long articleId) throws ArticlaException {
-        // Vérifier que l'article existe
         if (!articleRepository.existsById(articleId)) {
             throw new ArticlaException("Article introuvable");
         }
 
-        // Récupérer les commentaires
         List<Comment> comments = commentRepository.findByArticleIdAndIsDeletedFalse(articleId);
 
-        // Convertir en DTO
         return comments.stream()
                 .map(comment -> {
                     try {
                         User user = userService.getUserById(comment.getUserId());
                         return convertToDTO(comment, user);
                     } catch (ArticlaException e) {
-                        // En cas d'erreur, retourner null et filtrer après
                         return null;
                     }
                 })
@@ -93,17 +85,13 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void deleteComment(Long commentId, Long userId) throws ArticlaException {
-        // Récupérer le commentaire
         Comment comment = commentRepository.findByIdAndUserIdAndIsDeletedFalse(commentId, userId);
         if (comment == null) {
             throw new ArticlaException("Commentaire introuvable ou vous n'êtes pas autorisé à le supprimer");
         }
-
-        // Soft delete
         comment.setIsDeleted(true);
         commentRepository.save(comment);
 
-        // Décrémenter le compteur de commentaires de l'article
         Article article = articleRepository.findById(comment.getArticleId())
                 .orElseThrow(() -> new ArticlaException("Article introuvable"));
 
