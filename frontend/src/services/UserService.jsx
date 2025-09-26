@@ -77,7 +77,13 @@ const isArticleSaved = async (articleId) => {
         .catch(error => { throw error; });
 }
 
+const deleteAccount = async () => {
+    return axiosInstance.delete(`${base_url}delete-account`)
+        .then(res => res.data)
+        .catch(error => { throw error; });
+}
+
 
 export { updateUserProfile, 
     getUserProfile, uploadProfilePicture, followUser, unfollowUser, isFollowing, 
-    getFollowing, getFollowers, saveArticle, unsaveArticle, isArticleSaved };
+    getFollowing, getFollowers, saveArticle, unsaveArticle, isArticleSaved, deleteAccount};

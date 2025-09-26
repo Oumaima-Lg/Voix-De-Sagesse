@@ -1,14 +1,17 @@
 import { useState, useEffect, useRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import ShinyText from "../../blocks/TextAnimations/ShinyText/ShinyText"
-import { PiUser, PiUserCircle, PiCamera, PiPencil, PiCheck, PiX } from "react-icons/pi"
+import { PiUser, PiUserCircle, PiCamera, PiPencil, PiCheck, PiX, PiWarning, PiTrash } from "react-icons/pi"
 import { IoPersonOutline, IoMailOutline, IoCallOutline, IoLocationOutline } from "react-icons/io5"
 import { MdOutlineLanguage, MdOutlineNotifications, MdOutlineVisibility } from "react-icons/md"
 import profileAvatar from "../../assets/profileAvatar.jpg"
 import { errorNotification, successNotification } from "../../services/NotificationService"
 import { updateUser } from "../../Slices/UserSlice"
-import { updateUserProfile, getUserProfile, uploadProfilePicture } from '../../services/UserService';
+import { updateUserProfile, getUserProfile, uploadProfilePicture, deleteAccount } from '../../services/UserService';
 import { LoadingOverlay } from "@mantine/core"
+import { Modal } from "@mantine/core";
+import { useAuth } from "../../services/useAuth"
+
 
 
 const Profile = () => {
@@ -17,8 +20,12 @@ const Profile = () => {
     const [uploadingImage, setUploadingImage] = useState(false);
     const user = useSelector((state) => state.user)
     const dispatch = useDispatch()
+    const { logout } = useAuth();
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleteConfirmation, setDeleteConfirmation] = useState("");
+    const [isDeleting, setIsDeleting] = useState(false);
 
-    // État pour stocker les données du profil reçues du backend
+    // État pour stocker les données du profil reçues du back)end
     const [userProfile, setUserProfile] = useState(null);
 
     useEffect(() => {
@@ -68,6 +75,31 @@ const Profile = () => {
         pushNotifications: true,
         profileVisibility: "PUBLIC",
     })
+
+    const handleDeleteAccount = async () => {
+        if (deleteConfirmation !== "SUPPRIMER") {
+            errorNotification('Erreur', 'Veuillez taper SUPPRIMER pour confirmer');
+            return;
+        }
+
+        try {
+            setIsDeleting(true);
+            const response = await deleteAccount();
+
+            if (response.success) {
+                successNotification('Compte supprimé', 'Votre compte a été supprimé avec succès');
+
+
+                setTimeout(() => {
+                    logout('Votre compte a été supprimé avec succès');
+                }, 1500);
+            }
+        } catch (error) {
+            console.error('Erreur lors de la suppression:', error);
+            errorNotification('Erreur', 'Une erreur est survenue lors de la suppression du compte');
+            setIsDeleting(false);
+        }
+    };
 
     const handleInputChange = (field, value) => {
         setEditedUser((prev) => ({
@@ -592,6 +624,118 @@ const Profile = () => {
                                 </div>
                             </div>
                         </div>
+
+                        <div className="border-3 border-red-900 bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% rounded-lg shadow-lg p-6 text-white mt-8">
+                            <h3 className="text-2xl font-bold text-red-500 charm mb-6 flex items-center gap-2">
+                                <PiWarning className="text-3xl" />
+                                Zone Dangereuse
+                            </h3>
+
+                            <div className="bg-red-950/30 border-2 border-red-800 rounded-lg p-6">
+                                <h4 className="text-lg font-semibold text-red-400 mb-3">
+                                    Supprimer définitivement votre compte
+                                </h4>
+                                <p className="text-gray-300 mb-4">
+                                    Une fois votre compte supprimé, toutes vos données seront définitivement effacées.
+                                    Cette action est <span className="font-bold text-red-400">irréversible</span>.
+                                </p>
+                                <p className="text-sm text-gray-400 mb-4">
+                                    Cela inclut : vos articles, commentaires, likes, followers, photos et toutes vos données personnelles.
+                                </p>
+                                <button
+                                    onClick={() => setShowDeleteModal(true)}
+                                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-lg hover:scale-105 transform-gpu transition-all duration-300 font-medium"
+                                >
+                                    <PiTrash className="text-xl" />
+                                    Supprimer mon compte
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Modal de confirmation de suppression */}
+                        <Modal
+                            opened={showDeleteModal}
+                            onClose={() => {
+                                setShowDeleteModal(false);
+                                setDeleteConfirmation("");
+                            }}
+                            title={
+                                <div className="flex items-center gap-2 text-red-500">
+                                    <PiWarning className="text-2xl" />
+                                    <span className="text-xl font-bold">Confirmation de suppression</span>
+                                </div>
+                            }
+                            centered
+                            size="md"
+                            styles={{
+                                body: { backgroundColor: '#171717' },
+                                header: { backgroundColor: '#171717' },
+                                modal: { backgroundColor: '#171717' },
+                                title: { color: '#ef4444' }
+                            }}
+                        >
+                            <div className="text-white">
+                                <div className="bg-red-950/30 border-2 border-red-800 rounded-lg p-4 mb-4">
+                                    <p className="text-red-400 font-semibold mb-2">
+                                        ⚠️ Attention ! Cette action est irréversible
+                                    </p>
+                                    <p className="text-gray-300 text-sm">
+                                        La suppression de votre compte entraînera la perte définitive de :
+                                    </p>
+                                    <ul className="list-disc list-inside text-gray-400 text-sm mt-2 space-y-1">
+                                        <li>Tous vos articles publiés</li>
+                                        <li>Tous vos commentaires</li>
+                                        <li>Votre photo de profil</li>
+                                        <li>Vos followers et following</li>
+                                        <li>Vos articles sauvegardés</li>
+                                        <li>Toutes vos données personnelles</li>
+                                    </ul>
+                                </div>
+
+                                <div className="mb-4">
+                                    <p className="text-gray-300 mb-2">
+                                        Pour confirmer la suppression, tapez <span className="font-bold text-red-400">SUPPRIMER</span> ci-dessous :
+                                    </p>
+                                    <input
+                                        type="text"
+                                        value={deleteConfirmation}
+                                        onChange={(e) => setDeleteConfirmation(e.target.value)}
+                                        placeholder="Tapez SUPPRIMER"
+                                        className="w-full bg-[#202020] border-2 border-red-800 rounded-lg px-4 py-3 text-white focus:border-red-600 focus:outline-none transition-colors"
+                                    />
+                                </div>
+
+                                <div className="flex gap-3 justify-end">
+                                    <button
+                                        onClick={() => {
+                                            setShowDeleteModal(false);
+                                            setDeleteConfirmation("");
+                                        }}
+                                        disabled={isDeleting}
+                                        className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                                    >
+                                        Annuler
+                                    </button>
+                                    <button
+                                        onClick={handleDeleteAccount}
+                                        disabled={deleteConfirmation !== "SUPPRIMER" || isDeleting}
+                                        className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    >
+                                        {isDeleting ? (
+                                            <>
+                                                <span className="animate-spin">⏳</span>
+                                                Suppression...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <PiTrash />
+                                                Supprimer définitivement
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </Modal>
                     </div>
                 </div>
             </div>

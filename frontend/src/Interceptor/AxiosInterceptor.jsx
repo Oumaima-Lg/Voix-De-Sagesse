@@ -1,41 +1,34 @@
-// AxiosIntercepteur.jsx
 import axios from 'axios';
 import { errorNotification } from '../services/NotificationService';
 import { removeUser } from '../Slices/UserSlice';
 import { removeJwt } from '../Slices/JwtSlice';
 import store from '../store';
 
-// Nous n'importons plus useAuth ici pour éviter les problèmes de hook dans un contexte non-React
-// et pour centraliser la logique de redirection dans useAuth.logout
-
 const axiosInstance = axios.create({
   baseURL: "http://localhost:8080",
-  timeout: 10000,
+  timeout:  60000,
   headers: {
     'Content-Type': 'application/json',
   }
 });
 
-// ✅ Fonction pour vérifier si la route est publique
 const isPublicRoute = (url) => {
   const publicRoutes = [
     '/auth/login',
-    '/users/auth/register',
-    '/users/verifyOtp/',
-    '/users/sendOtp/',
-    '/users/auth/changePass'
+    '/auth/register',
+    '/auth/verifyOtp/',
+    '/auth/sendOtp/',
+    '/auth/changePass'
   ];
   return publicRoutes.some(route => url.includes(route));
 };
 
-// ✅ Intercepteur pour ajouter le token (AMÉLIORÉ)
 axiosInstance.interceptors.request.use(
   (config) => {
+
     const token = localStorage.getItem("token");
     const userData = localStorage.getItem("user");
 
-    // ✅ Vérification de cohérence avant chaque requête
-    // Ces vérifications sont importantes pour maintenir la cohérence avant d'envoyer la requête
     if (token && !userData) {
       console.log('Token exists but no user data - clearing token');
       localStorage.removeItem("token");
@@ -46,13 +39,11 @@ axiosInstance.interceptors.request.use(
       store.dispatch(removeUser());
     }
 
-    // Ajouter le token seulement si présent et route non publique
     const validToken = localStorage.getItem("token");
     if (validToken && !isPublicRoute(config.url)) {
       config.headers.Authorization = `Bearer ${validToken}`;
     }
 
-    // Ne pas écraser le Content-Type si c'est déjà défini
     if (config.headers['Content-Type'] === 'multipart/form-data') {
       delete config.headers['Content-Type'];
     }
