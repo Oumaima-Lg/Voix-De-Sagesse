@@ -98,6 +98,8 @@ public interface UserService {
 
     public List<UserDTO> getAllUsers() throws ArticlaException;
 
+    public void deleteUserAccount(Long userId) throws ArticlaException;
+
 }
 
 

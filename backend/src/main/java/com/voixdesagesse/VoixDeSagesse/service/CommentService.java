@@ -15,6 +15,5 @@ public interface CommentService {
     
     Long getCommentsCountByArticle(Long articleId);
     
-    void deleteAllCommentsByArticle(Long articleId) throws ArticlaException;
 
 }

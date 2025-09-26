@@ -37,7 +37,9 @@ import com.voixdesagesse.VoixDeSagesse.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @CrossOrigin
 @Validated
@@ -53,38 +55,37 @@ public class UserController {
     private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
             "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp");
 
-
     @PostMapping("/follow/{targetUserId}")
     public ResponseEntity<?> followUser(@PathVariable Long targetUserId) throws ArticlaException {
-            User currentUser = userService.getCurrentUser();
-            userService.followUser(currentUser.getId(), targetUserId);
+        User currentUser = userService.getCurrentUser();
+        userService.followUser(currentUser.getId(), targetUserId);
 
-            return ResponseEntity.ok(Map.of(
-                    "message", "Utilisateur suivi avec succès",
-                    "success", true,
-                    "isFollowing", true));
+        return ResponseEntity.ok(Map.of(
+                "message", "Utilisateur suivi avec succès",
+                "success", true,
+                "isFollowing", true));
     }
 
     @DeleteMapping("/unfollow/{targetUserId}")
     public ResponseEntity<?> unfollowUser(@PathVariable Long targetUserId) throws ArticlaException {
-            User currentUser = userService.getCurrentUser();
-            userService.unfollowUser(currentUser.getId(), targetUserId);
+        User currentUser = userService.getCurrentUser();
+        userService.unfollowUser(currentUser.getId(), targetUserId);
 
-            return ResponseEntity.ok(Map.of(
-                    "message", "Vous ne suivez plus cet utilisateur",
-                    "success", true,
-                    "isFollowing", false));
+        return ResponseEntity.ok(Map.of(
+                "message", "Vous ne suivez plus cet utilisateur",
+                "success", true,
+                "isFollowing", false));
 
     }
 
     @GetMapping("/is-following/{targetUserId}")
-    public ResponseEntity<?> isFollowingUser(@PathVariable Long targetUserId)  throws ArticlaException  {
-            User currentUser = userService.getCurrentUser();
-            boolean isFollowing = userService.isFollowing(currentUser.getId(), targetUserId);
+    public ResponseEntity<?> isFollowingUser(@PathVariable Long targetUserId) throws ArticlaException {
+        User currentUser = userService.getCurrentUser();
+        boolean isFollowing = userService.isFollowing(currentUser.getId(), targetUserId);
 
-            return ResponseEntity.ok(Map.of(
-                    "isFollowing", isFollowing,
-                    "success", true));
+        return ResponseEntity.ok(Map.of(
+                "isFollowing", isFollowing,
+                "success", true));
     }
 
     @GetMapping("/following")
@@ -105,7 +106,7 @@ public class UserController {
 
     @GetMapping("/my-followers")
     public ResponseEntity<?> getMyFollowers() throws ArticlaException {
-        
+
         User currentUser = userService.getCurrentUser();
         List<User> followers = userService.findByFollowingIdContaining(currentUser.getId());
 
@@ -160,7 +161,7 @@ public class UserController {
 
             // Créer la réponse
             Map<String, Object> response = new HashMap<>();
-            response.put("profilePictureUrl", fullUrl); 
+            response.put("profilePictureUrl", fullUrl);
             response.put("message", "Image uploadée avec succès");
             response.put("success", true);
 
@@ -181,7 +182,7 @@ public class UserController {
         try {
             Path uploadPath = Paths.get(uploadDir);
             Path filePath = uploadPath.resolve(filename);
-            
+
             if (!filePath.normalize().startsWith(uploadPath.normalize())) {
                 return ResponseEntity.badRequest().build();
             }
@@ -206,42 +207,67 @@ public class UserController {
         }
     }
 
-
     @PostMapping("/save-article/{articleId}")
     public ResponseEntity<?> saveArticle(@PathVariable Long articleId) throws ArticlaException {
-            User currentUser = userService.getCurrentUser();
-            userService.saveArticle(currentUser.getId(), articleId);
-            
-            return ResponseEntity.ok(Map.of(
+        User currentUser = userService.getCurrentUser();
+        userService.saveArticle(currentUser.getId(), articleId);
+
+        return ResponseEntity.ok(Map.of(
                 "message", "Article sauvegardé avec succès",
                 "success", true,
-                "isSaved", true
-            )); 
+                "isSaved", true));
     }
 
     @DeleteMapping("/unsave-article/{articleId}")
     public ResponseEntity<?> unsaveArticle(@PathVariable Long articleId) throws ArticlaException {
-            User currentUser = userService.getCurrentUser();
-            userService.unsaveArticle(currentUser.getId(), articleId);
-            
-            return ResponseEntity.ok(Map.of(
+        User currentUser = userService.getCurrentUser();
+        userService.unsaveArticle(currentUser.getId(), articleId);
+
+        return ResponseEntity.ok(Map.of(
                 "message", "Article retiré des favoris",
                 "success", true,
-                "isSaved", false
-            ));
+                "isSaved", false));
     }
 
     @GetMapping("/is-article-saved/{articleId}")
     public ResponseEntity<?> isArticleSaved(@PathVariable Long articleId) throws ArticlaException {
-            User currentUser = userService.getCurrentUser();
-            boolean isSaved = userService.isArticleSaved(currentUser.getId(), articleId);
-            
-            return ResponseEntity.ok(Map.of(
+        User currentUser = userService.getCurrentUser();
+        boolean isSaved = userService.isArticleSaved(currentUser.getId(), articleId);
+
+        return ResponseEntity.ok(Map.of(
                 "isSaved", isSaved,
-                "success", true
-            ));
+                "success", true));
     }
 
-    
+    @DeleteMapping("/delete-account")
+    public ResponseEntity<?> deleteAccount(HttpServletRequest request) {
+        try {
+            User currentUser = userService.getCurrentUser();
+
+            // Vérification de sécurité supplémentaire si nécessaire
+            log.info("Demande de suppression de compte pour l'utilisateur: {}", currentUser.getId());
+
+            // Supprimer le compte
+            userService.deleteUserAccount(currentUser.getId());
+
+            // Retourner une réponse de succès
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Votre compte a été supprimé avec succès"));
+
+        } catch (ArticlaException e) {
+            log.error("Erreur lors de la suppression du compte: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(Map.of(
+                            "success", false,
+                            "error", e.getMessage()));
+        } catch (Exception e) {
+            log.error("Erreur inattendue lors de la suppression du compte: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "success", false,
+                            "error", "Une erreur est survenue lors de la suppression du compte"));
+        }
+    }
 
 }

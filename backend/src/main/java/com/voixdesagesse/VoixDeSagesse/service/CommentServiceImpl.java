@@ -3,7 +3,6 @@ package com.voixdesagesse.VoixDeSagesse.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -92,14 +91,6 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void deleteAllCommentsByArticle(Long articleId) throws ArticlaException {
-        List<Comment> comments = commentRepository.findByArticleId(articleId);
-
-        comments.forEach(comment -> comment.setIsDeleted(true));
-        commentRepository.saveAll(comments);
-    }
-
-    @Override
     public void deleteComment(Long commentId, Long userId) throws ArticlaException {
         // Récupérer le commentaire
         Comment comment = commentRepository.findByIdAndUserIdAndIsDeletedFalse(commentId, userId);
@@ -121,14 +112,14 @@ public class CommentServiceImpl implements CommentService {
         System.out.println("Commentaire supprimé: " + commentId + " par utilisateur: " + userId);
     }
 
-    @Scheduled(cron = "0 0 2 * * ?") 
+    @Scheduled(cron = "0 0 2 * * ?")
     public void cleanupOldDeletedComments() {
         LocalDateTime cutoffDate = LocalDateTime.now().minusWeeks(1);
 
         List<Comment> oldDeletedComments = commentRepository
                 .findByIsDeletedTrueAndDeletedAtBefore(cutoffDate);
 
-        commentRepository.deleteAll(oldDeletedComments); 
+        commentRepository.deleteAll(oldDeletedComments);
 
         log.info("Nettoyage: " + oldDeletedComments.size() + " commentaires purgés");
     }
@@ -151,4 +142,6 @@ public class CommentServiceImpl implements CommentService {
                 timeAgo,
                 comment.getDateCreation());
     }
+
+    
 }

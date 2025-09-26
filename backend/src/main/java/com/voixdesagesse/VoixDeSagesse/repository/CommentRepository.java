@@ -35,4 +35,6 @@ public interface CommentRepository extends MongoRepository<Comment, Long> {
     // Trouver les commentaires supprimés avant une certaine date
     @Query("{ 'isDeleted': true, 'deletedAt': { $lt: ?0 } }")
     List<Comment> findByIsDeletedTrueAndDeletedAtBefore(LocalDateTime cutoffDate);
+
+    List<Comment> findByUserId(Long userId);
 }

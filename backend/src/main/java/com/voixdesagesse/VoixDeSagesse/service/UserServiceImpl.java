@@ -29,11 +29,14 @@ import com.voixdesagesse.VoixDeSagesse.dto.ResponseDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserProfileDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserRegistrationDTO;
+import com.voixdesagesse.VoixDeSagesse.entity.Article;
 import com.voixdesagesse.VoixDeSagesse.entity.Data;
 import com.voixdesagesse.VoixDeSagesse.entity.OTP;
 import com.voixdesagesse.VoixDeSagesse.entity.User;
 import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
+import com.voixdesagesse.VoixDeSagesse.repository.ArticleRepository;
 import com.voixdesagesse.VoixDeSagesse.repository.OTPRepository;
+import com.voixdesagesse.VoixDeSagesse.repository.SignalRepository;
 import com.voixdesagesse.VoixDeSagesse.repository.UserRepository;
 import com.voixdesagesse.VoixDeSagesse.utility.Utilities;
 
@@ -53,6 +56,9 @@ public class UserServiceImpl implements UserService {
     private final OTPRepository otpRepository;
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender mailSender;
+    private final CommonService commonService;
+    private final SignalRepository signalRepository;
+    private final ArticleRepository articleRepository;
 
     @Override
     public User getCurrentUser() throws ArticlaException {
@@ -465,6 +471,113 @@ public class UserServiceImpl implements UserService {
         return users.stream()
                 .map(User::toDTO)
                 .collect(Collectors.toList());
-    }    
+    }
 
+    @Override
+    @Transactional
+    public void deleteUserAccount(Long userId) throws ArticlaException {
+        log.info("Début de la suppression du compte utilisateur: {}", userId);
+
+        User user = getUserById(userId);
+
+        // 1. Supprimer la photo de profil du système de fichiers
+        if (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) {
+            try {
+                deleteOldProfilePicture(user.getProfilePicture());
+                log.info("Photo de profil supprimée pour l'utilisateur: {}", userId);
+            } catch (Exception e) {
+                log.error("Erreur lors de la suppression de la photo de profil: {}", e.getMessage());
+            }
+        }
+
+        // 2. Supprimer tous les commentaires de l'utilisateur
+        commonService.deleteAllCommentsByUser(userId);
+        log.info("Commentaires supprimés pour l'utilisateur: {}", userId);
+
+        // 3. Récupérer tous les articles de l'utilisateur
+        List<Article> userArticles = articleRepository.findByUserId(userId);
+
+        // 4. Pour chaque article de l'utilisateur
+        for (Article article : userArticles) {
+            // Supprimer l'article de toutes les listes de likes des autres utilisateurs
+            userRepository.removeArticleFromAllUsersLikes(article.getId());
+
+            // Supprimer l'article de toutes les listes sauvegardées des autres utilisateurs
+            userRepository.removeArticleFromAllUsersSaved(article.getId());
+
+            // Supprimer tous les commentaires sur cet article
+            commonService.deleteAllCommentsByArticle(article.getId());
+
+            // Supprimer tous les signalements liés à cet article
+            signalRepository.deleteByArticleId(article.getId());
+        }
+
+        // 5. Supprimer tous les articles de l'utilisateur
+        articleRepository.deleteByUserId(userId);
+        log.info("Articles supprimés pour l'utilisateur: {}", userId);
+
+        // 6. Gérer les relations de suivi
+        // Retirer l'utilisateur de la liste following de tous ceux qui le suivent
+        List<User> followers = userRepository.findByFollowingIdContaining(userId);
+        for (User follower : followers) {
+            follower.getFollowingId().remove(userId);
+            follower.setFollowingCount(Math.max(0, follower.getFollowingCount() - 1));
+            userRepository.save(follower);
+        }
+
+        // Pour chaque utilisateur que l'utilisateur supprimé suivait, décrémenter leur
+        // compteur de followers
+        if (user.getFollowingId() != null && !user.getFollowingId().isEmpty()) {
+            for (Long followedUserId : user.getFollowingId()) {
+                try {
+                    User followedUser = getUserById(followedUserId);
+                    followedUser.setFollowersCount(Math.max(0, followedUser.getFollowersCount() - 1));
+                    userRepository.save(followedUser);
+                } catch (ArticlaException e) {
+                    log.error("Erreur lors de la mise à jour du follower count pour l'utilisateur: {}", followedUserId);
+                }
+            }
+        }
+
+        // 7. Gérer les likes donnés par l'utilisateur
+        if (user.getLikedArticlesId() != null && !user.getLikedArticlesId().isEmpty()) {
+            for (Long articleId : user.getLikedArticlesId()) {
+                try {
+                    Article article = articleRepository.findById(articleId).orElse(null);
+                    if (article != null) {
+                        // Décrémenter le compteur de likes de l'article
+                        article.setLikes(Math.max(0, article.getLikes() - 1));
+                        articleRepository.save(article);
+
+                        // Décrémenter les likes reçus par l'auteur de l'article
+                        try {
+                            User articleAuthor = getUserById(article.getUserId());
+                            articleAuthor.setLikesReceived(Math.max(0, articleAuthor.getLikesReceived() - 1));
+                            userRepository.save(articleAuthor);
+                        } catch (ArticlaException e) {
+                            log.error("Erreur lors de la mise à jour des likes reçus pour l'auteur: {}",
+                                    article.getUserId());
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Erreur lors de la suppression du like pour l'article: {}", articleId);
+                }
+            }
+        }
+
+        // 8. Supprimer tous les signalements faits par l'utilisateur
+        signalRepository.deleteByReporterId(userId);
+
+        // 9. Supprimer tous les signalements contre l'utilisateur
+        signalRepository.deleteByReportedUserId(userId);
+
+        // 10. Supprimer l'OTP si existe
+        otpRepository.deleteById(user.getEmail());
+
+        // 11. Finalement, supprimer l'utilisateur
+        userRepository.deleteById(userId);
+        log.info("Compte utilisateur supprimé avec succès: {}", userId);
+    }
+
+    
 }

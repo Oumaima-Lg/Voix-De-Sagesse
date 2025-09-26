@@ -58,4 +58,6 @@ public interface ArticleRepository extends MongoRepository<Article, Long> {
         long countByDatePublicationAfter(LocalDateTime date);
 
         Long countByDatePublicationBetween(LocalDateTime start, LocalDateTime end);
+
+        void deleteByUserId(Long userId);
 }

@@ -33,7 +33,7 @@ public class ArticleService {
 
     private final UserService userService;
 
-    private final CommentService commentService;
+    private final CommonService commonService;
 
     private final ConcurrentHashMap<String, Long> likeOperationCache = new ConcurrentHashMap<>();
 
@@ -311,7 +311,7 @@ public class ArticleService {
             userService.decrementLikesReceivedByAmount(currentUserId, likesCount);
 
         userService.decrementContentCount(currentUserId);
-        commentService.deleteAllCommentsByArticle(articleId);
+        commonService.deleteAllCommentsByArticle(articleId);
         articleRepository.deleteById(articleId);
 
         log.info("Article supprimé - ID: %d, Likes: %d, Commentaires: %d, Partages: %d%n",
@@ -383,6 +383,11 @@ public class ArticleService {
         LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
         LocalDateTime endOfDay = startOfDay.plusDays(1);
         return articleRepository.countByDatePublicationBetween(startOfDay, endOfDay);
+    }
+
+    @Transactional
+    public void deleteByUserId(Long userId) {
+        articleRepository.deleteByUserId(userId);
     }
 
 }

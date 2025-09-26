@@ -32,4 +32,10 @@ public interface SignalRepository extends MongoRepository<Signal, Long> {
 
     List<Signal> findAllByOrderByCreatedAtDesc();
 
+    void deleteByArticleId(Long articleId);
+
+    void deleteByReporterId(Long reporterId);
+
+    void deleteByReportedUserId(Long reportedUserId);
+
 }

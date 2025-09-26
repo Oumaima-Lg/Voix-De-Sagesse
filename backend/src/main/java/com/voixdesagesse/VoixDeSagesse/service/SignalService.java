@@ -164,4 +164,19 @@ public class SignalService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
+
+    @Transactional
+    public void deleteByArticleId(Long id) {
+       signalRepository.deleteByArticleId(id);
+    }
+
+    @Transactional
+    public void deleteByReporterId(Long userId) {
+        signalRepository.deleteByReporterId(userId);
+    }
+
+    @Transactional
+    public void deleteByReportedUserId(Long userId) {
+        signalRepository.deleteByReportedUserId(userId);
+    }
 }
