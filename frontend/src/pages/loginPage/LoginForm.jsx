@@ -22,12 +22,11 @@ const LoginForm = () => {
     const [visible, { toggle }] = useDisclosure(true);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const location = useLocation(); // ✅ Pour gérer les redirections
-    const { clearAuth } = useAuth(); // ✅ Hook pour nettoyer l'auth
+    const location = useLocation(); 
+    const { clearAuth } = useAuth(); 
     const [urlMessage, setUrlMessage] = useState('');
     const [isFromLogout, setIsFromLogout] = useState(false);
 
-    // ✅ Effet pour récupérer le message et l'indicateur fromLogout depuis l'URL
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const message = params.get('message');
@@ -35,7 +34,6 @@ const LoginForm = () => {
 
         if (message) {
             setUrlMessage(decodeURIComponent(message));
-            // Nettoyer l'URL après avoir récupéré le message
             window.history.replaceState({}, '', location.pathname);
         }
         if (fromLogoutParam === 'true') {
@@ -59,9 +57,8 @@ const LoginForm = () => {
         setData({ ...data, [e.target.name]: e.target.value });
     }
 
-    // ✅ Fonction handleSubmit mise à jour avec synchronisation complète
     const handleSubmit = (e) => {
-        e.preventDefault(); // Empêcher le comportement par défaut du formulaire
+        e.preventDefault(); 
 
         let valid = true;
         let newFormError = {};
@@ -81,45 +78,32 @@ const LoginForm = () => {
                     console.log('Login success response:', res);
 
                     try {
-                        // ✅ ÉTAPE 1: Nettoyer toute donnée d'authentification existante
                         clearAuth();
 
-                        // ✅ ÉTAPE 2: Décoder le JWT
                         const decoded = jwtDecode(res.jwt);
                         console.log('Decoded JWT:', decoded);
 
-                        // ✅ ÉTAPE 3: Préparer les données utilisateur
                         const userData = {
                             ...decoded,
                             email: decoded.sub,
                             accountType: decoded.accountType,
-                            // Ajouter d'autres champs si nécessaire depuis la réponse
-                            ...(res.user || {}) // Si le backend renvoie des infos user supplémentaires
+                            ...(res.user || {})
                         };
 
-                        // ✅ ÉTAPE 4: Sauvegarder dans localStorage ET Redux de manière synchrone
                         localStorage.setItem('token', res.jwt);
                         localStorage.setItem('user', JSON.stringify(userData));
 
                         dispatch(setJwt(res.jwt));
                         dispatch(setUser(userData));
-
-                        // ✅ ÉTAPE 5: Notification de succès
                         successNotification('Succès', 'Connexion réussie !');
-
-                        // ✅ ÉTAPE 6: Redirection intelligente après un délai réduit
                         setTimeout(() => {
                             setLoading(false);
-
-                            // Déterminer la destination en fonction du rôle
                             let redirectTo;
 
-                            // Si c'est un admin, rediriger vers le dashboard admin
                             if (userData.accountType === 'ADMIN') {
                                 redirectTo = '/admin/dashboard';
                                 console.log('Redirecting admin user to:', redirectTo);
                             } else {
-                                // Pour les utilisateurs normaux, utiliser la logique de redirection existante
                                 const redirectParam = new URLSearchParams(location.search).get('redirect');
                                 const from = location.state?.from?.pathname;
                                 redirectTo = redirectParam || from || '/articla';
@@ -139,7 +123,6 @@ const LoginForm = () => {
                     setLoading(false);
                     console.error('Login error:', err);
 
-                    // ✅ Gestion d'erreur améliorée
                     const errorMessage = err.response?.data?.errorMessage ||
                         err.response?.data?.message ||
                         err.message ||
@@ -151,12 +134,11 @@ const LoginForm = () => {
         }
     }
 
-    // ✅ Fonction pour gérer la navigation vers register avec nettoyage
     const handleNavigateToRegister = (e) => {
         e.preventDefault();
         setFormError(form);
         setData(form);
-        clearAuth(); // S'assurer qu'il n'y a pas de données résiduelles
+        clearAuth();
         navigate("/auth/register");
     }
 
@@ -169,8 +151,8 @@ const LoginForm = () => {
 
                         {urlMessage && (
                             <div className={`text-center text-sm mb-4 p-3 rounded border ${isFromLogout
-                                ? 'text-green-400 bg-green-400/10 border-green-400/20' // ✅ Vert pour déconnexion réussie
-                                : 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20' // ✅ Jaune pour erreurs/session expirée
+                                ? 'text-green-400 bg-green-400/10 border-green-400/20' 
+                                : 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20' 
                                 }`}>
                                 <div className="flex items-center justify-center gap-2">
                                     <span>
@@ -189,17 +171,17 @@ const LoginForm = () => {
                                 value={data.email}
                                 onChange={handleChange}
                                 name="email"
-                                disabled={loading} // ✅ Désactiver pendant le chargement
+                                disabled={loading} 
                             />
                             <TextInput
                                 error={formError.password}
                                 size='lg'
                                 placeholder="Mot de passe"
-                                type="password" // ✅ Type password pour la sécurité
+                                type="password"
                                 value={data.password}
                                 onChange={handleChange}
                                 name="password"
-                                disabled={loading} // ✅ Désactiver pendant le chargement
+                                disabled={loading}
                             />
 
                             <div>
@@ -213,14 +195,14 @@ const LoginForm = () => {
                                 <button
                                     className="btn btn-border-gradient text-amber-50! mb-6!"
                                     onClick={handleSubmit}
-                                    disabled={loading} // ✅ Désactiver pendant le chargement
-                                    type="submit" // ✅ Type submit pour le formulaire
+                                    disabled={loading}
+                                    type="submit" 
                                 >
                                     {loading ? 'CONNEXION...' : 'CONNEXION'}
                                 </button>
 
                                 <div
-                                    onClick={loading ? undefined : open} // ✅ Désactiver pendant le chargement
+                                    onClick={loading ? undefined : open} 
                                     className={`block mb-6! border-b-1 max-w-max mx-auto ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                                 >
                                     Mot de passe oublié ?
@@ -231,8 +213,8 @@ const LoginForm = () => {
                                 <button
                                     className="btn btn-border-gradient text-amber-50! cursor-pointer"
                                     onClick={handleNavigateToRegister}
-                                    disabled={loading} // ✅ Désactiver pendant le chargement
-                                    type="button" // ✅ Type button pour éviter la soumission
+                                    disabled={loading} 
+                                    type="button"
                                 >
                                     Créer un nouveau compte
                                 </button>

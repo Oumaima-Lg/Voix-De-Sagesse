@@ -56,10 +56,10 @@ const AdminDashboard = () => {
         pendingSignals: 0,
     })
 
-    // État pour les utilisateurs, initialisé comme tableau vide
+
     const [users, setUsers] = useState([])
 
-    // Statistiques dynamiques basées sur les données de l'API
+    
     const stats = [
         {
             title: "Utilisateurs Total",
@@ -95,21 +95,20 @@ const AdminDashboard = () => {
         },
     ]
 
-    // Fonction pour charger les statistiques du tableau de bord
+
     const loadDashboardStats = async () => {
         try {
             const data = await getDashboardStats()
             setDashboardStats({
                 ...data,
-                totalSignals: 47, // Exemple de données
-                pendingSignals: 12, // Exemple de données
+                totalSignals: 47, 
+                pendingSignals: 12,
             })
         } catch (error) {
             console.error("Erreur lors du chargement des statistiques:", error)
         }
     }
 
-    // Fonction pour charger la liste des utilisateurs
     const loadUsers = async () => {
         try {
             const data = await getAllUsers()
@@ -117,7 +116,6 @@ const AdminDashboard = () => {
                 "Données des utilisateurs reçues avec profilePicture:",
                 data.map((u) => ({ id: u.id, profilePicture: u.profilePicture })),
             )
-            // Transformation des données utilisateurs reçues pour correspondre à la structure attendue
             const formattedUsers = data.map((user) => ({
                 id: user.id,
                 nom: user.nom,
@@ -129,8 +127,8 @@ const AdminDashboard = () => {
                         : user.accountType === "MODERATOR"
                             ? "Modérateur"
                             : "Utilisateur",
-                status: "Actif", // Par défaut, on considère tous les utilisateurs comme actifs
-                dateInscription: user.dateInscription, // Date d'inscription (à ajuster si disponible dans l'API)
+                status: "Actif",
+                dateInscription: user.dateInscription, 
                 profilePicture: user.profilePicture || null,
             }))
             setUsers(formattedUsers)
@@ -143,7 +141,6 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         setMounted(true)
-        // Chargement des données au montage du composant
         loadDashboardStats()
         loadUsers()
 
@@ -207,7 +204,6 @@ const AdminDashboard = () => {
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber)
 
-    // Navigation tabs
     const tabs = [
         { id: "dashboard", label: "Tableau de Bord", icon: BarChart3 },
         { id: "signals", label: "Signalements", icon: AlertTriangle },
@@ -244,7 +240,7 @@ const AdminDashboard = () => {
         )
     }
 
-    // Afficher un loader pendant le chargement des données
+
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gray-900">

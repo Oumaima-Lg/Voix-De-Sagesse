@@ -2,7 +2,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getItem, setItem, removeItem } from "../services/LocalStorageService";
 
-// L'état initial : on récupère l'utilisateur depuis le localStorage
 const initialState = localStorage.getItem("token") || "";
 
 const JwtSlice = createSlice({
@@ -10,12 +9,12 @@ const JwtSlice = createSlice({
   initialState,
   reducers: {
     setJwt: (state, action) => {
-      localStorage.setItem("token", action.payload); // effet de bord
-      return action.payload; // met à jour l'état avec le nouvel utilisateur
+      localStorage.setItem("token", action.payload); 
+      return action.payload; 
     },
     removeJwt: () => {
-      localStorage.removeItem("token"); // effet de bord
-      return ""; // réinitialise l'état
+      localStorage.removeItem("token"); 
+      return ""; 
     },
   },
 });

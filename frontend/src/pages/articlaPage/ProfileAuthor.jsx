@@ -14,13 +14,12 @@ import { useParams } from "react-router-dom";
 
 const Profile = ({userId: propUserId}) => {
 
-    const { id } = useParams();  // récupère l'id de l'URL
-    const userId = propUserId || id; // si un prop est passé, sinon depuis l'URL
+    const { id } = useParams(); 
+    const userId = propUserId || id; 
 
     const [loading, setLoading] = useState(true);
     const [uploadingImage, setUploadingImage] = useState(false);
 
-    // État pour stocker les données du profil reçues du backend
     const [userProfile, setUserProfile] = useState(null);
 
     useEffect(() => {
@@ -38,8 +37,6 @@ const Profile = ({userId: propUserId}) => {
     }, []);
 
 
-
-    // Si les données ne sont pas encore chargées, afficher le loading
     if (!userProfile) {
         return (
             <div className="pt-26 px-4 lg:px-8">
@@ -83,7 +80,7 @@ const Profile = ({userId: propUserId}) => {
                                         src={userProfile.profilePicture ?
                                             (userProfile.profilePicture.startsWith('http') ?
                                                 userProfile.profilePicture :
-                                                `http://localhost:8080${userProfile.profilePicture}` // Le chemin commence déjà par /uploads
+                                                `http://localhost:8080${userProfile.profilePicture}` 
                                             ) : profileAvatar}
                                         alt="Profile"
                                         className="w-32 h-32 rounded-full border-4 border-[#A09F87] object-cover"

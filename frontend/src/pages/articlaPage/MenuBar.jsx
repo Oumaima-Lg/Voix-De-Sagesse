@@ -74,7 +74,6 @@ const sharedTransition = {
 };
 
 function MenuBar() {
-  // Dark mode forcé
   const isDarkTheme = true;
 
   return (

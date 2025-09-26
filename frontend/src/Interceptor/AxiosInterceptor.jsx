@@ -70,16 +70,12 @@ axiosInstance.interceptors.response.use(
             const token = localStorage.getItem('token');
             const userData = localStorage.getItem('user');
 
-            // Si le token et les données utilisateur sont déjà absents, cela signifie
-            // qu'une déconnexion volontaire a probablement déjà eu lieu ou que l'état est déjà nettoyé.
-            // Dans ce cas, nous ne faisons rien pour éviter d'écraser le message de déconnexion.
             if (!token && !userData) {
               console.log('401 received but token and user already cleared. Assuming voluntary logout or already handled.');
               return Promise.reject(error);
             }
 
-            // Si nous arrivons ici, c'est un 401 inattendu (session expirée, token invalide, etc.)
-            // Nous nettoyons l'état et redirigeons avec un message d'expiration.
+     
             let message = 'Session expirée, veuillez vous reconnecter';
 
             if (!token && userData) {
@@ -90,31 +86,22 @@ axiosInstance.interceptors.response.use(
 
             errorNotification('Session expirée', message);
 
-            // Nettoyer l'état global via Redux et localStorage
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             store.dispatch(removeUser());
             store.dispatch(removeJwt());
 
-            // Redirection complète pour réinitialiser l'application React
             window.location.href = `/auth/login?message=${encodeURIComponent(message)}&redirect=${encodeURIComponent(window.location.pathname)}`;
           }
           break;
         
-        // Dans la section case 403:
         case 403:
           errorNotification('Accès refusé', 'Vous n\'avez pas les permissions nécessaires');
 
-          // Si l'utilisateur tentait d'accéder à une route admin mais n'est pas admin
           if (config.url.includes('/admin/')) {
-            // Rediriger vers la page principale utilisateur
             window.location.href = '/articla';
           }
           break;
-
-        // case 403:
-        //   errorNotification('Accès refusé', 'Vous n\'avez pas les permissions nécessaires');
-        //   break;
 
         case 500:
           errorNotification('Erreur serveur', 'Une erreur interne s\'est produite');

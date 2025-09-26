@@ -24,8 +24,6 @@ const Profile = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteConfirmation, setDeleteConfirmation] = useState("");
     const [isDeleting, setIsDeleting] = useState(false);
-
-    // État pour stocker les données du profil reçues du back)end
     const [userProfile, setUserProfile] = useState(null);
 
     useEffect(() => {
@@ -34,7 +32,6 @@ const Profile = () => {
             .then((data) => {
                 console.log(data);
                 setUserProfile(data);
-                // Initialiser editedUser avec les données reçues
                 setEditedUser({
                     id: data.id || "",
                     nom: data.nom || "",
@@ -45,7 +42,6 @@ const Profile = () => {
                     location: data.location || "",
                     bio: data.bio || "",
                     website: data.website || "",
-                    // Garder les préférences du Redux car elles ne sont pas dans UserProfileDTO
                     preferredLanguage: user.preferredLanguage || "fr",
                     emailNotifications: user.emailNotifications || true,
                     pushNotifications: user.pushNotifications || true,
@@ -112,7 +108,7 @@ const Profile = () => {
         updateUserProfile(editedUser).then((res) => {
             console.log(res);
             dispatch(updateUser(res));
-            // Mettre à jour userProfile avec les nouvelles données
+
             setUserProfile(prev => ({
                 ...prev,
                 ...res
@@ -123,6 +119,32 @@ const Profile = () => {
             errorNotification('Error', err.response.data.errorMessage);
         })
         setIsEditing(false)
+    }
+
+    const handleEditToggle = () => {
+        if (isEditing) {
+            handleCancel()
+        } else {
+            if (userProfile) {
+                setEditedUser((prev) => ({
+                    ...prev,
+                    id: userProfile.id || "",
+                    nom: userProfile.nom || "",
+                    prenom: userProfile.prenom || "",
+                    email: userProfile.email || "",
+                    username: userProfile.username || "",
+                    phoneNumber: userProfile.phoneNumber || "",
+                    location: userProfile.location || "",
+                    bio: userProfile.bio || "",
+                    website: userProfile.website || "",
+                    preferredLanguage: user.preferredLanguage || "fr",
+                    emailNotifications: user.emailNotifications ?? true,
+                    pushNotifications: user.pushNotifications ?? true,
+                    profileVisibility: user.profileVisibility || "PUBLIC",
+                }))
+            }
+            setIsEditing(true)
+        }
     }
 
     const handleCancel = () => {
@@ -137,7 +159,6 @@ const Profile = () => {
                 location: userProfile.location || "",
                 bio: userProfile.bio || "",
                 website: userProfile.website || "",
-                // Garder les préférences du Redux
                 preferredLanguage: user.preferredLanguage || "fr",
                 emailNotifications: user.emailNotifications || true,
                 pushNotifications: user.pushNotifications || true,
@@ -151,13 +172,11 @@ const Profile = () => {
         const file = event.target.files[0];
         if (!file) return;
 
-        // Vérifier que c'est bien une image
         if (!file.type.startsWith('image/')) {
             errorNotification('Erreur', 'Veuillez sélectionner un fichier image valide.');
             return;
         }
 
-        // Vérifier la taille du fichier (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
             errorNotification('Erreur', 'La taille de l\'image ne doit pas dépasser 5MB.');
             return;
@@ -166,24 +185,20 @@ const Profile = () => {
         try {
             setUploadingImage(true);
 
-            // Créer FormData pour l'upload
             const formData = new FormData();
             formData.append('profilePicture', file);
             formData.append('userId', user.id);
 
-            // Appeler le service d'upload
             const response = await uploadProfilePicture(formData);
 
             console.log('Response from backend:', response);
             console.log('Profile picture URL:', response.profilePictureUrl);
 
-            // Mettre à jour le profil local
             setUserProfile(prev => ({
                 ...prev,
                 profilePicture: response.profilePictureUrl
             }));
 
-            // Mettre à jour Redux si nécessaire
             dispatch(updateUser({
                 ...user,
                 profilePicture: response.profilePictureUrl
@@ -198,7 +213,6 @@ const Profile = () => {
         }
     }
 
-    // Si les données ne sont pas encore chargées, afficher le loading
     if (!userProfile) {
         return (
             <div className="pt-26 px-4 lg:px-8">
@@ -242,7 +256,7 @@ const Profile = () => {
                                         src={userProfile.profilePicture ?
                                             (userProfile.profilePicture.startsWith('http') ?
                                                 userProfile.profilePicture :
-                                                `http://localhost:8080${userProfile.profilePicture}` // Le chemin commence déjà par /uploads
+                                                `http://localhost:8080${userProfile.profilePicture}`
                                             ) : profileAvatar}
                                         alt="Profile"
                                         className="w-32 h-32 rounded-full border-4 border-[#A09F87] object-cover"
@@ -293,7 +307,7 @@ const Profile = () => {
 
                             {/* Bouton d'édition */}
                             <button
-                                onClick={() => setIsEditing(!isEditing)}
+                                onClick={handleEditToggle}
                                 className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#A09F87] to-[#4C3163] text-white py-3 px-4 rounded-lg hover:scale-105 transform-gpu transition-all duration-300 font-medium"
                             >
                                 {isEditing ? (

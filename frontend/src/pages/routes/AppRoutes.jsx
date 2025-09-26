@@ -14,14 +14,12 @@ import MyPosts from '../articlaPage/MyPosts'
 import NotFoundPage from './NotFoundPage'
 import { AuthChecker, PublicRoute, ProtectedRoute } from '../../services/AuthGuard'
 import { AdminRoute } from '../../services/AdminGuard'
-import AdminDashboard from '../adminPage/AdminDashboard' // À créer
-// import UserManagement from '../adminPage/UserManagement' // À créer
+import AdminDashboard from '../adminPage/AdminDashboard'
 
 
 const AppRoutes = () => {
     const user = useSelector((state) => state.user);
-    // const location = useLocation()
-    // console.log(location.pathname)
+
     return (
         <AuthChecker>
             <Routes>

@@ -23,10 +23,10 @@ const HeaderArticla = () => {
     const user = useSelector((state) => state.user);
     const { logout } = useAuth();
 
-     // ✅ Fonction de déconnexion avec message personnalisé
+   
     const handleLogout = () => {
-        setToggle(false); // Fermer le menu dropdown
-        logout('Vous avez été déconnecté avec succès'); // ✅ Message personnalisé
+        setToggle(false); 
+        logout('Vous avez été déconnecté avec succès');
     }
 
     const handleProfile = () => {
@@ -65,7 +65,7 @@ const HeaderArticla = () => {
                             <img src={user.profilePicture ?
                                 (user.profilePicture.startsWith('http') ?
                                     user.profilePicture :
-                                    `http://localhost:8080${user.profilePicture}` // Le chemin commence déjà par /uploads
+                                    `http://localhost:8080${user.profilePicture}` 
                                 ) : profileAvatar} alt="" 
                                 className="size-10 border-[#A09F87] object-cover"/>
                         </div>

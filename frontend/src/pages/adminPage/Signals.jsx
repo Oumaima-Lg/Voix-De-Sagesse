@@ -125,7 +125,6 @@ const Signals = () => {
             setProcessingSignal(true)
             await processSignal(signalId, status, user.id)
             
-            // Mise à jour locale
             setSignals(signals.map(signal => 
                 signal.id === signalId 
                     ? { 

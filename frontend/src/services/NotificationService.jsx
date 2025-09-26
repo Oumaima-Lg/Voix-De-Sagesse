@@ -9,7 +9,7 @@ const successNotification = (title, message) => {
         title: title,
         message: message,
         withCloseButton: true,
-        className: "!border-green-500",
+        className: "!border-green-500 !border-1",
         icon: <IconCheck style={{ width: "90%", height: "90%" }} />,
         color: "teal"
     })

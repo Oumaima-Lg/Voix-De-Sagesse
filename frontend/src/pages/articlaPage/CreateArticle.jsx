@@ -35,7 +35,6 @@ const CreateArticleForm = () => {
   const validateForm = () => {
     const newErrors = {}
 
-    // Validation pour sagesse
     if (isWisdom) {
       if (!formData.title.trim()) {
         newErrors.title = "Le contenu de la sagesse est obligatoire"
@@ -49,7 +48,6 @@ const CreateArticleForm = () => {
         newErrors.source = "La source ne peut pas dépasser 200 caractères"
       }
     } else {
-      // Validation pour histoire
       if (!formData.title.trim()) {
         newErrors.title = "Le titre de l'histoire est obligatoire"
       } else if (formData.title.trim().length < 5) {
@@ -71,12 +69,10 @@ const CreateArticleForm = () => {
       }
     }
 
-    // Validation commune
     if (!formData.category) {
       newErrors.category = "La catégorie est obligatoire"
     }
 
-    // Validation des tags
     if (formData.tags.trim()) {
       const tagsArray = formData.tags.split(",").map(tag => tag.trim()).filter(tag => tag.length > 0)
       if (tagsArray.length > 10) {
@@ -147,7 +143,6 @@ const CreateArticleForm = () => {
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
-    // Effacer l'erreur pour ce champ quand l'utilisateur tape
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }))
     }

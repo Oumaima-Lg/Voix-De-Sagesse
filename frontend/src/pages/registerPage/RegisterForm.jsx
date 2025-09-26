@@ -27,7 +27,6 @@ const RegisterForm = () => {
 
 
     const handleChangeOldVersion = (e) => {
-        // console.log(e);
         let name = e.target.name, value = e.target.value;
         setData({ ...data, [name]: value });
         setFormError({ ...formError, [name]: signupValidation(name, value) });
@@ -100,12 +99,11 @@ const RegisterForm = () => {
 
         setFormError(newFormError);
 
-        e.preventDefault(); // il est important de l'ajouter pour empêcher le comportement par défaut du formulaire
+        e.preventDefault();
 
         if (valid === true) {
             registerUser(data).then((res) => {
                 console.log(res);
-                // alert('Inscription réussie !');
                 setData(form);
                 successNotification('Success', 'Inscription réussie !');
                 
@@ -121,37 +119,6 @@ const RegisterForm = () => {
         }
     }
 
-    // const handleSubmit = () => {
-    //     e.preventDefault();
-
-    //     let valid = true;
-    //     let newFormError = {};
-
-    //     for (let key in data) {
-    //         if (key === "accountType") continue;
-
-    //         if (key === "confirmPassword") {
-    //             if (data[key] !== data["password"]) {
-    //                 newFormError[key] = "Passwords do not match.";
-    //             }
-    //         } else {
-    //             newFormError[key] = signupValidation(key, data[key]);
-    //         }
-
-    //         if (newFormError[key]) valid = false;
-    //     }
-
-    //     setFormError(newFormError);
-    //     console.log(valid);
-
-    //     if (valid === true) {
-    //         registerUser(data)
-    //             .then((res) => {
-    //                 console.log(res);
-    //             })
-    //             .catch((err) => console.log(err));
-    //     }
-    // };
 
 
     return (

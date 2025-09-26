@@ -93,8 +93,6 @@ const NotFoundPage = () => {
           
           <div className="grid md:grid-cols-2 gap-3">
             {[
-            //   { name: "Dashboard", path: "/dashboard", icon: "📊" },
-            //   { name: "Feed Articles", path: "/articla/poste", icon: "📝" },
               { name: "Mes Postes", path: "/articla/my-posts", icon: "✍️" },
               { name: "Articla", path: "/articla", icon: "📝" },
               { name: "Profil", path: "/articla/profile", icon: "👤" },

@@ -7,7 +7,7 @@ import { LoadingOverlay } from "@mantine/core"
 import { useSelector } from "react-redux"
 import { getSavedArticles, likeArticle, unlikeArticle } from "../../services/ArticleService"
 import { followUser, unfollowUser, unsaveArticle } from "../../services/UserService"
-import { addComment, getCommentsByArticle, deleteComment } from "../../services/CommentService" // ✅ Import CommentService
+import { addComment, getCommentsByArticle, deleteComment } from "../../services/CommentService" 
 import { errorNotification, successNotification } from "../../services/NotificationService"
 import profileAvatar from "../../assets/profileAvatar.jpg"
 import { Link } from "react-router-dom";
@@ -15,11 +15,11 @@ import { Link } from "react-router-dom";
 const SavedArticles = () => {
     const navigate = useNavigate()
     const [commentInputs, setCommentInputs] = useState({})
-    const [postComments, setPostComments] = useState({}) // ✅ État pour les commentaires de la DB
+    const [postComments, setPostComments] = useState({}) 
     const [showDropdown, setShowDropdown] = useState(null)
-    const [showComments, setShowComments] = useState({}) // ✅ État pour l'affichage des commentaires
-    const [commentLoading, setCommentLoading] = useState({}) // ✅ État pour le loading des commentaires
-    const [deleteCommentLoading, setDeleteCommentLoading] = useState({}) // ✅ État pour la suppression
+    const [showComments, setShowComments] = useState({})
+    const [commentLoading, setCommentLoading] = useState({}) 
+    const [deleteCommentLoading, setDeleteCommentLoading] = useState({}) 
     const user = useSelector((state) => state.user)
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -42,7 +42,6 @@ const SavedArticles = () => {
             });
     }, []);
 
-    // ✅ Fonction pour charger les commentaires
     const loadComments = async (articleId) => {
         try {
             const response = await getCommentsByArticle(articleId)
@@ -55,19 +54,16 @@ const SavedArticles = () => {
         }
     }
 
-    // ✅ Fonction pour basculer l'affichage des commentaires
     const toggleComments = async (articleId) => {
         const isCurrentlyShown = showComments[articleId]
 
         setShowComments((prev) => ({ ...prev, [articleId]: !isCurrentlyShown }))
 
-        // Si on affiche les commentaires et qu'ils ne sont pas encore chargés
         if (!isCurrentlyShown && !postComments[articleId]) {
             await loadComments(articleId)
         }
     }
 
-    // ✅ Fonction pour soumettre un commentaire
     const handleCommentSubmit = async (articleId) => {
         const content = commentInputs[articleId]
         if (!content?.trim()) return
@@ -77,10 +73,8 @@ const SavedArticles = () => {
         try {
             const response = await addComment(articleId, content.trim())
 
-            // Recharger tous les commentaires après ajout
             await loadComments(articleId)
 
-            // Mettre à jour le compteur de commentaires dans les posts
             setPosts((prev) =>
                 prev.map((post) =>
                     post.article.id === articleId
@@ -95,10 +89,8 @@ const SavedArticles = () => {
                 ),
             )
 
-            // Vider le champ de saisie
             setCommentInputs((prev) => ({ ...prev, [articleId]: "" }))
 
-            // S'assurer que les commentaires sont visibles
             setShowComments((prev) => ({ ...prev, [articleId]: true }))
 
             successNotification('Succès', 'Commentaire ajouté avec succès')
@@ -111,7 +103,6 @@ const SavedArticles = () => {
         }
     }
 
-    // ✅ Fonction pour supprimer un commentaire
     const handleDeleteComment = async (commentId, articleId) => {
         if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce commentaire ?")) {
             return
@@ -122,13 +113,11 @@ const SavedArticles = () => {
         try {
             await deleteComment(commentId)
 
-            // Retirer le commentaire de la liste locale
             setPostComments((prev) => ({
                 ...prev,
                 [articleId]: prev[articleId]?.filter((comment) => comment.id !== commentId) || [],
             }))
-
-            // Mettre à jour le compteur dans les posts
+            
             setPosts((prev) =>
                 prev.map((post) =>
                     post.article.id === articleId
