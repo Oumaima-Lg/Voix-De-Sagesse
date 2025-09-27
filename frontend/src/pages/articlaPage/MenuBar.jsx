@@ -83,7 +83,7 @@ function MenuBar() {
       whileHover="hover"
     >
       <motion.div
-        className="absolute -inset-2 bg-gradient-radial from-transparent via-blue-400/30 via-30% via-purple-400/30 via-60% via-red-400/30 via-90% to-transparent rounded-3xl z-0 pointer-events-none"
+        className="absolute -inset-2 bg-gradient-radial from-transparent via-blue-400/30 to-transparent rounded-3xl z-0 pointer-events-none"
         variants={navGlowVariants}
       />
       <ul className="flex items-center gap-2 relative z-10">

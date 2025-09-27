@@ -509,7 +509,7 @@ const Signals = () => {
 
                                     {selectedSignal.articleTags && (
                                         <div className="mb-4">
-                                            <label className="text-sm font-semibold text-[#A09F87] block mb-2 flex items-center gap-2">
+                                            <label className="text-sm font-semibold text-[#A09F87] mb-2 flex items-center gap-2">
                                                 <Tag className="w-4 h-4" />
                                                 Tags
                                             </label>
