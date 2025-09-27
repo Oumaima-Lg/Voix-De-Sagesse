@@ -10,7 +10,7 @@ import { updateUser } from "../../Slices/UserSlice"
 import { updateUserProfile, getUserProfile, uploadProfilePicture, deleteAccount } from '../../services/UserService';
 import { LoadingOverlay } from "@mantine/core"
 import { Modal } from "@mantine/core";
-import { useAuth } from "../../services/useAuth"
+import { useAuth } from "../../hooks/useAuth"
 
 
 

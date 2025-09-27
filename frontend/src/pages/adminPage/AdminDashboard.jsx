@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
-import { useAuth } from "../../services/useAuth"
+import { useAuth } from "../../hooks/useAuth"
 import { getAllUsers, getDashboardStats } from "../../services/AdminService"
 import profileAvatar from "../../assets/profileAvatar.jpg"
 import Signals from "./Signals"

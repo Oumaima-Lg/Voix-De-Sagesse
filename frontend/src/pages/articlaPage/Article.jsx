@@ -1,10 +1,10 @@
 import React from 'react'
-import Input from '../../semiComponents/InputSearch'
+import Input from '../../Components/InputSearch'
 import { IoArrowBackCircleOutline } from "react-icons/io5";
 import { Link as LinkRouter } from "react-router-dom";
-import LoaderPyramid from '../../semiComponents/Pyramid'
-import {Card2}  from '../../semiComponents/CardArticle';
-import  Card from '../../semiComponents/CardArticle';
+import LoaderPyramid from '../../Components/Pyramid'
+import {Card2}  from '../../Components/CardArticle';
+import  Card from '../../Components/CardArticle';
 import Marquee from "react-fast-marquee";
 import { Carousel } from '@mantine/carousel';
 

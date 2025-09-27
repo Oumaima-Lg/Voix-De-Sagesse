@@ -1,8 +1,8 @@
 import React from 'react'
 
-import Loader from '../../semiComponents/Loader'
+import Loader from '../../Components/Loader'
 import fireHuman from '../../assets/fireHuman.png'
-import Cube from '../../semiComponents/Cube'
+import Cube from '../../Components/Cube'
 import Article from '../../assets/Article.png'
 import nvArticle from '../../assets/nvArticle.png'
 import articlePerso from '../../assets/articlePerso.png'
@@ -12,7 +12,7 @@ import { PiArchiveLight } from "react-icons/pi";
 import ShinyText from '../../blocks/TextAnimations/ShinyText/ShinyText';
 import { Link as LinkRouter } from "react-router-dom";
 import { BiCollapseHorizontal } from "react-icons/bi";
-import Switch from '../../semiComponents/SideButton';
+import Switch from '../../Components/SideButton';
 import { BsLayoutSidebarInset } from "react-icons/bs";
 import { useDisclosure } from '@mantine/hooks';
 import { Drawer, Button, BackgroundImage } from '@mantine/core';

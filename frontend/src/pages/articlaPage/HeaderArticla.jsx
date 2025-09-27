@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { removeUser } from '../../Slices/UserSlice';
 import MenuBar from "./MenuBar";
 import profileAvatar from "../../assets/profileAvatar.jpg"
-import { useAuth } from '../../services/useAuth';
+import { useAuth } from '../../hooks/useAuth';
 
 
 

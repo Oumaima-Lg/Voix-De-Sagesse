@@ -14,7 +14,7 @@ import { LoadingOverlay, Button, Group, Box } from '@mantine/core';
 import { setJwt } from '../../Slices/JwtSlice';
 import { loginUser } from '../../services/AuthService';
 import { jwtDecode } from "jwt-decode";
-import { useAuth } from '../../services/useAuth';
+import { useAuth } from '../../hooks/useAuth';
 import { useEffect } from 'react';
 
 const LoginForm = () => {
