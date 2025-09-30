@@ -69,7 +69,7 @@ const Contact = () => {
               whileInView={'show'}
               className='lg:absolute  right-65 top-[-20px]'
             >
-              <p className='charm text-white text-xl bg-black/48 backdrop-blur-2xl px-4 py-5 rounded-3xl' >I Hate You All</p>
+              <p className='charm text-white text-xl bg-black/48 backdrop-blur-2xl px-4 py-5 rounded-3xl' >I hate this feeling</p>
             </motion.div>
           </div>
         </div>
