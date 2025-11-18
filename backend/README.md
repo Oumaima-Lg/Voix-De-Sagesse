@@ -1,510 +1,526 @@
-# 📖 Voix De Sagesse - Backend
+# VoixDeSagesse - Backend API
 
-API REST backend pour **Voix De Sagesse**, une plateforme web moderne de partage de contenu inspirationnel permettant aux utilisateurs de créer, partager et découvrir des articles de sagesse et des histoires inspirantes.
+<div align="center">
 
-## 📋 Table des Matières
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.4-brightgreen.svg)
+![Java](https://img.shields.io/badge/Java-17-orange.svg)
+![MongoDB](https://img.shields.io/badge/MongoDB-7.0-green.svg)
+![License](https://img.shields.io/badge/License-MIT-blue.svg)
 
-- [À Propos](#à-propos)
-- [Technologies](#technologies)
-- [Fonctionnalités](#fonctionnalités)
-- [Architecture](#architecture)
-- [Prérequis](#prérequis)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Lancement de l'Application](#lancement-de-lapplication)
-- [Déploiement Docker](#déploiement-docker)
-- [Documentation API](#documentation-api)
-- [Dépôt Frontend](#dépôt-frontend)
-- [Structure du Projet](#structure-du-projet)
-- [Sécurité](#sécurité)
-- [Contribution](#contribution)
+**A modern Spring Boot REST API for sharing inspirational content and wisdom**
 
-## 🔍 À Propos
+[Features](#features) • [Tech Stack](#tech-stack) • [Getting Started](#getting-started) • [API Documentation](#api-documentation) • [Frontend](#frontend)
 
-**Voix De Sagesse** est une application web full-stack de partage de contenu inspirationnel qui permet aux utilisateurs de :
-- Créer et partager du contenu de sagesse et des histoires inspirantes
-- Découvrir du contenu pertinent via un feed personnalisé
-- Interagir avec la communauté (likes, commentaires, suivi d'utilisateurs)
-- Bénéficier d'un système de modération collaborative
+</div>
 
-Le backend fournit une API REST sécurisée construite avec Spring Boot, offrant une architecture multicouches robuste et scalable.
+---
 
-## 🛠️ Technologies
+## 📖 Overview
+
+VoixDeSagesse (Voice of Wisdom) is a full-stack web platform that enables users to create, share, and discover inspirational content. This repository contains the backend API built with Spring Boot, providing a robust, secure, and scalable REST API with JWT authentication, social features, and collaborative moderation.
+
+## ✨ Features
+
+### 🔐 Authentication & Security
+- **JWT-based authentication** with token expiration management
+- **OTP verification system** via email for password recovery
+- **BCrypt password encryption** for secure credential storage
+- **Role-based access control** (User, Admin)
+- **CORS configuration** for secure cross-origin requests
+
+### 📝 Content Management
+- **Two article types**: Wisdom (quotes/citations) and Story (narratives)
+- **Categorization system** with multiple themes (Personal Development, Spirituality, etc.)
+- **Tag-based organization** for enhanced discoverability
+- **Advanced search functionality** with filters
+- **Article CRUD operations** with validation
+
+### 👥 Social Features
+- **User following system** with follower/following management
+- **Like/Unlike articles** with real-time counter updates
+- **Commenting system** with soft delete support
+- **Article bookmarking** for personalized collections
+- **User profiles** with statistics and activity tracking
+
+### 🛡️ Moderation & Administration
+- **Collaborative reporting system** for inappropriate content
+- **Admin dashboard** with comprehensive statistics
+- **Signal workflow** (Pending, Approved, Rejected states)
+- **Content moderation tools** with audit trail
+- **Automated cleanup** of expired OTP codes
+
+### 🚀 Technical Features
+- **Multi-layered architecture** with clear separation of concerns
+- **Optimized MongoDB queries** with compound indexes
+- **File upload support** for profile pictures
+- **Centralized error handling** with internationalized messages
+- **Comprehensive validation** with Jakarta Validation
+- **Unit & integration tests** with JUnit and Mockito
+- **Docker support** for containerized deployment
+
+## 🛠️ Tech Stack
 
 ### Core Framework
-- **Java 17** - Langage de programmation
-- **Spring Boot 3.4.4** - Framework principal
-- **Maven** - Gestion des dépendances
+- **Spring Boot 3.4.4** - Main application framework
+- **Java 17** - Programming language with LTS support
+- **Maven** - Dependency management and build tool
 
-### Sécurité
-- **Spring Security** - Framework de sécurité
-- **JWT (JSON Web Tokens) 0.11.5** - Authentication sans état
-- **Password Encoding** - Chiffrement des mots de passe
+### Database & Persistence
+- **MongoDB 7.0** - NoSQL database for flexible data storage
+- **Spring Data MongoDB** - Data access layer abstraction
 
-### Base de Données
-- **MongoDB** - Base de données NoSQL
-- **Spring Data MongoDB** - Couche d'accès aux données
+### Security
+- **Spring Security 6.4** - Authentication and authorization
+- **JWT (jjwt 0.11.5)** - Stateless token-based authentication
+- **BCrypt** - Password hashing algorithm
 
-### Services
-- **Spring Mail** - Service d'envoi d'emails
-- **Spring Actuator** - Monitoring et health checks
-- **Spring Validation** - Validation des données
+### Email & Communication
+- **Spring Boot Mail** - SMTP integration for email notifications
+- **OTP System** - One-time password generation and verification
 
-### Développement
-- **Lombok** - Réduction du code boilerplate
-- **Spring DevTools** - Rechargement automatique en développement
-- **Docker** - Containerisation
+### Development Tools
+- **Lombok** - Reduces boilerplate code
+- **Spring Boot DevTools** - Hot reload during development
+- **SLF4J** - Logging facade
+- **Jakarta Validation** - Data validation framework
 
-## ✨ Fonctionnalités
+### Testing
+- **JUnit 5** - Unit testing framework
+- **Mockito** - Mocking framework for tests
+- **Spring Test** - Integration testing support
 
-### 🔐 Authentification & Autorisation
-- Inscription et connexion sécurisées avec JWT
-- Gestion des rôles (User, Admin, Moderator)
-- Protection des endpoints par rôle
-- Refresh token management
+### DevOps
+- **Docker** - Containerization platform
+- **Spring Boot Actuator** - Application monitoring and metrics
 
-### 👤 Gestion des Profils
-- Création et modification de profil utilisateur
-- Upload de photo de profil
-- Suivi d'utilisateurs (followers/following)
-- Statistiques utilisateur
+## 📋 Prerequisites
 
-### 📝 Gestion du Contenu
-- **Deux types d'articles** :
-  - 📚 **Sagesse** - Citations et enseignements
-  - 📖 **Histoire** - Récits inspirants
-- Système de catégorisation
-- Tags pour une meilleure organisation
-- Brouillons et publications
+Before you begin, ensure you have the following installed:
 
-### 🔄 Interactions Sociales
-- Système de likes
-- Commentaires et réponses
-- Partages
-- Notifications en temps réel
+- **Java Development Kit (JDK) 17** or higher
+- **Maven 3.8+** for dependency management
+- **MongoDB 7.0+** (local installation or MongoDB Atlas)
+- **Docker** (optional, for containerized deployment)
+- **Git** for version control
 
-### 🔍 Découverte de Contenu
-- Feed personnalisé basé sur les intérêts
-- Recherche avancée (titre, contenu, tags, auteur)
-- Filtrage par catégorie et type
-- Tri par popularité, date, pertinence
+## 🚀 Getting Started
 
-### 🛡️ Modération
-- Système de signalement collaboratif
-- Interface d'administration
-- Gestion des contenus signalés
-- Modération des commentaires
-
-### 📊 Analytics
-- Statistiques d'articles
-- Métriques utilisateur
-- Monitoring via Spring Actuator
-
-## 🏗️ Architecture
-
-### Architecture Multicouches
-
-```
-┌─────────────────────────────────────┐
-│     Controllers (REST API)          │  ← Endpoints HTTP
-├─────────────────────────────────────┤
-│     Services (Business Logic)       │  ← Logique métier
-├─────────────────────────────────────┤
-│     Repositories (Data Access)      │  ← Accès données
-├─────────────────────────────────────┤
-│     MongoDB Database                │  ← Persistance
-└─────────────────────────────────────┘
-```
-
-### Principes de Design
-- **Separation of Concerns** - Séparation claire des responsabilités
-- **Dependency Injection** - Inversion de contrôle avec Spring
-- **RESTful API** - Respect des conventions REST
-- **DTO Pattern** - Objets de transfert de données
-- **Repository Pattern** - Abstraction de l'accès aux données
-- **Exception Handling** - Gestion centralisée des erreurs
-
-## 📦 Prérequis
-
-- **Java 17** ou supérieur
-- **Maven 3.6+**
-- **MongoDB 4.4+** (local ou cloud - MongoDB Atlas)
-- **Docker** (optionnel, pour le déploiement conteneurisé)
-
-## 🚀 Installation
-
-1. **Cloner le repository**
+### 1. Clone the Repository
 ```bash
-git clone https://github.com/OumaimaLg/Voix-De-Sagesse-Backend.git
-cd Voix-De-Sagesse-Backend
+git clone https://github.com/yourusername/voix-de-sagesse-backend.git
+cd voix-de-sagesse-backend
 ```
 
-2. **Installer les dépendances**
+### 2. Configure MongoDB
+
+**Option A: Local MongoDB**
 ```bash
-./mvnw clean install
+# Install MongoDB locally and start the service
+mongod --dbpath /path/to/data/directory
 ```
 
-3. **Créer le dossier uploads**
-```bash
-mkdir uploads
-```
+**Option B: MongoDB Atlas**
+- Create a free cluster on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+- Get your connection string
 
-## ⚙️ Configuration
+### 3. Configure Application Properties
 
-Créez un fichier `application.properties` dans `src/main/resources/` :
-
+Edit `src/main/resources/application.properties`:
 ```properties
-# ========================================
-# Configuration Serveur
-# ========================================
-server.port=8080
-server.servlet.context-path=/api
-
-# ========================================
-# Configuration MongoDB
-# ========================================
+# MongoDB Configuration
 spring.data.mongodb.uri=mongodb://localhost:27017/voixdesagesse
-spring.data.mongodb.database=voixdesagesse
-# Pour MongoDB Atlas (cloud)
-# spring.data.mongodb.uri=mongodb+srv://username:password@cluster.mongodb.net/voixdesagesse
+spring.data.mongodb.auto-index-creation=true
 
-# ========================================
-# Configuration JWT
-# ========================================
-jwt.secret=***REMOVED***
+# JWT Configuration
+jwt.secret=your-super-secret-key-at-least-32-characters-long
 jwt.expiration=86400000
-# 24 heures en millisecondes
-jwt.refresh-expiration=604800000
-# 7 jours
 
-# ========================================
-# Configuration Mail
-# ========================================
+# Email Configuration (SMTP)
 spring.mail.host=smtp.gmail.com
 spring.mail.port=587
-spring.mail.username=votre-email@gmail.com
-spring.mail.password=votre-mot-de-passe-app
+spring.mail.username=your-email@gmail.com
+spring.mail.password=your-app-password
+spring.mail.protocol=smtp
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
-spring.mail.properties.mail.smtp.starttls.required=true
 
-# ========================================
-# Configuration Upload de Fichiers
-# ========================================
-spring.servlet.multipart.enabled=true
-spring.servlet.multipart.max-file-size=10MB
-spring.servlet.multipart.max-request-size=10MB
-file.upload-dir=./uploads
-
-# ========================================
-# Configuration Spring Actuator
-# ========================================
-management.endpoints.web.exposure.include=health,info,metrics
-management.endpoint.health.show-details=when-authorized
-
-# ========================================
-# Configuration CORS
-# ========================================
-cors.allowed-origins=http://localhost:3000,http://localhost:5173
-cors.allowed-methods=GET,POST,PUT,DELETE,PATCH
-cors.allowed-headers=*
-cors.allow-credentials=true
-
-# ========================================
-# Configuration Logging
-# ========================================
-logging.level.com.voixdesagesse=DEBUG
-logging.level.org.springframework.security=DEBUG
-logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss} - %msg%n
+# File Upload Configuration
+spring.servlet.multipart.max-file-size=5MB
+spring.servlet.multipart.max-request-size=5MB
+file.upload-dir=uploads/profile-pictures
 ```
 
-## 🏃 Lancement de l'Application
+> **Note**: For Gmail, use an [App Password](https://support.google.com/accounts/answer/185833) instead of your regular password.
 
-### Mode Développement
-
+### 4. Build the Project
 ```bash
-./mvnw spring-boot:run
+mvn clean install
 ```
 
-### Mode Production
+### 5. Run the Application
 
+**Option A: Using Maven**
 ```bash
-# Compiler le projet
-./mvnw clean package -DskipTests
+mvn spring-boot:run
+```
 
-# Exécuter le JAR
+**Option B: Using JAR**
+```bash
 java -jar target/VoixDeSagesse-0.0.1-SNAPSHOT.jar
 ```
 
-L'API sera accessible sur `http://localhost:8080/api`
-
-## 🐳 Déploiement Docker
-
-### 1. Build de l'image Docker
-
+**Option C: Using Docker**
 ```bash
-docker build -t voixdesagesse-backend:latest .
+# Build Docker image
+docker build -t voix-de-sagesse-backend .
+
+# Run container
+docker run -p 8080:8080 voix-de-sagesse-backend
 ```
 
-### 2. Lancer avec Docker Compose
+The API will be available at `http://localhost:8080`
 
-Créez un fichier `docker-compose.yml` :
+## 📚 API Documentation
 
+### Base URL
+```
+http://localhost:8080
+```
+
+### Authentication Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/auth/register` | Register new user | No |
+| POST | `/auth/login` | User login | No |
+| POST | `/auth/sendOtp/{email}` | Send OTP for password reset | No |
+| GET | `/auth/verifyOtp/{email}/{otp}` | Verify OTP code | No |
+| POST | `/auth/changePass` | Change password with OTP | No |
+
+### User Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/users/profile/{userId}` | Get user profile | Yes |
+| PUT | `/users/updateProfile` | Update user profile | Yes |
+| POST | `/users/upload-profile-picture` | Upload profile picture | Yes |
+| POST | `/users/follow/{targetUserId}` | Follow a user | Yes |
+| DELETE | `/users/unfollow/{targetUserId}` | Unfollow a user | Yes |
+| GET | `/users/following` | Get following list | Yes |
+| GET | `/users/my-followers` | Get followers list | Yes |
+| POST | `/users/save-article/{articleId}` | Save article to favorites | Yes |
+| DELETE | `/users/unsave-article/{articleId}` | Remove from favorites | Yes |
+| DELETE | `/users/delete-account` | Delete user account | Yes |
+
+### Article Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/articles/createSagesseArticla` | Create wisdom article | Yes |
+| POST | `/articles/createHistoireArticla` | Create story article | Yes |
+| GET | `/articles` | Get all articles | Yes |
+| GET | `/articles/posts/{currentUserId}` | Get personalized feed | Yes |
+| GET | `/articles/persoArticle/{userId}` | Get user's articles | Yes |
+| GET | `/articles/saved/{userId}` | Get saved articles | Yes |
+| POST | `/articles/{id}/like` | Like an article | Yes |
+| POST | `/articles/{id}/unlike` | Unlike an article | Yes |
+| DELETE | `/articles/delete/{articleId}/{userId}` | Delete article | Yes |
+| GET | `/articles/search/{currentUserId}` | Search articles | Yes |
+
+### Comment Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/comments/add/{articleId}` | Add comment to article | Yes |
+| GET | `/comments/article/{articleId}` | Get article comments | Yes |
+| DELETE | `/comments/delete/{commentId}` | Delete comment | Yes |
+| GET | `/comments/count/{articleId}` | Get comment count | Yes |
+
+### Signal/Report Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/signals/report` | Report an article | Yes |
+| GET | `/signals/pending` | Get pending reports | Admin |
+| PUT | `/signals/process/{signalId}` | Process a report | Admin |
+| GET | `/signals/by-reporter/{reporterId}` | Get user's reports | Yes |
+
+### Admin Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/admin/dashboard` | Get dashboard statistics | Admin |
+| GET | `/admin/users` | Get all users | Admin |
+| GET | `/admin/signals` | Get all signals | Admin |
+| PUT | `/admin/signals/{signalId}/process` | Process signal | Admin |
+
+### Request/Response Examples
+
+**Register User**
+```json
+POST /auth/register
+{
+  "nom": "Doe",
+  "prenom": "John",
+  "email": "john.doe@example.com",
+  "motDePass": "SecurePass123!",
+  "accountType": "USER"
+}
+```
+
+**Create Wisdom Article**
+```json
+POST /articles/createSagesseArticla
+Headers: Authorization: Bearer {jwt-token}
+{
+  "type": "SAGESSE",
+  "content": "The only way to do great work is to love what you do.",
+  "source": "Steve Jobs",
+  "categorie": "INSPIRATION",
+  "tags": ["motivation", "work", "passion"]
+}
+```
+
+**Login Response**
+```json
+{
+  "userId": "1",
+  "nom": "Doe",
+  "prenom": "John",
+  "email": "john.doe@example.com",
+  "accountType": "USER",
+  "jwtToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+## 🏗️ Project Structure
+```
+src/
+├── main/
+│   ├── java/com/project/VoixDeSagesse/
+│   │   ├── config/                 # Configuration classes
+│   │   │   ├── AppConfig.java
+│   │   │   ├── SecurityConfig.java
+│   │   │   └── WebConfig.java
+│   │   ├── controller/             # REST Controllers
+│   │   │   ├── AdminController.java
+│   │   │   ├── ArticleController.java
+│   │   │   ├── AuthController.java
+│   │   │   ├── CommentController.java
+│   │   │   ├── SignalController.java
+│   │   │   └── UserController.java
+│   │   ├── dto/                    # Data Transfer Objects
+│   │   │   ├── UserDTO.java
+│   │   │   ├── ArticleDTO.java
+│   │   │   └── ...
+│   │   ├── entity/                 # MongoDB Entities
+│   │   │   ├── User.java
+│   │   │   ├── Article.java
+│   │   │   ├── Comment.java
+│   │   │   ├── Signal.java
+│   │   │   ├── Otp.java
+│   │   │   └── Sequence.java
+│   │   ├── exception/              # Exception Handling
+│   │   │   ├── ArticlaException.java
+│   │   │   └── ExceptionControllerAdvice.java
+│   │   ├── repository/             # Spring Data Repositories
+│   │   │   ├── UserRepository.java
+│   │   │   ├── ArticleRepository.java
+│   │   │   └── ...
+│   │   ├── security/               # Security Components
+│   │   │   ├── JwtAuthenticationEntryPoint.java
+│   │   │   ├── JwtAuthenticationFilter.java
+│   │   │   ├── JwtHelper.java
+│   │   │   └── UserDetailsServiceImpl.java
+│   │   └── service/                # Business Logic Services
+│   │       ├── AdminService.java
+│   │       ├── ArticleService.java
+│   │       ├── UserService.java
+│   │       ├── EmailService.java
+│   │       └── ...
+│   └── resources/
+│       ├── application.properties  # Application configuration
+│       └── ValidationMessages.properties  # Validation messages
+└── test/                           # Test classes
+    └── java/com/project/VoixDeSagesse/
+```
+
+## 🧪 Running Tests
+
+### Run All Tests
+```bash
+mvn test
+```
+
+### Run Specific Test Class
+```bash
+mvn test -Dtest=UserServiceImplTest
+```
+
+### Generate Test Coverage Report
+```bash
+mvn clean test jacoco:report
+```
+
+Test coverage reports will be available in `target/site/jacoco/index.html`
+
+## 🐳 Docker Deployment
+
+### Build Docker Image
+```bash
+docker build -t voix-de-sagesse-backend:latest .
+```
+
+### Run with Docker Compose
+
+Create a `docker-compose.yml`:
 ```yaml
 version: '3.8'
-
 services:
   mongodb:
     image: mongo:7.0
     container_name: voixdesagesse-mongodb
-    restart: always
     ports:
       - "27017:27017"
-    environment:
-      MONGO_INITDB_DATABASE: voixdesagesse
     volumes:
       - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: voixdesagesse
 
   backend:
-    image: voixdesagesse-backend:latest
+    image: voix-de-sagesse-backend:latest
     container_name: voixdesagesse-backend
-    restart: always
     ports:
       - "8080:8080"
     environment:
       SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/voixdesagesse
-      JWT_SECRET: ${JWT_SECRET}
-      SPRING_MAIL_USERNAME: ${MAIL_USERNAME}
-      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD}
+      JWT_SECRET: your-secret-key-here
+      SPRING_MAIL_USERNAME: your-email@gmail.com
+      SPRING_MAIL_PASSWORD: your-app-password
     depends_on:
       - mongodb
-    volumes:
-      - ./uploads:/app/uploads
 
 volumes:
   mongodb_data:
 ```
 
-Lancez les services :
-
+Run with:
 ```bash
 docker-compose up -d
 ```
 
-## 📚 Documentation API
+## 🔒 Security Best Practices
 
-### Endpoints d'Authentification
+This application implements several security measures:
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/api/auth/register` | Inscription d'un nouvel utilisateur |
-| POST | `/api/auth/login` | Connexion utilisateur |
-| POST | `/api/auth/refresh` | Rafraîchir le token JWT |
-| POST | `/api/auth/logout` | Déconnexion utilisateur |
-| GET | `/api/auth/me` | Récupérer le profil connecté |
+- ✅ **JWT Authentication** with token expiration
+- ✅ **Password Encryption** using BCrypt
+- ✅ **Input Validation** with Jakarta Validation
+- ✅ **CSRF Protection** (disabled for stateless API)
+- ✅ **CORS Configuration** for secure cross-origin requests
+- ✅ **Role-Based Access Control** (RBAC)
+- ✅ **Secure Password Reset** with OTP verification
+- ✅ **File Upload Validation** (size, type restrictions)
+- ✅ **Centralized Exception Handling**
+- ✅ **SQL Injection Prevention** (MongoDB parameterized queries)
 
-### Endpoints Articles
+## 🤝 Frontend Integration
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| GET | `/api/articles` | Liste des articles (feed) |
-| GET | `/api/articles/{id}` | Détails d'un article |
-| POST | `/api/articles` | Créer un article |
-| PUT | `/api/articles/{id}` | Modifier un article |
-| DELETE | `/api/articles/{id}` | Supprimer un article |
-| GET | `/api/articles/search` | Recherche avancée |
-| GET | `/api/articles/category/{category}` | Articles par catégorie |
+This backend API is designed to work seamlessly with the VoixDeSagesse frontend application.
 
-### Endpoints Utilisateurs
+**Frontend Repository**: [VoixDeSagesse Frontend](https://github.com/Oumaima-Lg/Voix-De-Sagesse-Frontend)
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| GET | `/api/users/{id}` | Profil utilisateur |
-| PUT | `/api/users/{id}` | Modifier le profil |
-| POST | `/api/users/{id}/follow` | Suivre un utilisateur |
-| DELETE | `/api/users/{id}/unfollow` | Ne plus suivre |
-| GET | `/api/users/{id}/followers` | Liste des abonnés |
-| GET | `/api/users/{id}/following` | Liste des abonnements |
+The frontend is built with:
+- React 19.0
+- Redux Toolkit for state management
+- Tailwind CSS for styling
+- Axios for API communication
 
-### Endpoints Interactions
+## 📝 Environment Variables
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/api/articles/{id}/like` | Liker un article |
-| DELETE | `/api/articles/{id}/unlike` | Retirer le like |
-| POST | `/api/articles/{id}/comments` | Ajouter un commentaire |
-| GET | `/api/articles/{id}/comments` | Liste des commentaires |
-| DELETE | `/api/comments/{id}` | Supprimer un commentaire |
+Create a `.env` file or set environment variables:
+```properties
+# Database
+MONGODB_URI=mongodb://localhost:27017/voixdesagesse
 
-### Endpoints Admin
+# JWT
+JWT_SECRET=your-super-secret-key-minimum-32-characters
+JWT_EXPIRATION=86400000
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| GET | `/api/admin/users` | Liste tous les utilisateurs |
-| GET | `/api/admin/reports` | Signalements en attente |
-| POST | `/api/admin/articles/{id}/moderate` | Modérer un article |
-| DELETE | `/api/admin/users/{id}` | Supprimer un utilisateur |
+# Email
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
 
-### Health Check
-
-```bash
-curl http://localhost:8080/actuator/health
+# File Upload
+UPLOAD_DIR=uploads/profile-pictures
+MAX_FILE_SIZE=5MB
 ```
 
-## 🎨 Dépôt Frontend
+## 🐛 Troubleshooting
 
-L'application frontend React est disponible sur :
+### Common Issues
 
-**🔗 [Voix De Sagesse Frontend](https://github.com/Oumaima-Lg/Voix-De-Sagesse-Frontend)**
-
-## 📁 Structure du Projet
-
+**MongoDB Connection Issues**
 ```
-Voix-De-Sagesse-Backend/
-├── src/
-│   ├── main/
-│   │   ├── java/com/voixdesagesse/
-│   │   │   ├── VoixDeSagesseApplication.java
-│   │   │   ├── config/
-│   │   │   │   ├── SecurityConfig.java
-│   │   │   │   ├── MongoConfig.java
-│   │   │   │   ├── CorsConfig.java
-│   │   │   │   └── MailConfig.java
-│   │   │   ├── controller/
-│   │   │   │   ├── AuthController.java
-│   │   │   │   ├── ArticleController.java
-│   │   │   │   ├── UserController.java
-│   │   │   │   ├── CommentController.java
-│   │   │   │   └── AdminController.java
-│   │   │   ├── model/
-│   │   │   │   ├── User.java
-│   │   │   │   ├── Article.java
-│   │   │   │   ├── Comment.java
-│   │   │   │   ├── Category.java
-│   │   │   │   └── ArticleType.java (SAGESSE/HISTOIRE)
-│   │   │   ├── dto/
-│   │   │   │   ├── AuthRequest.java
-│   │   │   │   ├── AuthResponse.java
-│   │   │   │   ├── ArticleDTO.java
-│   │   │   │   └── UserDTO.java
-│   │   │   ├── repository/
-│   │   │   │   ├── UserRepository.java
-│   │   │   │   ├── ArticleRepository.java
-│   │   │   │   ├── CommentRepository.java
-│   │   │   │   └── CategoryRepository.java
-│   │   │   ├── service/
-│   │   │   │   ├── AuthService.java
-│   │   │   │   ├── UserService.java
-│   │   │   │   ├── ArticleService.java
-│   │   │   │   ├── CommentService.java
-│   │   │   │   ├── EmailService.java
-│   │   │   │   └── FileStorageService.java
-│   │   │   ├── security/
-│   │   │   │   ├── JwtTokenProvider.java
-│   │   │   │   ├── JwtAuthenticationFilter.java
-│   │   │   │   ├── CustomUserDetailsService.java
-│   │   │   │   └── JwtAuthenticationEntryPoint.java
-│   │   │   ├── exception/
-│   │   │   │   ├── GlobalExceptionHandler.java
-│   │   │   │   ├── ResourceNotFoundException.java
-│   │   │   │   └── UnauthorizedException.java
-│   │   │   └── util/
-│   │   │       ├── Constants.java
-│   │   │       └── ValidationUtils.java
-│   │   └── resources/
-│   │       ├── application.properties
-│   │       └── application-prod.properties
-│   └── test/
-│       └── java/com/voixdesagesse/
-│           ├── controller/
-│           ├── service/
-│           └── repository/
-├── uploads/                    # Dossier pour les fichiers uploadés
-├── .gitignore
-├── Dockerfile
-├── docker-compose.yml
-├── pom.xml
-└── README.md
+Solution: Ensure MongoDB is running and the connection string is correct
+- Check MongoDB service status
+- Verify credentials and network connectivity
+- Check firewall settings
 ```
 
-## 🛡️ Sécurité
-
-### Mesures de Sécurité Implémentées
-
-✅ **Authentification JWT** - Tokens sécurisés avec expiration  
-✅ **Password Encoding** - Hachage BCrypt des mots de passe  
-✅ **CORS Configuration** - Protection contre les requêtes cross-origin non autorisées  
-✅ **CSRF Protection** - Protection contre les attaques CSRF  
-✅ **Input Validation** - Validation des données entrantes avec Bean Validation  
-✅ **SQL Injection Prevention** - Utilisation de Spring Data MongoDB  
-✅ **XSS Protection** - Échappement des données utilisateur  
-✅ **Rate Limiting** - Protection contre les attaques par force brute  
-✅ **Error Handling** - Gestion centralisée sans exposition d'informations sensibles  
-✅ **Role-Based Access Control** - Contrôle d'accès basé sur les rôles  
-
-### Bonnes Pratiques
-
-- Tokens JWT signés avec clé secrète forte
-- Mots de passe jamais stockés en clair
-- Validation systématique des entrées utilisateur
-- Gestion des exceptions sans leak d'informations
-- HTTPS recommandé en production
-- Variables d'environnement pour les secrets
-
-## 🤝 Contribution
-
-Les contributions sont les bienvenues ! Pour contribuer :
-
-1. **Fork** le projet
-2. Créez une branche feature (`git checkout -b feature/NouvelleFonctionnalite`)
-3. Committez vos changements (`git commit -m 'Ajout d'une nouvelle fonctionnalité'`)
-4. Push vers la branche (`git push origin feature/NouvelleFonctionnalite`)
-5. Ouvrez une **Pull Request**
-
-### Conventions de Code
-
-- Respecter les conventions Java et Spring Boot
-- Utiliser Lombok pour réduire le boilerplate
-- Commenter le code complexe
-- Écrire des tests unitaires
-- Suivre les principes SOLID
-
-## 📝 Tests
-
-```bash
-# Exécuter tous les tests
-./mvnw test
-
-# Exécuter avec couverture
-./mvnw test jacoco:report
+**JWT Token Expiration**
 ```
+Solution: Tokens expire after 24 hours by default
+- Implement token refresh mechanism
+- Adjust jwt.expiration in application.properties
+```
+
+**CORS Errors**
+```
+Solution: Configure CORS in SecurityConfig
+- Add frontend origin to allowed origins
+- Verify HTTP methods are allowed
+```
+
+**Email Sending Failures**
+```
+Solution: Check SMTP configuration
+- Use App Password for Gmail
+- Enable "Less secure app access" (not recommended)
+- Check firewall for port 587
+```
+
+## 📊 Performance Optimization
+
+- **MongoDB Indexing**: Unique index on user email, compound indexes on queries
+- **Lazy Loading**: User relationships loaded on demand
+- **DTO Pattern**: Reduce data transfer overhead
+- **Pagination**: Implemented for large result sets
+- **Caching**: Consider Redis for session management (future enhancement)
 
 ## 📄 License
 
-Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+This project is part of an academic end-of-year project at **Hassan I University - Faculty of Sciences and Techniques of Settat**, Department of Computer Engineering.
 
-## 👥 Auteurs
+**Academic Year**: 2024-2025  
+**Author**: Oumaima LAGHJIBI
 
-- **Oumaima Lg** - *Développeur Full-Stack* - [@OumaimaLg](https://github.com/OumaimaLg)
+## 👥 Contact & Support
 
-## 🙏 Remerciements
+For questions, issues, or contributions:
 
-- Spring Boot Team
-- MongoDB Team
-- La communauté Open Source
-
-## 📞 Support & Contact
-
-- 🐛 **Issues** : [GitHub Issues](https://github.com/OumaimaLg/Voix-De-Sagesse-Backend/issues)
-- 📧 **Email** : support@voixdesagesse.com
-- 💬 **Discussions** : [GitHub Discussions](https://github.com/OumaimaLg/Voix-De-Sagesse-Backend/discussions)
+- **Email**: laghjibioumaima2003@gmail.com
+- **GitHub Issues**: [Report an issue](https://github.com/yourusername/voix-de-sagesse-backend/issues)
+- **Frontend Repository**: [Voix-De-Sagesse-Frontend](https://github.com/Oumaima-Lg/Voix-De-Sagesse-Frontend)
 
 ---
 
 <div align="center">
 
-**Développé avec ❤️ en utilisant Spring Boot & MongoDB**
+**Built with ❤️ using Spring Boot and modern Java technologies**
 
-⭐ Si ce projet vous plaît, n'hésitez pas à lui donner une étoile !
+⭐ Star this repository if you find it helpful!
 
 </div>
