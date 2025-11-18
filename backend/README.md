@@ -1,4 +1,4 @@
-# VoixDeSagesse - Backend API
+# VoixDeSagesse - Backend
 
 <div align="center">
 
