@@ -26,8 +26,10 @@ import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
 import com.voixdesagesse.VoixDeSagesse.jwt.AuthenticationRequest;
 import com.voixdesagesse.VoixDeSagesse.jwt.AuthenticationResponse;
 import com.voixdesagesse.VoixDeSagesse.jwt.JwtHelper;
+import com.voixdesagesse.VoixDeSagesse.service.LoginAttemptService;
 import com.voixdesagesse.VoixDeSagesse.service.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
@@ -49,26 +51,30 @@ public class AuthController {
     private final JwtHelper jwtHelper;
 
     private final UserService userService;
+    private final LoginAttemptService loginAttemptService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody @Valid AuthenticationRequest request) {
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody @Valid AuthenticationRequest request,
+            HttpServletRequest httpRequest) throws ArticlaException {
+        String attemptKey = request.getEmail().toLowerCase() + "|" + httpRequest.getRemoteAddr();
+        if (loginAttemptService.isBlocked(attemptKey))
+            throw new ArticlaException("LOGIN_BLOCKED");
+
         try {
-            log.info("Attempting authentication for email: {}", request.getEmail());
-            
             authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
-            
+            loginAttemptService.loginSucceeded(attemptKey);
+
             final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
 
             final String jwt = jwtHelper.generateToken(userDetails);
             
-            log.info("Authentication successful for email: {}", request.getEmail());
-            
             return ResponseEntity.ok(new AuthenticationResponse(jwt));
             
         } catch (BadCredentialsException e) {
-            log.error("Authentication failed - Bad credentials for email: {}", request.getEmail());
+            loginAttemptService.loginFailed(attemptKey);
+            log.warn("Failed login attempt from {}", httpRequest.getRemoteAddr());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body("Invalid credentials");
         } catch (AuthenticationException e) {
