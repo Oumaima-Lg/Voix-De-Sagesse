@@ -586,11 +586,6 @@
 }
 
 
-/* Adding smooth scrolling and performance optimizations */
-* {
-  scroll-behavior: smooth;
-}
-
 .animate-float-slow,
 .animate-float-delayed,
 .animate-float-reverse,
