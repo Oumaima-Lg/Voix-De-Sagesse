@@ -17,20 +17,20 @@ const registerUser = async (user) => {
 };
 
 const sendOtp= async (email) => {
-    return axios.post(`${base_url}sendOtp/${email}`)
+    return axios.post(`${base_url}password/otp`, { email })
     .then(result => result.data)
     .catch(error =>{throw error;});
 }
 
 // Returns { message, resetToken }; the token is required by changePass.
 const verifyOtp= async (email, otp) => {
-    return axios.post(`${base_url}verifyOtp`, { email, otp })
+    return axios.post(`${base_url}password/otp/verify`, { email, otp })
     .then(result => result.data)
     .catch(error =>{throw error;});
 }
 
 const changePass=async(email, resetToken, newPassword) => {
-    return axios.post(`${base_url}changePass`, { email, resetToken, newPassword })
+    return axios.post(`${base_url}password/reset`, { email, resetToken, newPassword })
     .then(result => result.data)
     .catch(error =>{throw error;});
 }

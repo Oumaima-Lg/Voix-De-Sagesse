@@ -46,7 +46,7 @@ public class UserController {
     private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
             "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp");
 
-    @PostMapping("/follow/{targetUserId}")
+    @PostMapping("/{targetUserId}/follow")
     public ResponseEntity<?> followUser(@PathVariable Long targetUserId) throws VoixDeSagesseException {
         User currentUser = userService.getCurrentUser();
         userService.followUser(currentUser.getId(), targetUserId);
@@ -57,7 +57,7 @@ public class UserController {
                 "isFollowing", true));
     }
 
-    @DeleteMapping("/unfollow/{targetUserId}")
+    @DeleteMapping("/{targetUserId}/follow")
     public ResponseEntity<?> unfollowUser(@PathVariable Long targetUserId) throws VoixDeSagesseException {
         User currentUser = userService.getCurrentUser();
         userService.unfollowUser(currentUser.getId(), targetUserId);
@@ -69,7 +69,7 @@ public class UserController {
 
     }
 
-    @GetMapping("/is-following/{targetUserId}")
+    @GetMapping("/{targetUserId}/follow")
     public ResponseEntity<?> isFollowingUser(@PathVariable Long targetUserId) throws VoixDeSagesseException {
         User currentUser = userService.getCurrentUser();
         boolean isFollowing = userService.isFollowing(currentUser.getId(), targetUserId);
@@ -79,7 +79,7 @@ public class UserController {
                 "success", true));
     }
 
-    @GetMapping("/following")
+    @GetMapping("/me/following")
     public ResponseEntity<?> getFollowingUsers() throws VoixDeSagesseException {
         User currentUser = userService.getCurrentUser();
         Set<Long> followingIds = currentUser.getFollowingId();
@@ -95,7 +95,7 @@ public class UserController {
                 "success", true));
     }
 
-    @GetMapping("/my-followers")
+    @GetMapping("/me/followers")
     public ResponseEntity<?> getMyFollowers() throws VoixDeSagesseException {
 
         User currentUser = userService.getCurrentUser();
@@ -112,7 +112,7 @@ public class UserController {
 
     }
 
-    @PutMapping("/updateProfile")
+    @PutMapping("/me")
     public ResponseEntity<UserProfileDTO> updateUserProfile(@Valid @RequestBody UserProfileDTO profileDTO,
             @AuthenticationPrincipal CustomUserDetails currentUser)
             throws VoixDeSagesseException {
@@ -120,14 +120,14 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    @GetMapping("/profile/{userId}")
+    @GetMapping("/{userId}")
     public ResponseEntity<UserProfileDTO> getUserProfile(@PathVariable long userId,
             @AuthenticationPrincipal CustomUserDetails currentUser) throws VoixDeSagesseException {
         User user = userService.getUserById(userId);
         return ResponseEntity.ok(userId == currentUser.getId() ? user.toProfileDTO() : user.toPublicProfileDTO());
     }
 
-    @PostMapping("/upload-profile-picture")
+    @PostMapping("/me/picture")
     public ResponseEntity<?> uploadProfilePicture(@RequestParam("profilePicture") MultipartFile file,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
 
@@ -170,7 +170,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/save-article/{articleId}")
+    @PostMapping("/me/saved/{articleId}")
     public ResponseEntity<?> saveArticle(@PathVariable Long articleId) throws VoixDeSagesseException {
         User currentUser = userService.getCurrentUser();
         userService.saveArticle(currentUser.getId(), articleId);
@@ -181,7 +181,7 @@ public class UserController {
                 "isSaved", true));
     }
 
-    @DeleteMapping("/unsave-article/{articleId}")
+    @DeleteMapping("/me/saved/{articleId}")
     public ResponseEntity<?> unsaveArticle(@PathVariable Long articleId) throws VoixDeSagesseException {
         User currentUser = userService.getCurrentUser();
         userService.unsaveArticle(currentUser.getId(), articleId);
@@ -192,7 +192,7 @@ public class UserController {
                 "isSaved", false));
     }
 
-    @GetMapping("/is-article-saved/{articleId}")
+    @GetMapping("/me/saved/{articleId}")
     public ResponseEntity<?> isArticleSaved(@PathVariable Long articleId) throws VoixDeSagesseException {
         User currentUser = userService.getCurrentUser();
         boolean isSaved = userService.isArticleSaved(currentUser.getId(), articleId);
@@ -202,7 +202,7 @@ public class UserController {
                 "success", true));
     }
 
-    @DeleteMapping("/delete-account")
+    @DeleteMapping("/me")
     public ResponseEntity<?> deleteAccount(HttpServletRequest request) {
         try {
             User currentUser = userService.getCurrentUser();

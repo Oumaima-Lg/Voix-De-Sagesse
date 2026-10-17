@@ -15,10 +15,6 @@ public interface ArticleService {
 
     public Article getArticleById(Long articleId) throws VoixDeSagesseException;
 
-    public List<Article> getAllArticles();
-
-    public List<Article> getArticlesByUserId(long userId);
-
     public List<PosteDTO> displayPosts(long currentUserId) throws VoixDeSagesseException;
 
     public List<PosteDTO> getSavedArticles(Long currentUserId) throws VoixDeSagesseException;

@@ -13,7 +13,5 @@ public interface CommentService {
     
     void deleteComment(Long commentId, Long userId) throws VoixDeSagesseException;
     
-    Long getCommentsCountByArticle(Long articleId);
-    
 
 }

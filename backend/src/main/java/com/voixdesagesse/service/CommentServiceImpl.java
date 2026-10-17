@@ -77,11 +77,6 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Long getCommentsCountByArticle(Long articleId) {
-        return commentRepository.countByArticleIdAndIsDeletedFalse(articleId);
-    }
-
-    @Override
     public void deleteComment(Long commentId, Long userId) throws VoixDeSagesseException {
         Comment comment = commentRepository.findByIdAndUserIdAndIsDeletedFalse(commentId, userId);
         if (comment == null) {

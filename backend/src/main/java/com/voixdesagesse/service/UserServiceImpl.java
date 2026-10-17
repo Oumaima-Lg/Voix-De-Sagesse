@@ -127,7 +127,7 @@ public class UserServiceImpl implements UserService {
         MimeMessage mm = mailSender.createMimeMessage();
         MimeMessageHelper message = new MimeMessageHelper(mm, true);
         message.setTo(email);
-        message.setSubject("Your OTP Code");
+        message.setSubject("Votre code de vérification - Voix De Sagesse");
         String genOtp = Utilities.generateOTP();
         OTP otp = new OTP(email, genOtp, LocalDateTime.now());
         otpRepository.save(otp);

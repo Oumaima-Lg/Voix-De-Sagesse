@@ -3,28 +3,16 @@ import axiosInstance from "../Interceptor/AxiosInterceptor";
 const base_url = "/articles/"; 
 
 const createSagesseArticle = async (articleSagesse) => {
-    return axiosInstance.post(`${base_url}createSaggesseArticla`, articleSagesse)
+    return axiosInstance.post(`${base_url}sagesse`, articleSagesse)
         .then(res => res.data)
         .catch(error => { throw error; });
 };
 
 const createHistoireArticle = async (articleHistoire) => {
-    return axiosInstance.post(`${base_url}createHistoireArticla`, articleHistoire)
+    return axiosInstance.post(`${base_url}histoire`, articleHistoire)
         .then(res => res.data)
         .catch(error => { throw error; });
 };
-
-const DisplayArticles = async () => {
-    return axiosInstance.get(`${base_url}`)
-        .then(result => result.data)
-        .catch(error => { throw error; });
-}
-
-const DisplayPersoArticle = async (userId) => {
-    return axiosInstance.get(`${base_url}persoArticle/${userId}`)
-        .then(result => result.data)
-        .catch(error => { throw error; });
-}
 
 const DisplayPosts = async () => {
     return axiosInstance.get(`${base_url}posts`)
@@ -39,7 +27,7 @@ const likeArticle = async (id) => {
 }
 
 const unlikeArticle = async (id) => {
-    return axiosInstance.post(`${base_url}${id}/unlike`)
+    return axiosInstance.delete(`${base_url}${id}/like`)
         .then(result => result.data)
         .catch(error => { throw error; });
 }
@@ -52,12 +40,6 @@ const getSavedArticles = async () => {
 
 const getMyPosts = async () => {
     return axiosInstance.get(`${base_url}my-posts`)
-        .then(res => res.data)
-        .catch(error => { throw error; });
-}
-
-const getUserPosts = async (userId) => {
-    return axiosInstance.get(`${base_url}user-posts/${userId}`)
         .then(res => res.data)
         .catch(error => { throw error; });
 }
@@ -83,14 +65,11 @@ const searchArticles = async (searchParams) => {
 export { 
     createSagesseArticle, 
     createHistoireArticle, 
-    DisplayArticles, 
-    DisplayPersoArticle, 
     DisplayPosts, 
     likeArticle, 
     unlikeArticle,
     getSavedArticles,
     getMyPosts,
-    getUserPosts,
     deleteArticle,
     searchArticles
 };

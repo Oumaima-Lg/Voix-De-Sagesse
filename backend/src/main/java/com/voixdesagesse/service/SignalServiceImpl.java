@@ -79,14 +79,6 @@ public class SignalServiceImpl implements SignalService {
     }
 
     @Override
-    public List<SignalDTO> getSignalsByReporter(Long reporterId) throws VoixDeSagesseException {
-        List<Signal> signals = signalRepository.findByReporterIdOrderByCreatedAtDesc(reporterId);
-        return signals.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public SignalDTO processSignal(Long signalId, SignalStatus status, String adminComment, Long adminId) throws VoixDeSagesseException, Exception {
         Signal signal = signalRepository.findById(signalId)
                 .orElseThrow(() -> new VoixDeSagesseException("Signal non trouvé"));

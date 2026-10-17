@@ -31,7 +31,7 @@ public class CommentController {
      private final UserService userService;
 
     
-    @PostMapping("/add/{articleId}")
+    @PostMapping("/article/{articleId}")
     public ResponseEntity<?> addComment(@PathVariable Long articleId, @RequestBody Map<String, String> request) {
         try {
             User currentUser = userService.getCurrentUser();
@@ -90,7 +90,7 @@ public class CommentController {
     }
     
 
-    @DeleteMapping("/delete/{commentId}")
+    @DeleteMapping("/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long commentId) {
         try {
             User currentUser = userService.getCurrentUser();
@@ -115,21 +115,4 @@ public class CommentController {
     }
     
 
-    @GetMapping("/count/{articleId}")
-    public ResponseEntity<?> getCommentsCount(@PathVariable Long articleId) {
-        try {
-            Long count = commentService.getCommentsCountByArticle(articleId);
-            
-            return ResponseEntity.ok(Map.of(
-                "count", count,
-                "success", true
-            ));
-            
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                "error", "Erreur interne du serveur",
-                "success", false
-            ));
-        }
-    }
 }

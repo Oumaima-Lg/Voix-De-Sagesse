@@ -71,16 +71,6 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public List<Article> getAllArticles() {
-        return articleRepository.findAll();
-    }
-
-    @Override
-    public List<Article> getArticlesByUserId(long userId) {
-        return articleRepository.findByUserId(userId);
-    }
-
-    @Override
     public List<PosteDTO> displayPosts(long currentUserId) throws VoixDeSagesseException {
         List<Article> articles = articleRepository.findAll();
         User currentUser = userService.getUserById(currentUserId);

@@ -6,19 +6,19 @@ const base_url = "/users/";
 
 
 const updateUserProfile = async (userProfile) => {
-    return axiosInstance.put(`${base_url}updateProfile`, userProfile)
+    return axiosInstance.put(`${base_url}me`, userProfile)
     .then(res => res.data)
     .catch(error => { throw error; });
 }
 
 const getUserProfile = async (userId) => {
-    return axiosInstance.get(`${base_url}profile/${userId}`)
+    return axiosInstance.get(`${base_url}${userId}`)
     .then(res => res.data)
     .catch(error => { throw error; });
 }
 
 const uploadProfilePicture = async (formData) => {
-    return axiosInstance.post(`${base_url}upload-profile-picture`, formData, {
+    return axiosInstance.post(`${base_url}me/picture`, formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         }
@@ -28,56 +28,44 @@ const uploadProfilePicture = async (formData) => {
 }
 
 const followUser = async (targetUserId) => {
-    return axiosInstance.post(`${base_url}follow/${targetUserId}`)
+    return axiosInstance.post(`${base_url}${targetUserId}/follow`)
         .then(res => res.data)
         .catch(error => { throw error; });
 }
 
 const unfollowUser = async (targetUserId) => {
-    return axiosInstance.delete(`${base_url}unfollow/${targetUserId}`)
+    return axiosInstance.delete(`${base_url}${targetUserId}/follow`)
         .then(res => res.data)
         .catch(error => { throw error; });
 }
 
 const isFollowing = async (targetUserId) => {
-    return axiosInstance.get(`${base_url}is-following/${targetUserId}`)
-        .then(res => res.data)
-        .catch(error => { throw error; });
-}
-
-const getFollowing = async () => {
-    return axiosInstance.get(`${base_url}/following`)
-        .then(res => res.data)
-        .catch(error => { throw error; });
-}
-
-const getFollowers = async (userId) => {
-    return axiosInstance.get(`${base_url}followers/${userId}`)
+    return axiosInstance.get(`${base_url}${targetUserId}/follow`)
         .then(res => res.data)
         .catch(error => { throw error; });
 }
 
 
 const saveArticle = async (articleId) => {
-    return axiosInstance.post(`${base_url}save-article/${articleId}`)
+    return axiosInstance.post(`${base_url}me/saved/${articleId}`)
         .then(res => res.data)
         .catch(error => { throw error; });
 }
 
 const unsaveArticle = async (articleId) => {
-    return axiosInstance.delete(`${base_url}unsave-article/${articleId}`)
+    return axiosInstance.delete(`${base_url}me/saved/${articleId}`)
         .then(res => res.data)
         .catch(error => { throw error; });
 }
 
 const isArticleSaved = async (articleId) => {
-    return axiosInstance.get(`${base_url}is-article-saved/${articleId}`)
+    return axiosInstance.get(`${base_url}me/saved/${articleId}`)
         .then(res => res.data)
         .catch(error => { throw error; });
 }
 
 const deleteAccount = async () => {
-    return axiosInstance.delete(`${base_url}delete-account`)
+    return axiosInstance.delete(`${base_url}me`)
         .then(res => res.data)
         .catch(error => { throw error; });
 }
@@ -85,4 +73,4 @@ const deleteAccount = async () => {
 
 export { updateUserProfile, 
     getUserProfile, uploadProfilePicture, followUser, unfollowUser, isFollowing, 
-    getFollowing, getFollowers, saveArticle, unsaveArticle, isArticleSaved, deleteAccount};
+    saveArticle, unsaveArticle, isArticleSaved, deleteAccount};

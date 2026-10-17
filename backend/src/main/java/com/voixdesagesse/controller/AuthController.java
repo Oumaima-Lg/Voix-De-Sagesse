@@ -9,12 +9,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.voixdesagesse.dto.OtpRequest;
 import com.voixdesagesse.dto.OtpVerificationResponse;
 import com.voixdesagesse.dto.ResetPasswordRequest;
 import com.voixdesagesse.dto.ResponseDTO;
@@ -29,7 +29,6 @@ import com.voixdesagesse.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -83,21 +82,20 @@ public class AuthController {
         return new ResponseEntity<>(userService.registerUser(registerDTO), HttpStatus.CREATED);
     }
 
-    @PostMapping("/changePass")
+    @PostMapping("/password/reset")
     public ResponseEntity<ResponseDTO> changePassword(@RequestBody @Valid ResetPasswordRequest request)
             throws VoixDeSagesseException {
         return ResponseEntity.ok(userService.changePassword(request));
     }
 
-    @PostMapping("/sendOtp/{email}")
-    public ResponseEntity<ResponseDTO> sendOtp(@PathVariable @Email(message = "{user.email.invalid}") String email)
-            throws Exception {
-        userService.sendOtp(email);
+    @PostMapping("/password/otp")
+    public ResponseEntity<ResponseDTO> sendOtp(@RequestBody @Valid OtpRequest request) throws Exception {
+        userService.sendOtp(request.email());
         return ResponseEntity.ok(new ResponseDTO("Si un compte existe avec cet email, un code vient d'être envoyé."));
     }
 
     // POST so the code never ends up in URLs or access logs.
-    @PostMapping("/verifyOtp")
+    @PostMapping("/password/otp/verify")
     public ResponseEntity<OtpVerificationResponse> verifyOtp(@RequestBody @Valid VerifyOtpRequest request)
             throws VoixDeSagesseException {
         String resetToken = userService.verifyOtp(request.email(), request.otp());

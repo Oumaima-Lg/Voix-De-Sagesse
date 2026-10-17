@@ -79,7 +79,7 @@ class AuthorizationIntegrationTest {
     void createArticleUsesAuthenticatedUser() throws Exception {
         String body = "{\"content\":\"Une pensée publiée par Bob.\",\"category\":\"philosophie\",\"tags\":[\"t\"],\"userId\":" + ALICE_ID + "}";
 
-        mvc.perform(post("/articles/createSaggesseArticla").with(as(BOB_ID))
+        mvc.perform(post("/articles/sagesse").with(as(BOB_ID))
                 .contentType(MediaType.APPLICATION_JSON).content(body))
             .andExpect(status().isCreated());
 
@@ -123,7 +123,7 @@ class AuthorizationIntegrationTest {
     void updateProfileOnlyChangesCurrentUser() throws Exception {
         String body = "{\"id\":" + ALICE_ID + ",\"nom\":\"Pirate\",\"prenom\":\"Bob\",\"bio\":\"\"}";
 
-        mvc.perform(put("/users/updateProfile").with(as(BOB_ID))
+        mvc.perform(put("/users/me").with(as(BOB_ID))
                 .contentType(MediaType.APPLICATION_JSON).content(body))
             .andExpect(status().isOk());
 
@@ -149,9 +149,9 @@ class AuthorizationIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].user.id").value(ALICE_ID))
             .andExpect(jsonPath("$[0].user.email").doesNotExist());
-        mvc.perform(get("/users/profile/" + ALICE_ID).with(as(BOB_ID)))
+        mvc.perform(get("/users/" + ALICE_ID).with(as(BOB_ID)))
             .andExpect(jsonPath("$.email").doesNotExist());
-        mvc.perform(get("/users/profile/" + ALICE_ID).with(as(ALICE_ID)))
+        mvc.perform(get("/users/" + ALICE_ID).with(as(ALICE_ID)))
             .andExpect(jsonPath("$.email").value("alice@test.local"));
     }
 

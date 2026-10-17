@@ -37,7 +37,7 @@ public class ArticleController {
 
     private final ArticleService articleService;
 
-    @PostMapping("/createSaggesseArticla")
+    @PostMapping("/sagesse")
     public ResponseEntity<?> createSagesseArticle(@Valid @RequestBody SagesseDTO sagesseDTO, BindingResult result,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         try {
@@ -57,7 +57,7 @@ public class ArticleController {
         }
     }
 
-    @PostMapping("/createHistoireArticla")
+    @PostMapping("/histoire")
     public ResponseEntity<?> createHistoireArticle(@Valid @RequestBody HistoireDTO histoireDTO, BindingResult result,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         try {
@@ -77,16 +77,6 @@ public class ArticleController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<Article>> DisplayArticles() throws VoixDeSagesseException {
-        return ResponseEntity.ok(articleService.getAllArticles());
-    }
-
-    @GetMapping("/persoArticle/{userId}")
-    public ResponseEntity<List<Article>> DisplayArticlesByUser(@PathVariable long userId) throws VoixDeSagesseException {
-        return ResponseEntity.ok(articleService.getArticlesByUserId(userId));
-    }
-
     @GetMapping("/posts")
     public ResponseEntity<List<PosteDTO>> DisplayPosts(@AuthenticationPrincipal CustomUserDetails currentUser) throws VoixDeSagesseException {
         return ResponseEntity.ok(articleService.displayPosts(currentUser.getId()));
@@ -101,7 +91,7 @@ public class ArticleController {
         return ResponseEntity.ok("Article liked successfully");
     }
 
-    @PostMapping("/{id}/unlike")
+    @DeleteMapping("/{id}/like")
     public ResponseEntity<String> unlikeArticle(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails currentUser) throws VoixDeSagesseException {
