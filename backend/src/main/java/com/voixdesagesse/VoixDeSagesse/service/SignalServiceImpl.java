@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,9 @@ public class SignalServiceImpl implements SignalService {
     private final ArticleService articleService;
     private final ArticleRepository articleRepository;
     private final JavaMailSender mailSender;
+
+    @Value("${app.mail.from}")
+    private String mailFrom;
 
     @Override
     @Transactional
@@ -124,7 +128,7 @@ public class SignalServiceImpl implements SignalService {
         message.setSubject("[Avertissement] Votre article a été supprimé suite à des signalements");
 
         message.setText(Report.getDeletedArticleMessage(user.getNom(), user.getPrenom(), articleName), true);
-        message.setFrom("laghjibioumaima2003@gmail.com");
+        message.setFrom(mailFrom);
         mailSender.send(mm);
         return true;
     }

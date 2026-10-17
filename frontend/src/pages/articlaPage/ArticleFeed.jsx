@@ -13,6 +13,7 @@ import { Link } from "react-router-dom"
 import SearchBar from "./SearchBar"
 import ScrollToTop from "./ScrollToTop"
 import { reportArticle } from "../../services/SignalService"
+import { fileUrl } from "../../config"
 
 const posteFeed = () => {
   const navigate = useNavigate()
@@ -389,9 +390,7 @@ const posteFeed = () => {
                         {poste.user.profilePicture ? (
                           <img
                             src={
-                              poste.user.profilePicture.startsWith("http")
-                                ? poste.user.profilePicture
-                                : `http://localhost:8080${poste.user.profilePicture}`
+                              fileUrl(poste.user.profilePicture)
                             }
                             alt={`${poste.user.nom} ${poste.user.prenom}`}
                             className="w-full h-full object-cover"
@@ -578,9 +577,7 @@ const posteFeed = () => {
                             {comment.user.profilePicture ? (
                               <img
                                 src={
-                                  comment.user.profilePicture.startsWith("http")
-                                    ? comment.user.profilePicture
-                                    : `http://localhost:8080${comment.user.profilePicture}`
+                                  fileUrl(comment.user.profilePicture)
                                 }
                                 alt={`${comment.user.nom} ${comment.user.prenom}`}
                                 className="w-full h-full object-cover"
@@ -643,9 +640,7 @@ const posteFeed = () => {
                     {user.profilePicture ? (
                       <img
                         src={
-                          user.profilePicture.startsWith("http")
-                            ? user.profilePicture
-                            : `http://localhost:8080${user.profilePicture}`
+                          fileUrl(user.profilePicture)
                         }
                         alt="Votre avatar"
                         className="w-full h-full object-cover"

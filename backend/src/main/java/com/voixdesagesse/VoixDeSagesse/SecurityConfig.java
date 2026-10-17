@@ -63,6 +63,7 @@ public class SecurityConfig {
                         // Error dispatches (e.g. a 403) run without the JWT filter: keep their status instead of a 401.
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/uploads/profile-pictures/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/articles/**", "/comments/**", "/users/**", "/signals/**").hasAuthority("ROLE_USER")

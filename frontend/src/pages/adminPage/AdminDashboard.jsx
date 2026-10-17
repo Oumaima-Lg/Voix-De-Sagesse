@@ -27,6 +27,7 @@ import {
 } from "lucide-react"
 
 import Spline from '@splinetool/react-spline';
+import { fileUrl } from "../../config"
 
 export function AppSpline() {
     return (
@@ -518,11 +519,7 @@ const AdminDashboard = () => {
                                                         <img
                                                             className="h-12 w-12 rounded-full object-cover ring-2 ring-[#4C3163]/50 shadow-lg group-hover:ring-[#A09F87]/50 transition-all duration-300 group-hover:scale-110"
                                                             src={
-                                                                user.profilePicture
-                                                                    ? user.profilePicture.startsWith("http")
-                                                                        ? user.profilePicture
-                                                                        : `http://localhost:8080${user.profilePicture || "/placeholder.svg"}`
-                                                                    : profileAvatar
+                                                                user.profilePicture ? fileUrl(user.profilePicture) : profileAvatar
                                                             }
                                                             alt={`${user.prenom} ${user.nom}`}
                                                         />

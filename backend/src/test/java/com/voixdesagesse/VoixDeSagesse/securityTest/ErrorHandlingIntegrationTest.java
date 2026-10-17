@@ -50,6 +50,14 @@ class ErrorHandlingIntegrationTest {
     }
 
     @Test
+    @DisplayName("Health check public pour l'hébergeur")
+    void healthIsPublic() throws Exception {
+        mvc.perform(get("/actuator/health"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("UP"));
+    }
+
+    @Test
     @DisplayName("Connexion : 401 puis 429 après 5 échecs")
     void loginIsBlockedAfterFiveFailures() throws Exception {
         String body = "{\"email\":\"brute-force@test.local\",\"password\":\"wrong\"}";

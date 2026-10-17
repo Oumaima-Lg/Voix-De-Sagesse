@@ -12,6 +12,7 @@ import { removeUser } from '../../Slices/UserSlice';
 import MenuBar from "./MenuBar";
 import profileAvatar from "../../assets/profileAvatar.jpg"
 import { useAuth } from '../../hooks/useAuth';
+import { fileUrl } from "../../config"
 
 
 
@@ -63,9 +64,7 @@ const HeaderArticla = () => {
                         <div className='sm:text-sm text-xs text-center'>{user.nom + " " + user.prenom}</div>
                         <div className=''>
                             <img src={user.profilePicture ?
-                                (user.profilePicture.startsWith('http') ?
-                                    user.profilePicture :
-                                    `http://localhost:8080${user.profilePicture}` 
+                                (fileUrl(user.profilePicture) 
                                 ) : profileAvatar} alt="" 
                                 className="size-10 border-[#A09F87] object-cover"/>
                         </div>
