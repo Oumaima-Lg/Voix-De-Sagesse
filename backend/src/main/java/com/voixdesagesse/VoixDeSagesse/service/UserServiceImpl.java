@@ -194,8 +194,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserProfileDTO updateUserProfile(UserProfileDTO profileDTO) throws ArticlaException {
-        User user = userRepository.findById(profileDTO.getId())
+    public UserProfileDTO updateUserProfile(Long userId, UserProfileDTO profileDTO) throws ArticlaException {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ArticlaException("USER_NOT_FOUND"));
         user.setNom(profileDTO.getNom());
         user.setPrenom(profileDTO.getPrenom());

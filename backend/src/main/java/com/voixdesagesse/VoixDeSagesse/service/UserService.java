@@ -33,7 +33,7 @@ public interface UserService {
 
     public ResponseDTO changePassword(ResetPasswordRequest request) throws ArticlaException;
 
-    public UserProfileDTO updateUserProfile(UserProfileDTO profileDTO) throws ArticlaException;
+    public UserProfileDTO updateUserProfile(Long userId, UserProfileDTO profileDTO) throws ArticlaException;
 
     public User getUserById(long userId) throws ArticlaException;
 

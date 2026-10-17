@@ -16,6 +16,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.voixdesagesse.VoixDeSagesse.dto.UserProfileDTO;
 import com.voixdesagesse.VoixDeSagesse.entity.User;
 import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
+import com.voixdesagesse.VoixDeSagesse.jwt.CustomUserDetails;
 import com.voixdesagesse.VoixDeSagesse.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -122,9 +124,10 @@ public class UserController {
     }
 
     @PutMapping("/updateProfile")
-    public ResponseEntity<UserProfileDTO> updateUserProfile(@Valid @RequestBody UserProfileDTO profileDTO)
+    public ResponseEntity<UserProfileDTO> updateUserProfile(@Valid @RequestBody UserProfileDTO profileDTO,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
             throws ArticlaException {
-        UserProfileDTO updatedUser = userService.updateUserProfile(profileDTO);
+        UserProfileDTO updatedUser = userService.updateUserProfile(currentUser.getId(), profileDTO);
         return ResponseEntity.ok(updatedUser);
     }
 
@@ -135,7 +138,7 @@ public class UserController {
 
     @PostMapping("/upload-profile-picture")
     public ResponseEntity<?> uploadProfilePicture(@RequestParam("profilePicture") MultipartFile file,
-            @RequestParam("userId") Long userId, HttpServletRequest request) {
+            @AuthenticationPrincipal CustomUserDetails currentUser, HttpServletRequest request) {
 
         try {
             if (file.isEmpty()) {
@@ -154,7 +157,7 @@ public class UserController {
                         .body(Map.of("error", "La taille du fichier ne doit pas dépasser 5MB"));
             }
 
-            String profilePictureUrl = userService.saveProfilePicture(file, userId);
+            String profilePictureUrl = userService.saveProfilePicture(file, currentUser.getId());
 
             String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
             String fullUrl = baseUrl + profilePictureUrl;

@@ -42,7 +42,7 @@ const posteFeed = () => {
 
   const loadAllPosts = () => {
     setLoading(true)
-    DisplayPosts(user.id)
+    DisplayPosts()
       .then((data) => {
         console.log(data)
         setAllPosts(data)
@@ -68,7 +68,7 @@ const posteFeed = () => {
     setIsSearchActive(true)
 
     try {
-      const searchResults = await searchArticles(user.id, filters)
+      const searchResults = await searchArticles(filters)
       setPosts(searchResults)
       console.log(`Recherche terminée - ${searchResults.length} résultats trouvés`)
     } catch (error) {
@@ -183,9 +183,9 @@ const posteFeed = () => {
       const isCurrentlyLiked = poste.interaction.liked
 
       if (isCurrentlyLiked) {
-        await unlikeArticle(posteId, user.id)
+        await unlikeArticle(posteId)
       } else {
-        await likeArticle(posteId, user.id)
+        await likeArticle(posteId)
       }
 
       setPosts((prev) =>
@@ -289,7 +289,6 @@ const posteFeed = () => {
     setReportLoading(true)
     try {
       await reportArticle({
-        reporterId: user.id,
         articleId: articleId,
         reason: reportData.reason,
         description: reportData.description

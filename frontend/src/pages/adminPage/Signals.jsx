@@ -123,7 +123,7 @@ const Signals = () => {
     const handleProcessSignal = async (signalId, status) => {
         try {
             setProcessingSignal(true)
-            await processSignal(signalId, status, user.id)
+            await processSignal(signalId, status)
             
             setSignals(signals.map(signal => 
                 signal.id === signalId 

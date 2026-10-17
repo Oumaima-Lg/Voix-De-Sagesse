@@ -187,7 +187,6 @@ const Profile = () => {
 
             const formData = new FormData();
             formData.append('profilePicture', file);
-            formData.append('userId', user.id);
 
             const response = await uploadProfilePicture(formData);
 

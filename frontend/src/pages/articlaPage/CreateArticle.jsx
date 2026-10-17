@@ -106,7 +106,6 @@ const CreateArticleForm = () => {
       if (isWisdom) {
         const data = {
           content: formData.title,
-          userId: user.id,
           source: formData.source || null,
           category: formData.category,
           tags: tagsArray,
@@ -118,7 +117,6 @@ const CreateArticleForm = () => {
         const data = {
           title: formData.title,
           content: formData.content,
-          userId: user.id,
           lesson: formData.lesson || null,
           category: formData.category,
           tags: tagsArray,

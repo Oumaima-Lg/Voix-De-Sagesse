@@ -15,23 +15,16 @@ const getDashboardStats = async () => {
         .catch(error => { throw error; });
 }
 
-const getPendingSignals = async () => {
-    return axiosInstance.get('/signals/pending')
-        .then(res => res.data)
-        .catch(error => { throw error; });
-}
-
 const getAllSignals = async () => {
     return axiosInstance.get(`${base_url}signals`)
         .then(res => res.data)
         .catch(error => { throw error; });
 }
 
-const processSignal = async (signalId, status, adminId, adminComment = "") => {
+const processSignal = async (signalId, status, adminComment = "") => {
     return axiosInstance.put(`${base_url}signals/${signalId}/process`, null, {
         params: {
             status: status,
-            adminId: adminId,
             adminComment: adminComment
         }
     })
@@ -42,7 +35,6 @@ const processSignal = async (signalId, status, adminId, adminComment = "") => {
 export { 
     getAllUsers,
     getDashboardStats,
-    getPendingSignals,
     processSignal,
     getAllSignals
 };

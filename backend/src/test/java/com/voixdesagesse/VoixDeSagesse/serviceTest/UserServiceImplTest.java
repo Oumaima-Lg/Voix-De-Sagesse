@@ -359,7 +359,7 @@ public class UserServiceImplTest {
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         // When
-        UserProfileDTO result = userService.updateUserProfile(profileDTO);
+        UserProfileDTO result = userService.updateUserProfile(1L, profileDTO);
 
         // Then
         assertNotNull(result);
@@ -379,7 +379,7 @@ public class UserServiceImplTest {
 
         // When & Then
         ArticlaException exception = assertThrows(ArticlaException.class,
-            () -> userService.updateUserProfile(profileDTO));
+            () -> userService.updateUserProfile(999L, profileDTO));
         assertEquals("USER_NOT_FOUND", exception.getMessage());
     }
     
