@@ -2,7 +2,7 @@ import axios from 'axios';
 import { errorNotification } from '../services/NotificationService';
 import { removeUser } from '../Slices/UserSlice';
 import { removeJwt } from '../Slices/JwtSlice';
-import store from '../store';
+import store from '../Store';
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:8080",

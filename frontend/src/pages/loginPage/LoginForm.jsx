@@ -123,10 +123,11 @@ const LoginForm = () => {
                     setLoading(false);
                     console.error('Login error:', err);
 
-                    const errorMessage = err.response?.data?.errorMessage ||
-                        err.response?.data?.message ||
-                        err.message ||
-                        'Erreur de connexion';
+                    const errorMessage = !err.response
+                        ? 'Impossible de contacter le serveur. Réessayez plus tard.'
+                        : err.response.status === 401
+                            ? 'Email ou mot de passe incorrect.'
+                            : err.response.data?.errorMessage || err.response.data?.message || 'Erreur de connexion.';
 
                     errorNotification('Échec de la connexion', errorMessage);
                     clearAuth();
@@ -145,9 +146,9 @@ const LoginForm = () => {
     return (
         <>
             <StyledWrapper>
-                <div className="mx-auto p-14">
-                    <div className='card mx-auto border-4 border-image-gradient sm:px-9 sm:py-4 px-4 py-2 flex flex-col md:gap-10 sm:gap-8 gap-6'>
-                        <h4 className="text-gradient lg:text-4xl sm:text-3xl text-xl text-center lg:px-20 px-10 pt-2">Se Connecter</h4>
+                <div className="mx-auto px-4">
+                    <div className='card w-[min(92vw,26rem)] mx-auto border-4 border-image-gradient sm:px-8 px-4 py-4 flex flex-col gap-4'>
+                        <h4 className="text-gradient sm:text-3xl text-2xl text-center pt-2">Se Connecter</h4>
 
                         {urlMessage && (
                             <div className={`text-center text-sm mb-4 p-3 rounded border ${isFromLogout
@@ -163,10 +164,10 @@ const LoginForm = () => {
                             </div>
                         )}
 
-                        <form className='flex flex-col md:gap-4 gap-2'>
+                        <form className='flex flex-col gap-3'>
                             <TextInput
                                 error={formError.email}
-                                size='lg'
+                                size='md'
                                 placeholder="Email"
                                 value={data.email}
                                 onChange={handleChange}
@@ -175,7 +176,7 @@ const LoginForm = () => {
                             />
                             <TextInput
                                 error={formError.password}
-                                size='lg'
+                                size='md'
                                 placeholder="Mot de passe"
                                 type="password"
                                 value={data.password}
@@ -193,7 +194,7 @@ const LoginForm = () => {
                                 />
 
                                 <button
-                                    className="btn btn-border-gradient text-amber-50! mb-6!"
+                                    className="btn btn-border-gradient text-amber-50! mb-3!"
                                     onClick={handleSubmit}
                                     disabled={loading}
                                     type="submit" 
@@ -203,7 +204,7 @@ const LoginForm = () => {
 
                                 <div
                                     onClick={loading ? undefined : open} 
-                                    className={`block mb-6! border-b-1 max-w-max mx-auto ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                                    className={`block mb-3! border-b-1 max-w-max mx-auto ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                                 >
                                     Mot de passe oublié ?
                                 </div>
@@ -247,7 +248,7 @@ const StyledWrapper = styled.div`
 
   /*Buttons*/
   .btn {
-   margin: 1rem;
+   margin: 0.75rem;
    border: none;
    border-radius: 4px;
    font-weight: bold;

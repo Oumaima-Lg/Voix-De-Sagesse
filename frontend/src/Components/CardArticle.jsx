@@ -207,8 +207,8 @@ let experiences2 = [
 // ];
 
 const CitationCard = ({ content, star, emptyStar, user, image }) => (
-  <Tilt className="card px-2 pb-10 pt-14 justify-center flex-col gap-y-8">
-    <div className="flex flex-col gap-y-3 place-items-center justify-center min-h-[161px]">
+  <Tilt className="card px-2 pb-6 pt-8 justify-center flex-col gap-y-4">
+    <div className="flex flex-col gap-y-3 place-items-center justify-center min-h-[130px]">
       <p className="text-white/90 text-[18px] charm text-center">
         <span>‘’</span> {content} <span>‘’</span>
       </p>
@@ -254,9 +254,9 @@ const CitationCard2 = ({ content, star, emptyStar, user, image }) => (
 
 const ExperienceCard = ({ title, content, star, userName, userImage, image }) => (
   <div className="card2 p-4 pl-6 flex lg:flex-row flex-col-reverse gap-y-5 gap-x-10">
-    <div className='flex-4 flex flex-col lg:gap-y-14 gap-y-6'>
+    <div className='flex-4 flex flex-col lg:gap-y-4 gap-y-6'>
       <h3 className='text-white/90 lg:text-3xl text-xl charm text-center z-[1]'> <span>{title}</span> </h3>
-      <p className="text-white/90 lg:text-[20px] text-[14px] charm text-center" > <span>‘’</span> {content} <span>‘’</span> </p>
+      <p className="text-white/90 lg:text-[18px] text-[14px] charm text-center line-clamp-3" > <span>‘’</span> {content} <span>‘’</span> </p>
       <div className='z-[1] flex justify-evenly items-center lg:flex-row flex-col gap-y-6'>
         <button className='p-2 border-gradient background-gradient'>Voir la suite</button>
         <span> {star} </span>
@@ -267,7 +267,7 @@ const ExperienceCard = ({ title, content, star, userName, userImage, image }) =>
       </div>
     </div>
     <div className='z-[1] flex-1 flex justify-center '>
-      <img src={image} alt="" className='lg:h-full h-[186px] rounded-lg' />
+      <img src={image} alt="" className='lg:h-52 h-[186px] object-cover rounded-lg' />
     </div>
   </div>
 );
@@ -394,7 +394,7 @@ const AnimatedWrapper = styled.div`
 
   .card {
     width: 220px;
-    height: 277px;
+    height: 230px;
     background: #07182E;
     position: relative;
     display: flex;

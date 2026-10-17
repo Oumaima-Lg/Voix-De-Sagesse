@@ -1,24 +1,26 @@
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+// Same rule as the backend (UserRegistrationDTO), so both sides accept the same passwords.
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/;
+
 const signupValidation = (name, value) => {
   switch (name) {
     case "nom":
-      if (value.length === 0) return "Name is required.";
+      if (value.trim().length === 0) return "Le nom est obligatoire.";
       return "";
 
     case "prenom":
-      if (value.length === 0) return "Prenom is required.";
+      if (value.trim().length === 0) return "Le prénom est obligatoire.";
       return "";
 
     case "email":
-      if (value.length === 0) return "Email is required.";
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailRegex.test(value)) return "Email is invalid.";
+      if (value.trim().length === 0) return "L'email est obligatoire.";
+      if (!EMAIL_REGEX.test(value)) return "L'email n'est pas valide.";
       return "";
 
     case "motdepasse":
-      if (value.length === 0) return "Password is required.";
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,15}$/;
-      if (!passwordRegex.test(value)) {
-        return "Password must be 8-15 characters with an uppercase, a lowercase, a digit, and a special character.";
+      if (value.length === 0) return "Le mot de passe est obligatoire.";
+      if (!PASSWORD_REGEX.test(value)) {
+        return "8 à 15 caractères, avec une majuscule, une minuscule, un chiffre et un caractère spécial (@$!%*?&).";
       }
       return "";
 
@@ -32,11 +34,12 @@ const loginValidation = (name, value) => {
   switch (name) {
 
     case "email":
-      if (value.length === 0) return "Email is required.";
+      if (value.trim().length === 0) return "L'email est obligatoire.";
+      if (!EMAIL_REGEX.test(value)) return "L'email n'est pas valide.";
       return "";
 
-    case "motdepasse":
-      if (value.length === 0) return "Password is required.";
+    case "password":
+      if (value.length === 0) return "Le mot de passe est obligatoire.";
       return "";
 
     default:

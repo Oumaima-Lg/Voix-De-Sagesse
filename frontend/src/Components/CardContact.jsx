@@ -27,7 +27,7 @@ const StyledWrapper = styled.div`
     background: linear-gradient(#212121, #212121) padding-box,
                 linear-gradient(145deg, transparent 35%, #A09F87, #4C3163) border-box;
     border: 2px solid transparent;
-    padding: 32px 24px;
+    padding: 24px;
     font-size: 14px;
     font-family: inherit;
     color: white;
@@ -61,7 +61,7 @@ const StyledWrapper = styled.div`
   .form-container .form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 14px;
   }
 
   .form-container .form-group {
@@ -94,7 +94,7 @@ const StyledWrapper = styled.div`
     border-radius: 8px;
     resize: none;
     color: #fff;
-    height: 96px;
+    height: 80px;
     border: 1px solid #414141;
     background-color: transparent;
     font-family: inherit;

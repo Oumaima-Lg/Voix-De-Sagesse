@@ -40,7 +40,7 @@
 @layer base {
 
   .section {
-    @apply py-8 lg:py-24 flex items-center ;
+    @apply py-10 lg:py-6 flex items-center;
   }
 
 
@@ -585,10 +585,6 @@
   }
 }
 
-/* Adding smooth scrolling and performance optimizations */
-* {
-  scroll-behavior: smooth;
-}
 
 .animate-float-slow,
 .animate-float-delayed,
