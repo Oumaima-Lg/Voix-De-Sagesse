@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import magic from '../../assets/magicBook.jpg';
+import magic from '../../assets/magicBook.webp';
 import Switch from '../../components/Switch';
 import Card from '../../components/CardArticle';
 

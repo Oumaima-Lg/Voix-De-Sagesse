@@ -1,5 +1,5 @@
 import React from 'react'
-import brain from '../../assets/brain.jpg'
+import brain from '../../assets/brain.webp'
 import { motion } from 'framer-motion';
 import { fadeIn } from '../../animations/variants';
 import { Link as LinkRouter } from "react-router-dom";

@@ -1,7 +1,7 @@
 import React from 'react'
 
 import Loader from '../../components/Loader'
-import fireHuman from '../../assets/fireHuman.png'
+import fireHuman from '../../assets/fireHuman.webp'
 import Article from '../../assets/Article.png'
 import { PiArticleLight, PiStarLight } from "react-icons/pi";
 import { IoCreateOutline } from "react-icons/io5";

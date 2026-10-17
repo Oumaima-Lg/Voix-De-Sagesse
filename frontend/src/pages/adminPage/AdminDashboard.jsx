@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import { useAuth } from "../../hooks/useAuth"
 import { getAllUsers, getDashboardStats } from "../../api/adminService"
-import profileAvatar from "../../assets/profileAvatar.jpg"
+import profileAvatar from "../../assets/profileAvatar.webp"
 import Signals from "./Signals"
 import {
     Users,

@@ -5,7 +5,7 @@ import { Link as LinkRouter, useNavigate } from "react-router-dom";
 import vector from '../../assets/Vector.png';
 import { PermIdentityIcon, BookmarkBorderIcon, LogoutIcon } from '../../components/icons/MaterialIcons';
 import { useSelector } from 'react-redux';
-import profileAvatar from "../../assets/profileAvatar.jpg"
+import profileAvatar from "../../assets/profileAvatar.webp"
 import { useAuth } from '../../hooks/useAuth';
 import { fileUrl } from "../../config"
 

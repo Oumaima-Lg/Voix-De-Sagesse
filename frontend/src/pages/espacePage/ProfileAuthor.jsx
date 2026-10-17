@@ -3,7 +3,7 @@ import ShinyText from "../../blocks/TextAnimations/ShinyText/ShinyText"
 import { PiUser, PiUserCircle } from "react-icons/pi"
 import { IoPersonOutline, IoLocationOutline } from "react-icons/io5"
 import { MdOutlineLanguage } from "react-icons/md"
-import profileAvatar from "../../assets/profileAvatar.jpg"
+import profileAvatar from "../../assets/profileAvatar.webp"
 import { getUserProfile } from '../../api/userService';
 import { LoadingOverlay } from "@mantine/core"
 import { useParams } from "react-router-dom";

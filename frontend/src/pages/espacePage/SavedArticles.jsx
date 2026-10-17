@@ -9,7 +9,7 @@ import { getSavedArticles, likeArticle, unlikeArticle } from "../../api/articleS
 import { followUser, unfollowUser, unsaveArticle } from "../../api/userService"
 import { addComment, getCommentsByArticle, deleteComment } from "../../api/commentService"
 import { errorNotification, successNotification } from "../../utils/notifications"
-import profileAvatar from "../../assets/profileAvatar.jpg"
+import profileAvatar from "../../assets/profileAvatar.webp"
 import { Link } from "react-router-dom";
 import { fileUrl } from "../../config"
 

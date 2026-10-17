@@ -5,7 +5,7 @@ import Footer from '../homePage/Footer'
 
 const LoginPage = () => {
     return (
-        <div className='bg-[url(/src/assets/diego.jpg)] bg-cover min-h-svh flex flex-col'>
+        <div className='bg-[url(/src/assets/diego.webp)] bg-cover min-h-svh flex flex-col'>
             <Header isHidden={true} />
             <Login />
             <Footer></Footer>

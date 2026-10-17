@@ -1,12 +1,12 @@
 import React from 'react';
-import user2 from '../assets/user2.jpg'
-import user3 from '../assets/user3.jpg'
-import user1 from '../assets/user1.png'
-import picExperience from '../assets/concept-portrait-overstimulated-person.jpg'
-import picExperience2 from '../assets/un-enfant-adorable-jouant-avec-des-ombres.jpg'
-import picExperience3 from '../assets/peinture-d-une-personne-souffrant-d-anxiete.jpg'
-import picExperience4 from '../assets/formes-geometriques-3d-en-arriere-plan-naturel.jpg'
-import picExperience5 from '../assets/rendu-d-une-personne-avec-des-personnalites-differentes.jpg'
+import user2 from '../assets/user2.webp'
+import user3 from '../assets/user3.webp'
+import user1 from '../assets/user1.webp'
+import picExperience from '../assets/concept-portrait-overstimulated-person.webp'
+import picExperience2 from '../assets/un-enfant-adorable-jouant-avec-des-ombres.webp'
+import picExperience3 from '../assets/peinture-d-une-personne-souffrant-d-anxiete.webp'
+import picExperience4 from '../assets/formes-geometriques-3d-en-arriere-plan-naturel.webp'
+import picExperience5 from '../assets/rendu-d-une-personne-avec-des-personnalites-differentes.webp'
 import Tilt from 'react-parallax-tilt';
 import { Carousel } from '@mantine/carousel';
 import './CardArticle.css';
