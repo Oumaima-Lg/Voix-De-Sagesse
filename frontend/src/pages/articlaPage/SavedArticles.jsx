@@ -11,6 +11,7 @@ import { addComment, getCommentsByArticle, deleteComment } from "../../services/
 import { errorNotification, successNotification } from "../../services/NotificationService"
 import profileAvatar from "../../assets/profileAvatar.jpg"
 import { Link } from "react-router-dom";
+import { fileUrl } from "../../config"
 
 const SavedArticles = () => {
     const navigate = useNavigate()
@@ -306,9 +307,7 @@ const SavedArticles = () => {
                                             <Link to={`/articla/poste/profile/${poste.user.id}`}>
                                                 {poste.user.profilePicture ? (
                                                     <img
-                                                        src={poste.user.profilePicture.startsWith('http')
-                                                            ? poste.user.profilePicture
-                                                            : `http://localhost:8080${poste.user.profilePicture}`}
+                                                        src={fileUrl(poste.user.profilePicture)}
                                                         alt={`${poste.user.nom} ${poste.user.prenom}`}
                                                         className="w-full h-full object-cover"
                                                         onError={(e) => {
@@ -487,9 +486,7 @@ const SavedArticles = () => {
                                                         {comment.user.profilePicture ? (
                                                             <img
                                                                 src={
-                                                                    comment.user.profilePicture.startsWith("http")
-                                                                        ? comment.user.profilePicture
-                                                                        : `http://localhost:8080${comment.user.profilePicture}`
+                                                                    fileUrl(comment.user.profilePicture)
                                                                 }
                                                                 alt={`${comment.user.nom} ${comment.user.prenom}`}
                                                                 className="w-full h-full object-cover"
@@ -553,9 +550,7 @@ const SavedArticles = () => {
                                     <div className="w-8 h-8 rounded-full overflow-hidden border border-[#4C3163]">
                                         {user.profilePicture ? (
                                             <img
-                                                src={user.profilePicture.startsWith('http') ?
-                                                    user.profilePicture :
-                                                    `http://localhost:8080${user.profilePicture}`}
+                                                src={fileUrl(user.profilePicture)}
                                                 alt="Votre avatar"
                                                 className="w-full h-full object-cover"
                                                 onError={(e) => {

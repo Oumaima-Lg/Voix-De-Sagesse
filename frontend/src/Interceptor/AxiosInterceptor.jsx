@@ -3,9 +3,10 @@ import { errorNotification } from '../services/NotificationService';
 import { removeUser } from '../Slices/UserSlice';
 import { removeJwt } from '../Slices/JwtSlice';
 import store from '../Store';
+import { API_URL } from '../config';
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: API_URL,
   timeout:  60000,
   headers: {
     'Content-Type': 'application/json',

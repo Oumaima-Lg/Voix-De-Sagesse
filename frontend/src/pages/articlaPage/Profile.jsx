@@ -12,6 +12,7 @@ import { updateUserProfile, getUserProfile, uploadProfilePicture, deleteAccount 
 import { LoadingOverlay } from "@mantine/core"
 import { Modal } from "@mantine/core";
 import { useAuth } from "../../hooks/useAuth"
+import { fileUrl } from "../../config"
 
 
 
@@ -252,9 +253,7 @@ const Profile = () => {
                                 <div className="relative group">
                                     <img
                                         src={userProfile.profilePicture ?
-                                            (userProfile.profilePicture.startsWith('http') ?
-                                                userProfile.profilePicture :
-                                                `http://localhost:8080${userProfile.profilePicture}`
+                                            (fileUrl(userProfile.profilePicture)
                                             ) : profileAvatar}
                                         alt="Profile"
                                         className="w-32 h-32 rounded-full border-4 border-[#A09F87] object-cover"

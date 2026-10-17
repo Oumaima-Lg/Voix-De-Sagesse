@@ -2,7 +2,6 @@ import axios from "axios";
 
 import axiosInstance from "../Interceptor/AxiosInterceptor";
 
-// const base_url = "https://articlabackend-production.up.railway.app/users/";
 const base_url = "/users/";
 
 

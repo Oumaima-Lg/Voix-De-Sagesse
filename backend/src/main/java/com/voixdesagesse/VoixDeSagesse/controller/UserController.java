@@ -138,7 +138,7 @@ public class UserController {
 
     @PostMapping("/upload-profile-picture")
     public ResponseEntity<?> uploadProfilePicture(@RequestParam("profilePicture") MultipartFile file,
-            @AuthenticationPrincipal CustomUserDetails currentUser, HttpServletRequest request) {
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
 
         try {
             if (file.isEmpty()) {
@@ -159,11 +159,10 @@ public class UserController {
 
             String profilePictureUrl = userService.saveProfilePicture(file, currentUser.getId());
 
-            String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
-            String fullUrl = baseUrl + profilePictureUrl;
 
             Map<String, Object> response = new HashMap<>();
-            response.put("profilePictureUrl", fullUrl);
+            // Relative path, like the stored value: the frontend prefixes it with the API URL.
+            response.put("profilePictureUrl", profilePictureUrl);
             response.put("message", "Image uploadée avec succès");
             response.put("success", true);
 

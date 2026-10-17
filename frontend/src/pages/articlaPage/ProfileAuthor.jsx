@@ -10,6 +10,7 @@ import { updateUser } from "../../Slices/UserSlice"
 import { updateUserProfile, getUserProfile, uploadProfilePicture } from '../../services/UserService';
 import { LoadingOverlay } from "@mantine/core"
 import { useParams } from "react-router-dom";
+import { fileUrl } from "../../config"
 
 
 const Profile = ({userId: propUserId}) => {
@@ -78,9 +79,7 @@ const Profile = ({userId: propUserId}) => {
                                 <div className="relative group">
                                     <img
                                         src={userProfile.profilePicture ?
-                                            (userProfile.profilePicture.startsWith('http') ?
-                                                userProfile.profilePicture :
-                                                `http://localhost:8080${userProfile.profilePicture}` 
+                                            (fileUrl(userProfile.profilePicture) 
                                             ) : profileAvatar}
                                         alt="Profile"
                                         className="w-32 h-32 rounded-full border-4 border-[#A09F87] object-cover"
