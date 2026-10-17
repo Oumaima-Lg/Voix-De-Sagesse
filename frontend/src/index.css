@@ -40,7 +40,7 @@
 @layer base {
 
   .section {
-    @apply py-8 lg:py-24 flex items-center ;
+    @apply py-10 lg:py-6 flex items-center;
   }
 
 
@@ -584,6 +584,7 @@
     filter: blur(32px);
   }
 }
+
 
 /* Adding smooth scrolling and performance optimizations */
 * {

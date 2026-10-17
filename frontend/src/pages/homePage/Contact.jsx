@@ -34,7 +34,7 @@ export function AppSpline() {
 const Contact = () => {
   return (
     <section id='Contact' className='section text-white border-1 border-white/0'>
-      <div className='sm:container mx-auto p-[20px] pt-35 flex flex-col gap-y-18 mb-20'>
+      <div className='sm:container mx-auto p-[20px] flex flex-col gap-y-6'>
         <motion.div
           variants={fadeIn('right', 0.3)}
           initial="hidden"
@@ -61,7 +61,7 @@ const Contact = () => {
               whileInView={'show'}
               className='lg:absolute right-30'
             >
-              <img src={robot} alt="" className='object-cover' />
+              <img src={robot} alt="" className='h-64 lg:h-72 w-auto' />
             </motion.div>
             <motion.div
               variants={fadeIn('left', 0.2)}
