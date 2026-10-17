@@ -1,5 +1,4 @@
 import React from 'react';
-import styled from 'styled-components';
 import { useState } from 'react';
 import { useLocation } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
@@ -16,6 +15,7 @@ import { loginUser } from '../../api/authService';
 import { jwtDecode } from "jwt-decode";
 import { useAuth } from '../../hooks/useAuth';
 import { useEffect } from 'react';
+import './LoginForm.css';
 
 const LoginForm = () => {
     const [loading, setLoading] = useState(false);
@@ -66,7 +66,6 @@ const LoginForm = () => {
             if (newFormError[key]) valid = false;
         }
         setFormError(newFormError);
-
 
         if (valid) {
             setLoading(true);
@@ -139,7 +138,7 @@ const LoginForm = () => {
 
     return (
         <>
-            <StyledWrapper>
+            <div className='login-form'>
                 <div className="mx-auto px-4">
                     <div className='card w-[min(92vw,26rem)] mx-auto border-4 border-image-gradient sm:px-8 px-4 py-4 flex flex-col gap-4'>
                         <h4 className="text-gradient sm:text-3xl text-2xl text-center pt-2">Se Connecter</h4>
@@ -217,7 +216,7 @@ const LoginForm = () => {
                         </form>
                     </div>
                 </div>
-            </StyledWrapper>
+            </div>
 
             <div>
                 <ResetPassword opened={opened} close={close} />
@@ -225,55 +224,6 @@ const LoginForm = () => {
         </>
     );
 }
-
-const StyledWrapper = styled.div`
-  .card {
-    box-shadow: 
-    8px 8px 20px -5px rgba(76, 49, 99, 0.4),
-    -5px -5px 15px rgba(160, 159, 135, 0.2),
-    inset 2px 2px 5px rgba(255, 255, 255, 0.1);
-   text-align: center;
-  }
-
-  .input-icon {
-   height: 1em;
-   width: 1em;
-  }
-
-  /*Buttons*/
-  .btn {
-   margin: 0.75rem;
-   border: none;
-   border-radius: 4px;
-   font-weight: bold;
-   font-size: .8em;
-   text-transform: uppercase;
-   padding: 0.6em 1.2em;
-   box-shadow: 0 8px 24px 0 rgb(255 235 167 / 20%);
-   transition: all .3s ease-in-out;
-  }
-
-  .btn:disabled {
-   opacity: 0.6;
-   cursor: not-allowed;
-  }
-
-  .btn-link {
-   display: block;
-   font-size: .75em;
-   transition: color .3s ease-out;
-  }
-
-  /*Hover & focus*/
-  input:focus::placeholder {
-   opacity: 0;
-   transition: opacity .3s;
-  }
-
-  .btn:hover:not(:disabled) {
-   box-shadow: 0 8px 24px 0 rgb(16 39 112 / 20%);
-  }
-`;
 
 export default LoginForm;
 

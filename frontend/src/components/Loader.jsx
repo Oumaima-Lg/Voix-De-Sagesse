@@ -1,9 +1,9 @@
 import React from 'react';
-import styled from 'styled-components';
+import './Loader.css';
 
 const Loader = () => {
   return (
-    <StyledWrapper>
+    <div className='loader-anim'>
       <svg xmlns="http://www.w3.org/2000/svg" height={200} width={200} >
         <g style={{order: -1}}>
           <polygon transform="rotate(45 100 100)" strokeWidth={1} stroke="#d3a410" fill="none" points="70,70 148,50 130,130 50,150" id="bounce" />
@@ -39,67 +39,8 @@ const Loader = () => {
           <polygon transform="translate(50, 92)" strokeWidth={2} stroke fill="#1f2127" points="50,50 120.5,8 120.5,35 50,80" />
         </g>
       </svg>
-    </StyledWrapper>
+    </div>
   );
 }
-
-const StyledWrapper = styled.div`
-  .container {
-    background-color: #414141;
-  }
-  @keyframes bounce {
-    0%,
-    100% {
-      translate: 0px 36px;
-    }
-    50% {
-      translate: 0px 46px;
-    }
-  }
-  @keyframes bounce2 {
-    0%,
-    100% {
-      translate: 0px 46px;
-    }
-    50% {
-      translate: 0px 56px;
-    }
-  }
-
-  @keyframes umbral {
-    0% {
-      stop-color: #d3a5102e;
-    }
-    50% {
-      stop-color: rgba(211, 165, 16, 0.519);
-    }
-    100% {
-      stop-color: #d3a5102e;
-    }
-  }
-  @keyframes partciles {
-    0%,
-    100% {
-      translate: 0px 16px;
-    }
-    50% {
-      translate: 0px 6px;
-    }
-  }
-  #particles {
-    animation: partciles 4s ease-in-out infinite;
-  }
-  #animatedStop {
-    animation: umbral 4s infinite;
-  }
-  #bounce {
-    animation: bounce 4s ease-in-out infinite;
-    translate: 0px 36px;
-  }
-  #bounce2 {
-    animation: bounce2 4s ease-in-out infinite;
-    translate: 0px 46px;
-    animation-delay: 0.5s;
-  }`;
 
 export default Loader;

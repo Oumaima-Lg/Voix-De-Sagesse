@@ -3,11 +3,9 @@ import React, { useState } from 'react'
 import arrow from '../../assets/arrow.png';
 import { Link as LinkRouter, useNavigate } from "react-router-dom";
 import vector from '../../assets/Vector.png';
-import PermIdentityIcon from '@mui/icons-material/PermIdentity';
-import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
-import LogoutIcon from '@mui/icons-material/Logout';
+import { PermIdentityIcon, BookmarkBorderIcon, LogoutIcon } from '../../components/icons/MaterialIcons';
 import { useSelector } from 'react-redux';
-import profileAvatar from "../../assets/profileAvatar.jpg"
+import profileAvatar from "../../assets/profileAvatar.webp"
 import { useAuth } from '../../hooks/useAuth';
 import { fileUrl } from "../../config"
 
@@ -65,19 +63,19 @@ const HeaderEspace = () => {
                         <div className={`${toggle ? "flex" : "hidden"} absolute top-13 right-0 left-0 h-50 py-6 px-2 flex-col justify-between bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] border-3 border-[#202020] rounded-lg`}>
                             <div className='flex gap-2 items-center cursor-pointer hover:scale-105 transform-gpu hover:text-[#A09F87]'>
                                 <div className='text-xl'>
-                                    <PermIdentityIcon fontSize='inherit' />
+                                    <PermIdentityIcon />
                                 </div>
                                 <div className='text-md font-medium ' onClick={handleProfile}>Votre Profil</div>
                             </div>
                             <div className='flex gap-2 items-center  cursor-pointer hover:scale-105 transform-gpu hover:text-[#A09F87]'>
                                 <div className='text-xl'>
-                                    <BookmarkBorderIcon fontSize='inherit' />
+                                    <BookmarkBorderIcon />
                                 </div>
                                 <div className='text-md font-medium' onClick={handleFavoris}>Vos Favoris</div>
                             </div>
                             <div className='flex gap-2 items-center cursor-pointer  text-orange-600 hover:scale-105 transform-gpu hover:text-[#A09F87]'>
                                 <div className='pl-1 text-xl' >
-                                    <LogoutIcon fontSize='inherit' />
+                                    <LogoutIcon />
                                 </div>
                                 <div className='text-md xs:font-medium font-normal' onClick={handleLogout}>Déconnexion</div>
                             </div>
