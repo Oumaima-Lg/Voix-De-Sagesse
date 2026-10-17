@@ -14,14 +14,9 @@ import { Drawer } from '@mantine/core';
 import { IconXboxX } from '@tabler/icons-react';
 
 
-import Spline from '@splinetool/react-spline';
+import SplineScene from '../../components/SplineScene';
 import { useSelector } from 'react-redux'
 
-export function AppSpline() {
-    return (
-        <Spline scene="https://prod.spline.design/VbFDnYNrBVOXKv9u/scene.splinecode" />
-    );
-}
 
 
 
@@ -193,7 +188,7 @@ const Home = () => {
                             </div>
                         </div>
                         <div className='hidden 2xl:block h-130 flex-1  overflow-hidden '>
-                            <AppSpline />
+                            <SplineScene scene="https://prod.spline.design/VbFDnYNrBVOXKv9u/scene.splinecode" />
                         </div>
                     </div>
                 </div>

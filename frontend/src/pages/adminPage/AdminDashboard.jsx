@@ -26,14 +26,9 @@ import {
     BarChart3,
 } from "lucide-react"
 
-import Spline from '@splinetool/react-spline';
+import SplineScene from '../../components/SplineScene';
 import { fileUrl } from "../../config"
 
-export function AppSpline() {
-    return (
-        <Spline scene="https://prod.spline.design/9vqrsAo-EuX1s3i7/scene.splinecode" />
-    );
-}
 
 
 const AdminDashboard = () => {
@@ -212,7 +207,7 @@ const AdminDashboard = () => {
                 {/* Left */}
                 <div className="w-1/2 h-full flex items-center justify-center">
                     <div className="w-full h-full">
-                        <AppSpline />
+                        <SplineScene scene="https://prod.spline.design/9vqrsAo-EuX1s3i7/scene.splinecode" />
                     </div>
                 </div>
 
