@@ -14,7 +14,7 @@ const NotFoundPage = () => {
   };
 
   const handleGoToArticles = () => {
-    navigate('/articla');
+    navigate('/espace');
   };
 
   return (
@@ -93,10 +93,10 @@ const NotFoundPage = () => {
           
           <div className="grid md:grid-cols-2 gap-3">
             {[
-              { name: "Mes Postes", path: "/articla/my-posts", icon: "✍️" },
-              { name: "Articla", path: "/articla", icon: "📝" },
-              { name: "Profil", path: "/articla/profile", icon: "👤" },
-              { name: "Favoris", path: "/saved-articles", icon: "⭐" }
+              { name: "Mes publications", path: "/espace/mes-publications", icon: "✍️" },
+              { name: "Mon espace", path: "/espace", icon: "📝" },
+              { name: "Profil", path: "/espace/profil", icon: "👤" },
+              { name: "Favoris", path: "/espace/favoris", icon: "⭐" }
             ].map((item) => (
               <button
                 key={item.path}

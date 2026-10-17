@@ -1,14 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useState } from 'react';
-import { registerUser } from '../../services/AuthService';
-import { signupValidation } from '../../services/FormValidation';
+import { registerUser } from '../../api/authService';
+import { signupValidation } from '../../utils/formValidation';
 import { TextInput } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
-import { IconCheck } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
-import { Link as LinkRouter } from "react-router-dom";
-import { errorNotification, successNotification } from '../../services/NotificationService';
+import { errorNotification, successNotification } from '../../utils/notifications';
 
 const form = {
     nom: "",
@@ -24,35 +21,6 @@ const RegisterForm = () => {
     const [data, setData] = useState(form);
     const [formError, setFormError] = useState(form);
     const navigate = useNavigate();
-
-
-    const handleChangeOldVersion = (e) => {
-        let name = e.target.name, value = e.target.value;
-        setData({ ...data, [name]: value });
-        setFormError({ ...formError, [name]: signupValidation(name, value) });
-
-        console.log("avant if", formError);
-
-        if (name === "motdepasse" && data.confirmerMotdepasse !== "") {
-            if (data.confirmerMotdepasse !== value) {
-                console.log("dans if", formError);
-                setFormError({ ...formError, confirmerMotdepasse: "Les mots de passe ne correspondent pas." });
-            }
-
-            else
-                setFormError({ ...formError, confirmerMotdepasse: "" });
-            setFormError({ ...formError, [name]: signupValidation(name, value) });
-        }
-
-        if (name === "confirmerMotdepasse") {
-            if (data.motdepasse !== value)
-                setFormError({ ...formError, [name]: "Les mots de passe ne correspondent pas." });
-            else
-                setFormError({ ...formError, [name]: "" });
-        }
-
-
-    }
 
 
     const handleChange = (e) => {
@@ -102,8 +70,7 @@ const RegisterForm = () => {
         e.preventDefault();
 
         if (valid === true) {
-            registerUser(data).then((res) => {
-                console.log(res);
+            registerUser(data).then(() => {
                 setData(form);
                 successNotification('Succès', 'Inscription réussie !');
                 
@@ -112,7 +79,6 @@ const RegisterForm = () => {
                 }, 2000 )
 
             }).catch((err) => {
-                console.log(err);
                 errorNotification("Échec de l'inscription", err.response
                     ? err.response.data?.errorMessage || "Erreur lors de l'inscription."
                     : 'Impossible de contacter le serveur. Réessayez plus tard.');
@@ -129,7 +95,6 @@ const RegisterForm = () => {
                 <div className='card w-[min(92vw,26rem)] mx-auto border-4 border-image-gradient sm:px-8 px-4 py-4 flex flex-col gap-4'>
                     <h4 className="text-gradient sm:text-3xl text-2xl text-center pt-2">Créer un compte</h4>
                     <form className='flex flex-col gap-3'>
-                        {/* <input autoComplete="off" value={data.prenom} onChange={handleChange} id="prenom" name="prenom" type="text" placeholder="Prénom" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto " /> */}
                         <div className='grid sm:grid-cols-2 gap-3'>
                             <TextInput error={formError.prenom} size='md' placeholder="Prénom" value={data.prenom} onChange={handleChange} name="prenom" />
                             <TextInput

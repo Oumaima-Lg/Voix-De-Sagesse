@@ -1,0 +1,77 @@
+package com.voixdesagesse.entity;
+
+import java.time.LocalDateTime;
+import java.util.Set;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.voixdesagesse.dto.AccountType;
+import com.voixdesagesse.dto.UserDTO;
+import com.voixdesagesse.dto.UserProfileDTO;
+import com.voixdesagesse.dto.UserRegistrationDTO;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Document(collection = "users")  
+public class User {
+
+    @Id
+    private Long id;  
+    private String nom;
+    private String prenom;
+    @Indexed(unique = true)  
+    private String email;
+    private String motdepasse;
+    private AccountType accountType;
+
+    private String username;
+    private String phoneNumber;
+    private String location;
+    private String website;
+    private String profilePicture;
+    private String bio;
+    private Long contentCount;
+    private Long followersCount;
+    private Long followingCount;
+    private Long likesReceived;
+
+    private Set<Long> likedArticlesId; 
+    private Set<Long> followingId; 
+    private Set<Long> savedArticlesId;
+    private Set<Long> reportedArticlesId;
+    private LocalDateTime dateInscription;
+    
+
+    public UserRegistrationDTO toRegisterDTO() {
+        return new UserRegistrationDTO(this.id, this.nom, this.prenom, this.email, this.motdepasse, this.accountType);
+    }
+
+    public UserDTO toDTO() {
+        return new UserDTO(this.id, this.nom, this.prenom, this.email, this.motdepasse, this.accountType, this.username, 
+        this.phoneNumber, this.location, this.website, this.profilePicture,this.bio, this.contentCount, this.followersCount, 
+        this.followingCount, this.likesReceived, this.likedArticlesId, this.followingId, this.savedArticlesId, this.reportedArticlesId, this.dateInscription);
+    }
+
+    // Profile as seen by other users: contact details (email, phone) stay private.
+    public UserProfileDTO toPublicProfileDTO() {
+        UserProfileDTO profile = toProfileDTO();
+        profile.setEmail(null);
+        profile.setPhoneNumber(null);
+        return profile;
+    }
+
+    public UserProfileDTO toProfileDTO() {
+        return new UserProfileDTO(this.id, this.nom, this.prenom, this.email, this.username, 
+        this.phoneNumber, this.location, this.website, this.profilePicture, this.bio, this.contentCount, this.followersCount, 
+        this.followingCount, this.likesReceived);
+    }
+
+}

@@ -1,14 +1,14 @@
 import React from 'react'
 import Header from '../homePage/Header'
 import Login from './Login'
-import Fouter from '../homePage/Fouter'
+import Footer from '../homePage/Footer'
 
 const LoginPage = () => {
     return (
         <div className='bg-[url(/src/assets/diego.jpg)] bg-cover min-h-svh flex flex-col'>
             <Header isHidden={true} />
             <Login />
-            <Fouter></Fouter>
+            <Footer></Footer>
         </div>
     )
 }

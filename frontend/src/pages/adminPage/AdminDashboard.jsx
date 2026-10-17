@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import { useAuth } from "../../hooks/useAuth"
-import { getAllUsers, getDashboardStats } from "../../services/AdminService"
+import { getAllUsers, getDashboardStats } from "../../api/adminService"
 import profileAvatar from "../../assets/profileAvatar.jpg"
 import Signals from "./Signals"
 import {
@@ -113,10 +113,6 @@ const AdminDashboard = () => {
     const loadUsers = async () => {
         try {
             const data = await getAllUsers()
-            console.log(
-                "Données des utilisateurs reçues avec profilePicture:",
-                data.map((u) => ({ id: u.id, profilePicture: u.profilePicture })),
-            )
             const formattedUsers = data.map((user) => ({
                 id: user.id,
                 nom: user.nom,

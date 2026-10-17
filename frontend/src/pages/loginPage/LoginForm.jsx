@@ -1,25 +1,24 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useState } from 'react';
-import { Link as LinkRouter, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
-import { loginValidation } from '../../services/FormValidation';
+import { loginValidation } from '../../utils/formValidation';
 import { TextInput } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import ResetPassword from './ResetPassword';
-import { errorNotification, successNotification } from '../../services/NotificationService';
+import { errorNotification, successNotification } from '../../utils/notifications';
 import { useDispatch } from 'react-redux';
-import { setUser } from '../../Slices/UserSlice';
-import { LoadingOverlay, Button, Group, Box } from '@mantine/core';
-import { setJwt } from '../../Slices/JwtSlice';
-import { loginUser } from '../../services/AuthService';
+import { setUser } from '../../store/userSlice';
+import { LoadingOverlay } from '@mantine/core';
+import { setJwt } from '../../store/jwtSlice';
+import { loginUser } from '../../api/authService';
 import { jwtDecode } from "jwt-decode";
 import { useAuth } from '../../hooks/useAuth';
 import { useEffect } from 'react';
 
 const LoginForm = () => {
     const [loading, setLoading] = useState(false);
-    const [visible, { toggle }] = useDisclosure(true);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation(); 
@@ -68,20 +67,17 @@ const LoginForm = () => {
         }
         setFormError(newFormError);
 
-        console.log("data recu : ", data);
 
         if (valid) {
             setLoading(true);
 
             loginUser(data)
                 .then((res) => {
-                    console.log('Login success response:', res);
 
                     try {
                         clearAuth();
 
                         const decoded = jwtDecode(res.jwt);
-                        console.log('Decoded JWT:', decoded);
 
                         const userData = {
                             ...decoded,
@@ -102,12 +98,10 @@ const LoginForm = () => {
 
                             if (userData.accountType === 'ADMIN') {
                                 redirectTo = '/admin/dashboard';
-                                console.log('Redirecting admin user to:', redirectTo);
                             } else {
                                 const redirectParam = new URLSearchParams(location.search).get('redirect');
                                 const from = location.state?.from?.pathname;
-                                redirectTo = redirectParam || from || '/articla';
-                                console.log('Redirecting regular user to:', redirectTo);
+                                redirectTo = redirectParam || from || '/espace';
                             }
 
                             navigate(redirectTo, { replace: true });

@@ -1,7 +1,7 @@
 import React from 'react'
 import brain from '../../assets/brain.jpg'
 import { motion } from 'framer-motion';
-import { fadeIn } from '../../Motions/variants';
+import { fadeIn } from '../../animations/variants';
 import { Link as LinkRouter } from "react-router-dom";
 import { useSelector } from 'react-redux';
 
@@ -31,7 +31,7 @@ const Accueil = () => {
           >
             <button className='border-gradient hover:border-white/45 lg:px-6 lg:py-4 px-4 py-2 text-xl lg:text-2xl font-bold cursor-pointer background-gradient '>
               {user ?
-              <LinkRouter to='/articla'>Mon espace</LinkRouter>
+              <LinkRouter to='/espace'>Mon espace</LinkRouter>
               :
               <LinkRouter to='/auth/login'>Se Connecter</LinkRouter>
               }

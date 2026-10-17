@@ -2,29 +2,25 @@ import React from 'react'
 import HomePage from '../pages/homePage/HomePage' 
 import LoginPage from '../pages/loginPage/LoginPage'
 import RegisterPage from '../pages/registerPage/RegisterPage'
-import ArticlaPage from '../pages/articlaPage/ArticlaPage'
+import EspacePage from '../pages/espacePage/EspacePage'
 import { Routes, Route,  } from 'react-router-dom';
-import { useSelector } from 'react-redux'
-import ArticleTypeSelection from '../pages/articlaPage/ArticleTypeSelection'
-import CreateArticleForm from '../pages/articlaPage/CreateArticle'
-import ArticleFeed from '../pages/articlaPage/ArticleFeed'
-import ProfileAuthor from '../pages/articlaPage/ProfileAuthor'
-import SavedArticles from '../pages/articlaPage/SavedArticles'
-import MyPosts from '../pages/articlaPage/MyPosts'
+import ArticleTypeSelection from '../pages/espacePage/ArticleTypeSelection'
+import CreateArticleForm from '../pages/espacePage/CreateArticle'
+import ArticleFeed from '../pages/espacePage/ArticleFeed'
+import ProfileAuthor from '../pages/espacePage/ProfileAuthor'
+import SavedArticles from '../pages/espacePage/SavedArticles'
+import MyPosts from '../pages/espacePage/MyPosts'
 import NotFoundPage from './NotFoundPage'
-import { AuthChecker, PublicRoute, ProtectedRoute } from '../services/AuthGuard'
-import { AdminRoute } from '../services/AdminGuard'
+import { AuthChecker, PublicRoute, ProtectedRoute } from './AuthGuard'
+import { AdminRoute } from './AdminGuard'
 import AdminDashboard from '../pages/adminPage/AdminDashboard'
 
 
 const AppRoutes = () => {
-    const user = useSelector((state) => state.user);
-
     return (
         <AuthChecker>
             <Routes>
                 <Route path="/" element={<HomePage />} />
-                {/* <Route path="/auth/login" element={user ? <Navigate to="/articla" /> : <LoginPage />} /> */}
                 <Route path="/auth/login" element={
                     <PublicRoute>
                         <LoginPage />
@@ -35,50 +31,49 @@ const AppRoutes = () => {
                         <RegisterPage />
                     </PublicRoute>
                 } />
-                {/* <Route path="/auth/register" element={user ? <Navigate to="/articla" /> : <RegisterPage />} /> */}
-                <Route path="/articla" element={
+                <Route path="/espace" element={
                     <ProtectedRoute>
-                        <ArticlaPage />
+                        <EspacePage />
                     </ProtectedRoute>
                 } />
-                <Route path="/articla/article" element={
+                <Route path="/espace/fil" element={
                     <ProtectedRoute>
                         <ArticleFeed />
                     </ProtectedRoute>
                 } />
-                <Route path="/articla/my-posts" element={
+                <Route path="/espace/mes-publications" element={
                     <ProtectedRoute>
                         <MyPosts />
                     </ProtectedRoute>
                 } />
-                <Route path="/saved-articles" element={
+                <Route path="/espace/favoris" element={
                     <ProtectedRoute>
                         <SavedArticles />
                     </ProtectedRoute>
                 } />
-                <Route path="/articla/creerArticle" element={
+                <Route path="/espace/publier/formulaire" element={
                     <ProtectedRoute>
                         <CreateArticleForm />
                     </ProtectedRoute>
                 } />
-                 <Route path="/articla/nouveauArticle" element={
+                 <Route path="/espace/publier" element={
                     <ProtectedRoute>
                         <ArticleTypeSelection />
                     </ProtectedRoute>
                 } />
-                <Route path="/articla/poste/profile/:id" element={
+                <Route path="/espace/auteur/:id" element={
                     <ProtectedRoute>
                         <ProfileAuthor />
                     </ProtectedRoute>
                 } />
-                <Route path="/articla/topArticla" element={
+                <Route path="/espace/top-articles" element={
                     <ProtectedRoute>
-                        <ArticlaPage />
+                        <EspacePage />
                     </ProtectedRoute>
                 } />
-                <Route path="/articla/profile" element={
+                <Route path="/espace/profil" element={
                     <ProtectedRoute>
-                        <ArticlaPage />
+                        <EspacePage />
                     </ProtectedRoute>
                 } />
                 <Route path="/admin/dashboard" element={
@@ -86,32 +81,12 @@ const AppRoutes = () => {
                         <AdminDashboard />
                     </AdminRoute>
                 } />
-                {/* <Route path="/admin/users" element={
-                    <AdminRoute>
-                        <UserManagement />
-                    </AdminRoute>
-                } /> */}
-                {/* <Route path="/articla" element={<ArticlaPage />} /> */}
-                {/* <Route path="/articla/topArticla" element={<ArticlaPage />} /> */}
-                {/* <Route path="/articla/article" element={<ArticleFeed />} /> */}
-                {/* <Route path="/articla/nouveauArticle" element={<ArticleTypeSelection />} /> */}
-                {/* <Route path="/articla/creerArticle" element={<CreateArticleForm />} /> */}
-                {/* <Route path="/articla/profile" element={<ArticlaPage />} /> */}
-                {/* <Route path="/articla/poste/profile/:id" element={<ProfileAuthor />} /> */}
-                {/* <Route path="/saved-articles" element={<SavedArticles />} /> */}
-                {/* <Route path="/articla/my-posts" element={<MyPosts />} /> */}
                 {/* ✅ Route catch-all pour 404 - DOIT ÊTRE EN DERNIER */}
                 <Route path="*" element={<NotFoundPage />} />
 
                 {/* ✅ Redirection par défaut */}
-                {/* <Route path="/" element={<Navigate to="/articla" replace />} /> */}
 
                 {/* ✅ Route 404 */}
-                {/* <Route path="*" element={
-                    <ProtectedRoute>
-                        <NotFound />
-                    </ProtectedRoute>
-                } /> */}
             </Routes>
         </AuthChecker>
     )
