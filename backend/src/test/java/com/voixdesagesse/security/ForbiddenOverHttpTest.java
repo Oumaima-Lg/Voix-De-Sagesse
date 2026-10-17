@@ -62,6 +62,7 @@ class ForbiddenOverHttpTest {
                 .header("Authorization", "Bearer " + jwt).GET().build(), HttpResponse.BodyHandlers.ofString());
 
         assertEquals(403, admin.statusCode());
+        assertEquals("Accès refusé.", objectMapper.readTree(admin.body()).get("errorMessage").asText());
     }
 
     private URI uri(String path) {
