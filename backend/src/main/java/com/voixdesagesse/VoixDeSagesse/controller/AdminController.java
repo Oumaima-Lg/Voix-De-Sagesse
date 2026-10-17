@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,13 +16,13 @@ import com.voixdesagesse.VoixDeSagesse.dto.SignalDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.SignalStatus;
 import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
 import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
+import com.voixdesagesse.VoixDeSagesse.jwt.CustomUserDetails;
 import com.voixdesagesse.VoixDeSagesse.service.AdminService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@CrossOrigin
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 @Slf4j
@@ -62,11 +62,11 @@ public class AdminController {
     public ResponseEntity<?> processSignal(
             @PathVariable Long signalId,
             @RequestParam SignalStatus status,
-            @RequestParam Long adminId,
-            @RequestParam(required = false) String adminComment) throws Exception  {
+            @RequestParam(required = false) String adminComment,
+            @AuthenticationPrincipal CustomUserDetails currentUser) throws Exception  {
         try {
             log.info("Admin processing signal: {}", signalId);
-            SignalDTO processedSignal = adminService.processSignal(signalId, status, adminComment, adminId);
+            SignalDTO processedSignal = adminService.processSignal(signalId, status, adminComment, currentUser.getId());
             return ResponseEntity.ok(processedSignal);
         } catch (ArticlaException e) {
             log.error("Error processing signal: " + e.getMessage());

@@ -29,7 +29,7 @@ const SavedArticles = () => {
 
     useEffect(() => {
         setLoading(true);
-        getSavedArticles(user.id)
+        getSavedArticles()
             .then((data) => {
                 console.log('Articles sauvegardés:', data);
                 setPosts(data.savedArticles || []);
@@ -162,9 +162,9 @@ const SavedArticles = () => {
             const isCurrentlyLiked = poste.interaction.liked;
 
             if (isCurrentlyLiked) {
-                await unlikeArticle(posteId, user.id);
+                await unlikeArticle(posteId);
             } else {
-                await likeArticle(posteId, user.id);
+                await likeArticle(posteId);
             }
 
             setPosts((prev) =>

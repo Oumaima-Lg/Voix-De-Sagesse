@@ -7,6 +7,7 @@ import java.util.Set;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.voixdesagesse.VoixDeSagesse.dto.LoginDTO;
+import com.voixdesagesse.VoixDeSagesse.dto.ResetPasswordRequest;
 import com.voixdesagesse.VoixDeSagesse.dto.ResponseDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserProfileDTO;
@@ -28,11 +29,11 @@ public interface UserService {
 
     public Boolean sendOtp(String email) throws Exception;
 
-    public Boolean verifyOtp(String email, String otp) throws ArticlaException;
+    public String verifyOtp(String email, String otp) throws ArticlaException;
 
-    public ResponseDTO changePassword(LoginDTO loginDTO) throws ArticlaException;
+    public ResponseDTO changePassword(ResetPasswordRequest request) throws ArticlaException;
 
-    public UserProfileDTO updateUserProfile(UserProfileDTO profileDTO) throws ArticlaException;
+    public UserProfileDTO updateUserProfile(Long userId, UserProfileDTO profileDTO) throws ArticlaException;
 
     public User getUserById(long userId) throws ArticlaException;
 

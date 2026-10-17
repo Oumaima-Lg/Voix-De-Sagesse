@@ -114,12 +114,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private CommentDTO convertToDTO(Comment comment, User user) {
-        UserProfileDTO userDTO = new UserProfileDTO(
-                user.getId(), user.getNom(), user.getPrenom(),
-                user.getEmail(), user.getUsername(), user.getPhoneNumber(),
-                user.getLocation(), user.getWebsite(), user.getProfilePicture(),
-                user.getBio(), user.getContentCount(), user.getFollowersCount(),
-                user.getFollowingCount(), user.getLikesReceived());
+        UserProfileDTO userDTO = user.toPublicProfileDTO();
 
         String timeAgo = Utilities.getElapsedTime(comment.getDateCreation());
 

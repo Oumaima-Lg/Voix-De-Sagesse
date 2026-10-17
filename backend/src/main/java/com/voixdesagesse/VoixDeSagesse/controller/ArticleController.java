@@ -7,8 +7,8 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,13 +23,13 @@ import com.voixdesagesse.VoixDeSagesse.dto.PosteDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.SagesseDTO;
 import com.voixdesagesse.VoixDeSagesse.entity.Article;
 import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
+import com.voixdesagesse.VoixDeSagesse.jwt.CustomUserDetails;
 import com.voixdesagesse.VoixDeSagesse.service.ArticleService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/articles")
@@ -38,7 +38,8 @@ public class ArticleController {
     private final ArticleService articleService;
 
     @PostMapping("/createSaggesseArticla")
-    public ResponseEntity<?> createSagesseArticle(@Valid @RequestBody SagesseDTO sagesseDTO, BindingResult result) {
+    public ResponseEntity<?> createSagesseArticle(@Valid @RequestBody SagesseDTO sagesseDTO, BindingResult result,
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
         try {
             if (result.hasErrors()) {
                 StringBuilder errorMessage = new StringBuilder();
@@ -48,6 +49,7 @@ public class ArticleController {
                 return ResponseEntity.badRequest().body(Map.of("errorMessage", errorMessage.toString()));
             }
 
+            sagesseDTO.setUserId(currentUser.getId());
             Article article = articleService.createSagesseArticle(sagesseDTO);
             return new ResponseEntity<>(article, HttpStatus.CREATED);
         } catch (ArticlaException e) {
@@ -56,7 +58,8 @@ public class ArticleController {
     }
 
     @PostMapping("/createHistoireArticla")
-    public ResponseEntity<?> createHistoireArticle(@Valid @RequestBody HistoireDTO histoireDTO, BindingResult result) {
+    public ResponseEntity<?> createHistoireArticle(@Valid @RequestBody HistoireDTO histoireDTO, BindingResult result,
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
         try {
             if (result.hasErrors()) {
                 StringBuilder errorMessage = new StringBuilder();
@@ -66,6 +69,7 @@ public class ArticleController {
                 return ResponseEntity.badRequest().body(Map.of("errorMessage", errorMessage.toString()));
             }
 
+            histoireDTO.setUserId(currentUser.getId());
             Article article = articleService.createHistoireArticle(histoireDTO);
             return new ResponseEntity<>(article, HttpStatus.CREATED);
         } catch (ArticlaException e) {
@@ -83,32 +87,32 @@ public class ArticleController {
         return ResponseEntity.ok(articleService.getArticlesByUserId(userId));
     }
 
-    @GetMapping("/posts/{currentUserId}")
-    public ResponseEntity<List<PosteDTO>> DisplayPosts(@PathVariable long currentUserId) throws ArticlaException {
-        return ResponseEntity.ok(articleService.displayPosts(currentUserId));
+    @GetMapping("/posts")
+    public ResponseEntity<List<PosteDTO>> DisplayPosts(@AuthenticationPrincipal CustomUserDetails currentUser) throws ArticlaException {
+        return ResponseEntity.ok(articleService.displayPosts(currentUser.getId()));
     }
 
     @PostMapping("/{id}/like")
     public ResponseEntity<String> likeArticle(
             @PathVariable Long id,
-            @RequestParam Long currentUserId) throws ArticlaException {
+            @AuthenticationPrincipal CustomUserDetails currentUser) throws ArticlaException {
 
-        articleService.likeArticle(id, currentUserId);
+        articleService.likeArticle(id, currentUser.getId());
         return ResponseEntity.ok("Article liked successfully");
     }
 
     @PostMapping("/{id}/unlike")
     public ResponseEntity<String> unlikeArticle(
             @PathVariable Long id,
-            @RequestParam Long currentUserId) throws ArticlaException {
+            @AuthenticationPrincipal CustomUserDetails currentUser) throws ArticlaException {
 
-        articleService.unlikeArticle(id, currentUserId);
+        articleService.unlikeArticle(id, currentUser.getId());
         return ResponseEntity.ok("Article unliked successfully");
     }
 
-    @GetMapping("/saved/{userId}")
-    public ResponseEntity<?> getSavedArticles(@PathVariable Long userId) throws ArticlaException {
-        List<PosteDTO> savedPosts = articleService.getSavedArticles(userId);
+    @GetMapping("/saved")
+    public ResponseEntity<?> getSavedArticles(@AuthenticationPrincipal CustomUserDetails currentUser) throws ArticlaException {
+        List<PosteDTO> savedPosts = articleService.getSavedArticles(currentUser.getId());
 
         return ResponseEntity.ok(Map.of(
                 "savedArticles", savedPosts,
@@ -116,10 +120,10 @@ public class ArticleController {
                 "success", true));
     }
 
-    @GetMapping("/my-posts/{userId}")
-    public ResponseEntity<?> getMyPosts(@PathVariable Long userId) throws ArticlaException {
+    @GetMapping("/my-posts")
+    public ResponseEntity<?> getMyPosts(@AuthenticationPrincipal CustomUserDetails currentUser) throws ArticlaException {
 
-        List<PosteDTO> myPosts = articleService.getMyPosts(userId);
+        List<PosteDTO> myPosts = articleService.getMyPosts(currentUser.getId());
 
         return ResponseEntity.ok(Map.of(
                 "myPosts", myPosts,
@@ -128,10 +132,10 @@ public class ArticleController {
 
     }
 
-    @DeleteMapping("/delete/{articleId}/{userId}")
-    public ResponseEntity<?> deleteArticleWithUserId(@PathVariable Long articleId, @PathVariable Long userId)
+    @DeleteMapping("/{articleId}")
+    public ResponseEntity<?> deleteArticle(@PathVariable Long articleId, @AuthenticationPrincipal CustomUserDetails currentUser)
             throws ArticlaException {
-        articleService.deleteArticle(articleId, userId);
+        articleService.deleteArticle(articleId, currentUser.getId());
 
         return ResponseEntity.ok(Map.of(
                 "message", "Article supprimé avec succès",
@@ -139,14 +143,14 @@ public class ArticleController {
                 "deletedArticleId", articleId));
     }
 
-    @GetMapping("/search/{currentUserId}")
+    @GetMapping("/search")
     public ResponseEntity<?> searchArticles(
-            @PathVariable Long currentUserId,
+            @AuthenticationPrincipal CustomUserDetails currentUser,
             @RequestParam(required = false) String searchText,
             @RequestParam(required = false) String type) throws ArticlaException {
         
         try {
-            List<PosteDTO> searchResults = articleService.searchArticles(currentUserId, searchText, type);
+            List<PosteDTO> searchResults = articleService.searchArticles(currentUser.getId(), searchText, type);
             
             return ResponseEntity.ok(searchResults);
         } catch (ArticlaException e) {

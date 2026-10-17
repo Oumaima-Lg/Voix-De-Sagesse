@@ -16,8 +16,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.voixdesagesse.VoixDeSagesse.dto.UserProfileDTO;
 import com.voixdesagesse.VoixDeSagesse.entity.User;
 import com.voixdesagesse.VoixDeSagesse.exception.ArticlaException;
+import com.voixdesagesse.VoixDeSagesse.jwt.CustomUserDetails;
 import com.voixdesagesse.VoixDeSagesse.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,7 +42,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@CrossOrigin
 @Validated
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -95,7 +95,7 @@ public class UserController {
         List<User> followingUsers = userService.findAllFollowingUsersById(followingIds);
 
         List<UserProfileDTO> followingDTO = followingUsers.stream()
-                .map(User::toProfileDTO)
+                .map(User::toPublicProfileDTO)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(Map.of(
@@ -111,7 +111,7 @@ public class UserController {
         List<User> followers = userService.findByFollowingIdContaining(currentUser.getId());
 
         List<UserProfileDTO> followersDTO = followers.stream()
-                .map(User::toProfileDTO)
+                .map(User::toPublicProfileDTO)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(Map.of(
@@ -122,20 +122,23 @@ public class UserController {
     }
 
     @PutMapping("/updateProfile")
-    public ResponseEntity<UserProfileDTO> updateUserProfile(@Valid @RequestBody UserProfileDTO profileDTO)
+    public ResponseEntity<UserProfileDTO> updateUserProfile(@Valid @RequestBody UserProfileDTO profileDTO,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
             throws ArticlaException {
-        UserProfileDTO updatedUser = userService.updateUserProfile(profileDTO);
+        UserProfileDTO updatedUser = userService.updateUserProfile(currentUser.getId(), profileDTO);
         return ResponseEntity.ok(updatedUser);
     }
 
     @GetMapping("/profile/{userId}")
-    public ResponseEntity<UserProfileDTO> getUserProfile(@PathVariable long userId) throws ArticlaException {
-        return ResponseEntity.ok(userService.getUserProfileById(userId));
+    public ResponseEntity<UserProfileDTO> getUserProfile(@PathVariable long userId,
+            @AuthenticationPrincipal CustomUserDetails currentUser) throws ArticlaException {
+        User user = userService.getUserById(userId);
+        return ResponseEntity.ok(userId == currentUser.getId() ? user.toProfileDTO() : user.toPublicProfileDTO());
     }
 
     @PostMapping("/upload-profile-picture")
     public ResponseEntity<?> uploadProfilePicture(@RequestParam("profilePicture") MultipartFile file,
-            @RequestParam("userId") Long userId, HttpServletRequest request) {
+            @AuthenticationPrincipal CustomUserDetails currentUser, HttpServletRequest request) {
 
         try {
             if (file.isEmpty()) {
@@ -154,7 +157,7 @@ public class UserController {
                         .body(Map.of("error", "La taille du fichier ne doit pas dépasser 5MB"));
             }
 
-            String profilePictureUrl = userService.saveProfilePicture(file, userId);
+            String profilePictureUrl = userService.saveProfilePicture(file, currentUser.getId());
 
             String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
             String fullUrl = baseUrl + profilePictureUrl;
@@ -167,8 +170,9 @@ public class UserController {
             return ResponseEntity.ok(response);
 
         } catch (IOException e) {
+            log.error("Profile picture upload failed for user {}", currentUser.getId(), e);
             Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Erreur lors de l'upload: " + e.getMessage());
+            errorResponse.put("error", "Erreur lors de l'enregistrement de l'image.");
             errorResponse.put("success", false);
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

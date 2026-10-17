@@ -4,6 +4,7 @@ package com.voixdesagesse.VoixDeSagesse.dto;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.voixdesagesse.VoixDeSagesse.entity.User;
 
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ public class UserDTO {
     private String nom;
     private String prenom;
     private String email;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String motdepasse;
     private AccountType accountType;
     private String username;

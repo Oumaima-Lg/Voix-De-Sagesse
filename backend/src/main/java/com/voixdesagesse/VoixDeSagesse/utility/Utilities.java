@@ -1,6 +1,7 @@
 package com.voixdesagesse.VoixDeSagesse.utility;
 
 import java.security.SecureRandom;
+import java.util.Base64;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -47,6 +48,12 @@ public class Utilities {
         }
         return otp.toString();
 
+    }
+
+    public static String generateResetToken() {
+        byte[] bytes = new byte[32];
+        new SecureRandom().nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
     public static String getElapsedTime(LocalDateTime datePublication) {

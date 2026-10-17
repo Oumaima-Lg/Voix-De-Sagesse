@@ -5,7 +5,7 @@ import { FaQuoteLeft, FaHeart, FaBookmark } from "react-icons/fa"
 import { BiBook } from "react-icons/bi"
 import { LoadingOverlay } from "@mantine/core"
 import { useSelector } from "react-redux"
-import { getMyPosts, likeArticle, unlikeArticle, deleteArticleWithUserId } from "../../services/ArticleService"
+import { getMyPosts, likeArticle, unlikeArticle, deleteArticle } from "../../services/ArticleService"
 import { saveArticle, unsaveArticle } from "../../services/UserService"
 import { addComment, getCommentsByArticle, deleteComment } from "../../services/CommentService" 
 import { errorNotification, successNotification } from "../../services/NotificationService"
@@ -28,7 +28,7 @@ const MyPosts = () => {
 
     useEffect(() => {
         setLoading(true);
-        getMyPosts(user.id)
+        getMyPosts()
             .then((data) => {
                 console.log('Mes postes:', data);
                 setPosts(data.myPosts || []);
@@ -160,9 +160,9 @@ const MyPosts = () => {
             const isCurrentlyLiked = poste.interaction.liked;
 
             if (isCurrentlyLiked) {
-                await unlikeArticle(posteId, user.id);
+                await unlikeArticle(posteId);
             } else {
-                await likeArticle(posteId, user.id);
+                await likeArticle(posteId);
             }
 
             setPosts((prev) =>
@@ -237,7 +237,7 @@ const MyPosts = () => {
             setDeleteLoading(prev => ({ ...prev, [articleId]: true }));
 
             try {
-                await deleteArticleWithUserId(articleId, user.id);
+                await deleteArticle(articleId);
                 setPosts(prev => prev.filter(poste => poste.article.id !== articleId));
                 successNotification('Succès', 'Article supprimé avec succès');
                 setShowDropdown(null);

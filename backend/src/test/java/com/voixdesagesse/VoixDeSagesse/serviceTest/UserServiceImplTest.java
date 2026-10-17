@@ -12,13 +12,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -99,6 +105,24 @@ public class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Inscription - le rôle est toujours USER, même si ADMIN est demandé")
+    void testRegisterUserIgnoresRequestedRole() throws ArticlaException {
+        registrationDTO.setAccountType(AccountType.ADMIN);
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        try (MockedStatic<Utilities> utilities = mockStatic(Utilities.class)) {
+            utilities.when(() -> Utilities.getNextSequence("users")).thenReturn(1L);
+            userService.registerUser(registrationDTO);
+        }
+
+        ArgumentCaptor<User> saved = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(saved.capture());
+        assertEquals(AccountType.USER, saved.getValue().getAccountType());
+    }
+
+    @Test
     @DisplayName("Test enregistrement utilisateur - utilisateur déjà existant")
     void testRegisterUserAlreadyExists() {
         // Given
@@ -175,13 +199,24 @@ public class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Test envoi OTP - utilisateur non trouvé")
-    void testSendOtpUserNotFound() {
-        // Given
+    @DisplayName("Envoi OTP - email inconnu : même réponse, aucun email envoyé")
+    void testSendOtpUserNotFound() throws Exception {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-        // When & Then
-        assertThrows(ArticlaException.class, () -> userService.sendOtp("test@example.com"));
+        assertTrue(userService.sendOtp("unknown@example.com"));
+        verify(otpRepository, never()).save(any(OTP.class));
+        verify(mailSender, never()).send(any(MimeMessage.class));
+    }
+
+    @Test
+    @DisplayName("Envoi OTP - refusé si un code a été envoyé il y a moins d'une minute")
+    void testSendOtpTooSoon() {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(otpRepository.findById(anyString()))
+            .thenReturn(Optional.of(new OTP("test@example.com", "123456", LocalDateTime.now().minusSeconds(20))));
+
+        ArticlaException exception = assertThrows(ArticlaException.class, () -> userService.sendOtp("test@example.com"));
+        assertEquals("OTP_TOO_SOON", exception.getMessage());
         verify(mailSender, never()).send(any(MimeMessage.class));
     }
 
@@ -193,10 +228,36 @@ public class UserServiceImplTest {
         when(otpRepository.findById(anyString())).thenReturn(Optional.of(otp));
 
         // When
-        Boolean result = userService.verifyOtp("test@example.com", "123456");
+        String resetToken = userService.verifyOtp("test@example.com", "123456");
 
-        // Then
-        assertTrue(result);
+        // Then: a reset token is issued and the code cannot be reused
+        assertNotNull(resetToken);
+        assertEquals(resetToken, otp.getResetToken());
+        assertNull(otp.getOtpCode());
+        verify(otpRepository).save(otp);
+    }
+
+    @Test
+    @DisplayName("Vérification OTP - code expiré")
+    void testVerifyOtpExpired() {
+        OTP otp = new OTP("test@example.com", "123456", LocalDateTime.now().minusMinutes(11));
+        when(otpRepository.findById(anyString())).thenReturn(Optional.of(otp));
+
+        ArticlaException exception = assertThrows(ArticlaException.class,
+            () -> userService.verifyOtp("test@example.com", "123456"));
+        assertEquals("OTP_NOT_FOUND", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Vérification OTP - le code est supprimé après 5 essais incorrects")
+    void testVerifyOtpTooManyAttempts() {
+        OTP otp = new OTP("test@example.com", "654321", LocalDateTime.now(), 4, null);
+        when(otpRepository.findById(anyString())).thenReturn(Optional.of(otp));
+
+        ArticlaException exception = assertThrows(ArticlaException.class,
+            () -> userService.verifyOtp("test@example.com", "123456"));
+        assertEquals("OTP_TOO_MANY_ATTEMPTS", exception.getMessage());
+        verify(otpRepository).delete(otp);
     }
 
     @Test
@@ -222,24 +283,52 @@ public class UserServiceImplTest {
         ArticlaException exception = assertThrows(ArticlaException.class,
             () -> userService.verifyOtp("test@example.com", "123456"));
         assertEquals("OTP_INCORRECT", exception.getMessage());
+        assertEquals(1, otp.getAttempts());
+        verify(otpRepository).save(otp);
     }
 
     @Test
     @DisplayName("Test changement de mot de passe - succès")
     void testChangePasswordSuccess() throws ArticlaException {
-        // Given
+        // Given: the OTP was verified and a reset token issued
+        OTP otp = new OTP("test@example.com", null, LocalDateTime.now(), 0, "reset-token");
+        when(otpRepository.findById(anyString())).thenReturn(Optional.of(otp));
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(passwordEncoder.encode(anyString())).thenReturn("newEncodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         // When
-        ResponseDTO result = userService.changePassword(loginDTO);
+        ResponseDTO result = userService.changePassword(
+            new ResetPasswordRequest("test@example.com", "reset-token", "Password123!"));
 
         // Then
         assertNotNull(result);
-        assertEquals("Password changed successfully.", result.getMessage());
         verify(userRepository).save(any(User.class));
         verify(passwordEncoder).encode("Password123!");
+        verify(otpRepository).delete(otp);
+    }
+
+    @Test
+    @DisplayName("Changement de mot de passe - refusé sans code vérifié")
+    void testChangePasswordWithoutVerifiedOtp() {
+        when(otpRepository.findById(anyString())).thenReturn(Optional.empty());
+
+        ArticlaException exception = assertThrows(ArticlaException.class, () -> userService.changePassword(
+            new ResetPasswordRequest("test@example.com", "anything", "Password123!")));
+        assertEquals("RESET_TOKEN_INVALID", exception.getMessage());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("Changement de mot de passe - refusé avec un mauvais jeton")
+    void testChangePasswordWrongToken() {
+        OTP otp = new OTP("test@example.com", null, LocalDateTime.now(), 0, "reset-token");
+        when(otpRepository.findById(anyString())).thenReturn(Optional.of(otp));
+
+        ArticlaException exception = assertThrows(ArticlaException.class, () -> userService.changePassword(
+            new ResetPasswordRequest("test@example.com", "forged-token", "Password123!")));
+        assertEquals("RESET_TOKEN_INVALID", exception.getMessage());
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
@@ -275,13 +364,49 @@ public class UserServiceImplTest {
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         // When
-        UserProfileDTO result = userService.updateUserProfile(profileDTO);
+        UserProfileDTO result = userService.updateUserProfile(1L, profileDTO);
 
         // Then
         assertNotNull(result);
         assertEquals(profileDTO.getNom(), result.getNom());
         assertEquals(profileDTO.getPrenom(), result.getPrenom());
         verify(userRepository).save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("Mise à jour profil - la photo ne peut pas être modifiée par ce biais")
+    void testUpdateUserProfileIgnoresPicture() throws ArticlaException {
+        user.setProfilePicture("/uploads/profile-pictures/profile_1_1.png");
+        UserProfileDTO profileDTO = new UserProfileDTO();
+        profileDTO.setNom("Nom");
+        profileDTO.setPrenom("Prenom");
+        profileDTO.setProfilePicture("/uploads/profile-pictures/profile_2_2.png");
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        userService.updateUserProfile(1L, profileDTO);
+
+        assertEquals("/uploads/profile-pictures/profile_1_1.png", user.getProfilePicture());
+    }
+
+    @Test
+    @DisplayName("Upload photo - l'extension vient du type d'image, pas du nom de fichier")
+    void testSaveProfilePictureUsesImageExtension(@TempDir Path uploadDir) throws IOException {
+        ReflectionTestUtils.setField(userService, "uploadDir", uploadDir.toString());
+        MockMultipartFile file = new MockMultipartFile("profilePicture", "evil.html", "image/png", new byte[] { 1, 2, 3 });
+
+        String url = userService.saveProfilePicture(file, 1L);
+
+        assertTrue(url.endsWith(".png"), url);
+    }
+
+    @Test
+    @DisplayName("Upload photo - un type qui n'est pas une image est refusé")
+    void testSaveProfilePictureRejectsNonImage(@TempDir Path uploadDir) {
+        ReflectionTestUtils.setField(userService, "uploadDir", uploadDir.toString());
+        MockMultipartFile file = new MockMultipartFile("profilePicture", "evil.html", "text/html", new byte[] { 1 });
+
+        assertThrows(IOException.class, () -> userService.saveProfilePicture(file, 1L));
     }
 
     @Test
@@ -295,7 +420,7 @@ public class UserServiceImplTest {
 
         // When & Then
         ArticlaException exception = assertThrows(ArticlaException.class,
-            () -> userService.updateUserProfile(profileDTO));
+            () -> userService.updateUserProfile(999L, profileDTO));
         assertEquals("USER_NOT_FOUND", exception.getMessage());
     }
     

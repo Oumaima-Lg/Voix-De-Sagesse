@@ -26,36 +26,32 @@ const DisplayPersoArticle = async (userId) => {
         .catch(error => { throw error; });
 }
 
-const DisplayPosts = async (currentUserId) => {
-    return axiosInstance.get(`${base_url}posts/${currentUserId}`)
+const DisplayPosts = async () => {
+    return axiosInstance.get(`${base_url}posts`)
         .then(result => result.data)
         .catch(error => { throw error; });
 }
 
-const likeArticle = async (id, currentUserId) => {
-    return axiosInstance.post(`${base_url}${id}/like`, null, {
-        params: { currentUserId }
-    })
+const likeArticle = async (id) => {
+    return axiosInstance.post(`${base_url}${id}/like`)
         .then(result => result.data)
         .catch(error => { throw error; });
 }
 
-const unlikeArticle = async (id, currentUserId) => {
-    return axiosInstance.post(`${base_url}${id}/unlike`, null, {
-        params: { currentUserId }
-    })
+const unlikeArticle = async (id) => {
+    return axiosInstance.post(`${base_url}${id}/unlike`)
         .then(result => result.data)
         .catch(error => { throw error; });
 }
 
-const getSavedArticles = async (userId) => {
-    return axiosInstance.get(`${base_url}saved/${userId}`)
+const getSavedArticles = async () => {
+    return axiosInstance.get(`${base_url}saved`)
         .then(res => res.data)
         .catch(error => { throw error; });
 }
 
-const getMyPosts = async (userId) => {
-    return axiosInstance.get(`${base_url}my-posts/${userId}`)
+const getMyPosts = async () => {
+    return axiosInstance.get(`${base_url}my-posts`)
         .then(res => res.data)
         .catch(error => { throw error; });
 }
@@ -66,14 +62,14 @@ const getUserPosts = async (userId) => {
         .catch(error => { throw error; });
 }
 
-const deleteArticleWithUserId = async (articleId, userId) => {
-    return axiosInstance.delete(`${base_url}delete/${articleId}/${userId}`)
+const deleteArticle = async (articleId) => {
+    return axiosInstance.delete(`${base_url}${articleId}`)
         .then(res => res.data)
         .catch(error => { throw error; });
 }
 
-const searchArticles = async (userId, searchParams) => {
-    return axiosInstance.get(`${base_url}search/${userId}`, {
+const searchArticles = async (searchParams) => {
+    return axiosInstance.get(`${base_url}search`, {
         params: {
             searchText: searchParams.searchText || '',
             type: searchParams.type || ''
@@ -95,6 +91,6 @@ export {
     getSavedArticles,
     getMyPosts,
     getUserPosts,
-    deleteArticleWithUserId,
+    deleteArticle,
     searchArticles
 };

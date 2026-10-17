@@ -1,5 +1,6 @@
 package com.voixdesagesse.VoixDeSagesse.jwt;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import jakarta.annotation.PostConstruct;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -19,11 +21,20 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JwtHelper {
 
-    @Value("${jwt.secret:mySecretKey}")
+    private static final int MIN_SECRET_BYTES = 32; // HS256 needs a 256-bit key
+
+    @Value("${jwt.secret}")
     private String secret;
 
     @Value("${jwt.expiration:86400000}")
     private Long jwtExpiration;
+
+    // Fail at startup rather than signing tokens with a missing or guessable key.
+    @PostConstruct
+    void checkSecret() {
+        if (secret == null || secret.getBytes(StandardCharsets.UTF_8).length < MIN_SECRET_BYTES)
+            throw new IllegalStateException("JWT_SECRET must be set and at least " + MIN_SECRET_BYTES + " bytes long");
+    }
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());

@@ -103,11 +103,7 @@ public class ArticleServiceImpl implements ArticleService {
                     User user;
                     try {
                         user = userService.getUserById(article.getUserId());
-                        UserProfileDTO userProfileDTO = new UserProfileDTO(user.getId(), user.getNom(),
-                                user.getPrenom(),
-                                user.getEmail(), user.getUsername(), user.getPhoneNumber(), user.getLocation(),
-                                user.getWebsite(), user.getProfilePicture(), user.getBio(), user.getContentCount(),
-                                user.getFollowersCount(), user.getFollowingCount(), user.getLikesReceived());
+                        UserProfileDTO userProfileDTO = user.toPublicProfileDTO();
                         posteDTO.setUser(userProfileDTO);
                         posteDTO.setCreatedAt(Utilities.getElapsedTime(article.getDatePublication()));
 
@@ -148,11 +144,7 @@ public class ArticleServiceImpl implements ArticleService {
                     User user;
                     try {
                         user = userService.getUserById(article.getUserId());
-                        UserProfileDTO userProfileDTO = new UserProfileDTO(user.getId(), user.getNom(),
-                                user.getPrenom(),
-                                user.getEmail(), user.getUsername(), user.getPhoneNumber(), user.getLocation(),
-                                user.getWebsite(), user.getProfilePicture(), user.getBio(), user.getContentCount(),
-                                user.getFollowersCount(), user.getFollowingCount(), user.getLikesReceived());
+                        UserProfileDTO userProfileDTO = user.toPublicProfileDTO();
                         posteDTO.setUser(userProfileDTO);
                         posteDTO.setCreatedAt(Utilities.getElapsedTime(article.getDatePublication()));
 
@@ -187,12 +179,7 @@ public class ArticleServiceImpl implements ArticleService {
                     posteDTO.setArticle(article);
 
                     try {
-                        UserProfileDTO userProfileDTO = new UserProfileDTO(
-                                currentUser.getId(), currentUser.getNom(), currentUser.getPrenom(),
-                                currentUser.getEmail(), currentUser.getUsername(), currentUser.getPhoneNumber(),
-                                currentUser.getLocation(), currentUser.getWebsite(), currentUser.getProfilePicture(),
-                                currentUser.getBio(), currentUser.getContentCount(), currentUser.getFollowersCount(),
-                                currentUser.getFollowingCount(), currentUser.getLikesReceived());
+                        UserProfileDTO userProfileDTO = currentUser.toPublicProfileDTO();
                         posteDTO.setUser(userProfileDTO);
                         posteDTO.setCreatedAt(Utilities.getElapsedTime(article.getDatePublication()));
 
@@ -262,7 +249,7 @@ public class ArticleServiceImpl implements ArticleService {
         if (likeOperationCache.containsKey(cacheKey)) {
             long lastOperation = likeOperationCache.get(cacheKey);
             if (System.currentTimeMillis() - lastOperation < 1000) {
-                throw new RuntimeException("Opération trop rapide, veuillez patienter");
+                throw new ArticlaException("Opération trop rapide, veuillez patienter");
             }
         }
 
@@ -274,11 +261,11 @@ public class ArticleServiceImpl implements ArticleService {
             Set<Long> likedArticles = currentUser.getLikedArticlesId();
 
             if (likedArticles == null || !likedArticles.contains(articleId)) {
-                throw new RuntimeException("Article pas encore liké");
+                throw new ArticlaException("Article pas encore liké");
             }
 
             Article article = articleRepository.findById(articleId)
-                    .orElseThrow(() -> new RuntimeException("Article not found"));
+                    .orElseThrow(() -> new ArticlaException("Article introuvable"));
 
             Long authorId = article.getUserId();
 
@@ -354,12 +341,7 @@ public class ArticleServiceImpl implements ArticleService {
 
                     try {
                         User user = userService.getUserById(article.getUserId());
-                        UserProfileDTO userProfileDTO = new UserProfileDTO(
-                                user.getId(), user.getNom(), user.getPrenom(),
-                                user.getEmail(), user.getUsername(), user.getPhoneNumber(),
-                                user.getLocation(), user.getWebsite(), user.getProfilePicture(),
-                                user.getBio(), user.getContentCount(), user.getFollowersCount(),
-                                user.getFollowingCount(), user.getLikesReceived());
+                        UserProfileDTO userProfileDTO = user.toPublicProfileDTO();
                         posteDTO.setUser(userProfileDTO);
                         posteDTO.setCreatedAt(Utilities.getElapsedTime(article.getDatePublication()));
 
