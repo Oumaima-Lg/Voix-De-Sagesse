@@ -1,5 +1,4 @@
 import React from 'react';
-import styled from 'styled-components';
 import user2 from '../assets/user2.jpg'
 import user3 from '../assets/user3.jpg'
 import user1 from '../assets/user1.png'
@@ -10,6 +9,7 @@ import picExperience4 from '../assets/formes-geometriques-3d-en-arriere-plan-nat
 import picExperience5 from '../assets/rendu-d-une-personne-avec-des-personnalites-differentes.jpg'
 import Tilt from 'react-parallax-tilt';
 import { Carousel } from '@mantine/carousel';
+import './CardArticle.css';
 
 let citations = [
   {
@@ -34,7 +34,6 @@ let citations = [
     image: user3
   },
 ];
-
 
 let citations2 = [
   {
@@ -123,7 +122,6 @@ let citations2 = [
   },
 ];
 
-
 let experiences = [
   {
     title: 'Les cicatrices invisibles',
@@ -178,7 +176,6 @@ let experiences2 = [
   }
 ];
 
-
 const CitationCard = ({ content, star, emptyStar, user, image }) => (
   <Tilt className="card px-2 pb-6 pt-8 justify-center flex-col gap-y-4">
     <div className="flex flex-col gap-y-3 place-items-center justify-center min-h-[130px]">
@@ -186,7 +183,7 @@ const CitationCard = ({ content, star, emptyStar, user, image }) => (
         <span>‘’</span> {content} <span>‘’</span>
       </p>
       <div className="z-[1] flex items-center gap-1">
-        <StyledStars>{star}</StyledStars>
+        <div className='card-article-stars'>{star}</div>
         <p className='text-[1.2em] text-gray-400'>{emptyStar}</p>
       </div>
     </div>
@@ -199,18 +196,16 @@ const CitationCard = ({ content, star, emptyStar, user, image }) => (
   </Tilt>
 );
 
-
-
 const CitationCard2 = ({ content, star, emptyStar, user, image }) => (
   <Carousel.Slide >
-    <AnimatedWrapper2 >
+    <div className='card-article-carousel'>
       <div className="card my-4 mx-2 px-2 pb-10 pt-14 justify-center flex-col gap-y-8  hover: cursor-pointer hover:shadow-[0_0_5px_2px_black] shadow-amber-50">
         <div className="flex flex-col gap-y-3 place-items-center justify-center min-h-[161px]">
           <p className="text-white/90 text-[18px] charm text-center">
             <span>‘’</span> {content} <span>‘’</span>
           </p>
           <div className="z-[1] flex items-center gap-1">
-            <StyledStars>{star}</StyledStars>
+            <div className='card-article-stars'>{star}</div>
             <p className='text-[1.2em] text-gray-400'>{emptyStar}</p>
           </div>
         </div>
@@ -221,7 +216,7 @@ const CitationCard2 = ({ content, star, emptyStar, user, image }) => (
           <img src={image} alt="user" className="h-9 rounded-full object-cover" />
         </div>
       </div>
-    </AnimatedWrapper2>
+    </div>
   </Carousel.Slide>
 );
 
@@ -245,10 +240,9 @@ const ExperienceCard = ({ title, content, star, userName, userImage, image }) =>
   </div>
 );
 
-
 const ExperienceCard2 = ({ title, content, star, userName, userImage, image }) => (
   <Carousel.Slide >
-    <AnimatedWrapper2 id='card2' className=''>
+    <div id='card2' className='card-article-carousel'>
       {/* flex mx-auto  */}
       <div className="card2 h-96 my-4 mx-2  p-4 pl-6 flex lg:flex-row flex-col-reverse gap-y-5 gap-x-10  hover:shadow-[0_0_5px_2px_black] shadow-amber-50">
         <div className='flex-4 flex flex-col lg:gap-y-14 gap-y-6'>
@@ -267,7 +261,7 @@ const ExperienceCard2 = ({ title, content, star, userName, userImage, image }) =
           <img src={image} alt="" className='lg:h-full h-[186px] rounded-lg' />
         </div>
       </div>
-    </AnimatedWrapper2>
+    </div>
   </Carousel.Slide>
 );
 
@@ -277,26 +271,24 @@ const Card = ({ isToggled }) => {
     <div className='flex justify-items-center mx-auto'>
       {/* Card 1 - visible quand switch est OFF */}
       {!isToggled && (
-        <AnimatedWrapper id='card1' className='grid md:grid-cols-3 grid-row-3 md:space-x-28  space-y-6  mx-auto'>
+        <div id='card1' className='card-article grid md:grid-cols-3 grid-row-3 md:space-x-28  space-y-6  mx-auto'>
           {citations.map((citation, index) => (
             <CitationCard key={index} {...citation} />
           ))}
-        </AnimatedWrapper>
+        </div>
       )}
 
       {/* Card 2 - visible quand switch est ON */}
       {isToggled && (
-        <AnimatedWrapper id='card2' className='flex mx-auto '>
+        <div id='card2' className='card-article flex mx-auto'>
           {experiences.map((experience, index) => (
             <ExperienceCard key={index} {...experience} />
           ))}
-        </AnimatedWrapper>
+        </div>
       )}
     </div>
   );
 };
-
-
 
 const Card2 = ({ isToggled }) => {
   return (
@@ -312,7 +304,6 @@ const Card2 = ({ isToggled }) => {
         }}
           classNames={{ control: 'carousel-control' }}
         >
-
 
           {citations2.map((citation, index) => (
             <CitationCard2 key={index} {...citation} />
@@ -341,143 +332,6 @@ const Card2 = ({ isToggled }) => {
     </div>
   );
 };
-
-
-const StyledStars = styled.div`
-  color: #c4af39; /* Jaune doré */
-  font-size: 1.2em; /* Taille de police pour les étoiles */
-`;
-
-const AnimatedWrapper = styled.div`
-  opacity: 0;
-  transform: translateX(-100px);
-  animation: fadeInUp 2.6s ease forwards;
-
-  @keyframes fadeInUp {
-    to {
-      opacity: 20;
-      transform: translateX(0);
-    }
-  }
-
-  .card span, .card2 span {
-    color: #d1b82d;
-    font-size: 1.2em;
-  }
-
-  .card {
-    width: 220px;
-    height: 230px;
-    background: #07182E;
-    position: relative;
-    display: flex;
-    place-content: center;
-    place-items: center;
-    overflow: hidden;
-    border-radius: 20px;
-  }
-
-  .card2 {
-    // width: 100%;
-    background: #07182E;
-    position: relative;
-    display: flex;
-    place-content: center;
-    place-items: center;
-    overflow: hidden;
-    border-radius: 20px;
-  }
-
-  .card p, .card2 p {
-    z-index: 1;
-  }
-
-  .card::before {
-    content: '';
-    position: absolute;
-    width: 100px;
-    background-image: linear-gradient(180deg, #A09F87, #4C3163);
-    height: 130%;
-    animation: rotBGimg 3s linear infinite;
-    transition: all 0.2s linear;
-  }
-
-  .card2::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    background-image: linear-gradient(180deg, #A09F87, #4C3163);
-    height: 130%;
-    animation: rotBGimg 10s linear infinite;
-    transition: all 0.2s linear;
-  }
-
-  .card2::after {
-    content: '';
-    position: absolute;
-    background: #07182E;
-    inset: 5px;
-    border-radius: 15px;
-  }
-
-  @keyframes rotBGimg {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  .card::after {
-    content: '';
-    position: absolute;
-    background: #07182E;
-    inset: 5px;
-    border-radius: 15px;
-  }
-`;
-
-
-const AnimatedWrapper2 = styled.div`
-  
-
-  .card span, .card2 span {
-    color: #d1b82d;
-    font-size: 1.2em;
-  }
-
-  .card {
-    width: 220px;
-    height: 277px;
-    background: #16191f;
-    position: relative;
-    display: flex;
-    place-content: center;
-    place-items: center;
-    overflow: hidden;
-    border-radius: 20px;
-  }
-
-  .card2 {
-    // width: 100%;
-    background: #16191f;
-    position: relative;
-    display: flex;
-    place-content: center;
-    place-items: center;
-    overflow: hidden;
-    border-radius: 20px;
-  }
-
-  .card p, .card2 p {
-    z-index: 1;
-  }
-
-  
-
-
-`;
 
 export default Card;
 export { Card2 };

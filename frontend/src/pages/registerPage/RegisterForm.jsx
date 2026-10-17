@@ -1,11 +1,11 @@
 import React from 'react';
-import styled from 'styled-components';
 import { useState } from 'react';
 import { registerUser } from '../../api/authService';
 import { signupValidation } from '../../utils/formValidation';
 import { TextInput } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { errorNotification, successNotification } from '../../utils/notifications';
+import './RegisterForm.css';
 
 const form = {
     nom: "",
@@ -21,7 +21,6 @@ const RegisterForm = () => {
     const [data, setData] = useState(form);
     const [formError, setFormError] = useState(form);
     const navigate = useNavigate();
-
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -44,7 +43,6 @@ const RegisterForm = () => {
 
         setFormError(newErrors);
     };
-
 
     const handleSubmit = (e) => {
 
@@ -87,10 +85,8 @@ const RegisterForm = () => {
         }
     }
 
-
-
     return (
-        <StyledWrapper>
+        <div className='register-form'>
             <div className="mx-auto px-4">
                 <div className='card w-[min(92vw,26rem)] mx-auto border-4 border-image-gradient sm:px-8 px-4 py-4 flex flex-col gap-4'>
                     <h4 className="text-gradient sm:text-3xl text-2xl text-center pt-2">Créer un compte</h4>
@@ -142,63 +138,8 @@ const RegisterForm = () => {
                 </div>
 
             </div>
-        </StyledWrapper>
+        </div>
     );
 }
-
-const StyledWrapper = styled.div`
-  .card {
-    box-shadow: 
-    8px 8px 20px -5px rgba(76, 49, 99, 0.4),
-    -5px -5px 15px rgba(160, 159, 135, 0.2),
-    inset 2px 2px 5px rgba(255, 255, 255, 0.1);
-   text-align: center;
-  }
-
-
-  .input-icon {
-   height: 1em;
-   width: 1em;
-//    fill: #ffeba7;
-  }
-
-
-  /*Buttons*/
-  .btn {
-   margin: 0.75rem;
-   border: none;
-   border-radius: 4px;
-   font-weight: bold;
-   font-size: .8em;
-   text-transform: uppercase;
-   padding: 0.6em 1.2em;
-//    background-color: #ffeba7;
-//    color: #5e6681;
-   box-shadow: 0 8px 24px 0 rgb(255 235 167 / 20%);
-   transition: all .3s ease-in-out;
-  }
-
-  .btn-link {
-//    color: #f5f5f5;
-   display: block;
-   font-size: .75em;
-   transition: color .3s ease-out;
-  }
-
-  /*Hover & focus*/
-  input:focus::placeholder {
-   opacity: 0;
-   transition: opacity .3s;
-  }
-
-  .btn:hover {
-//    background-color: #5e6681;
-//    color: #ffeba7;
-   box-shadow: 0 8px 24px 0 rgb(16 39 112 / 20%);
-  }
-
-  .btn-link:hover {
-//    color: #ffeba7;
-  }`;
 
 export default RegisterForm;

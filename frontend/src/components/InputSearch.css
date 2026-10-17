@@ -1,0 +1,318 @@
+/* Moved from styled-components without changes: compiled with the same stylis version,
+   under a readable class instead of the generated one. */
+
+.input-search .galaxy {
+  height: 800px;
+  width: 800px;
+  background-image: radial-gradient(#ffffff 1px, transparent 1px),radial-gradient(#ffffff 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: 0 0,25px 25px;
+  position: absolute;
+  z-index: -1;
+  animation: twinkle 5s infinite;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.input-search .stardust,
+.input-search .cosmic-ring,
+.input-search .starfield,
+.input-search .nebula {
+  max-height: 70px;
+  max-width: 314px;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  overflow: hidden;
+  z-index: -1;
+  border-radius: 12px;
+  filter: blur(3px);
+}
+
+.input-search .input {
+  background-color: #4C3163;
+  border: none;
+  width: 301px;
+  height: 56px;
+  border-radius: 10px;
+  color: #A09F87;
+  padding-inline: 59px;
+  font-size: 18px;
+}
+
+.input-search #search-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-search .input::placeholder {
+  color: #A09F87;
+}
+
+.input-search .input:focus {
+  outline: none;
+}
+
+.input-search #main:focus-within>#input-mask {
+  display: none;
+}
+
+.input-search #input-mask {
+  pointer-events: none;
+  width: 100px;
+  height: 20px;
+  position: absolute;
+  top: 18px;
+  left: 70px;
+}
+
+.input-search #cosmic-glow {
+  pointer-events: none;
+  width: 30px;
+  height: 20px;
+  position: absolute;
+  background: #A09F87;
+  top: 10px;
+  left: 5px;
+  filter: blur(20px);
+  opacity: 0.8;
+  transition: all 2s;
+}
+
+.input-search #main:hover>#cosmic-glow {
+  opacity: 0;
+}
+
+.input-search .stardust {
+  max-height: 63px;
+  max-width: 307px;
+  border-radius: 10px;
+  filter: blur(2px);
+}
+
+.input-search .stardust::before {
+  content: "";
+  z-index: -2;
+  text-align: center;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(83deg);
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  filter: brightness(1.4);
+  background-image: conic-gradient(
+      rgba(0, 0, 0, 0) 0%,
+      #A09F87,
+      rgba(0, 0, 0, 0) 8%,
+      rgba(0, 0, 0, 0) 50%,
+      #A09F87,
+      rgba(0, 0, 0, 0) 58%
+    );
+  transition: all 2s;
+}
+
+.input-search .cosmic-ring {
+  max-height: 59px;
+  max-width: 303px;
+  border-radius: 11px;
+  filter: blur(0.5px);
+}
+
+.input-search .cosmic-ring::before {
+  content: "";
+  z-index: -2;
+  text-align: center;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(70deg);
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  filter: brightness(1.3);
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-image: conic-gradient(
+      #05071b,
+      #A09F87 5%,
+      #05071b 14%,
+      #05071b 50%,
+      #A09F87 60%,
+      #05071b 64%
+    );
+  transition: all 2s;
+}
+
+.input-search .starfield {
+  max-height: 65px;
+  max-width: 312px;
+}
+
+.input-search .starfield::before {
+  content: "";
+  z-index: -2;
+  text-align: center;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(82deg);
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-image: conic-gradient(
+      rgba(0, 0, 0, 0),
+      #1c2452,
+      rgba(0, 0, 0, 0) 10%,
+      rgba(0, 0, 0, 0) 50%,
+      #2a3875,
+      rgba(0, 0, 0, 0) 60%
+    );
+  transition: all 2s;
+}
+
+.input-search #search-container:hover>.starfield::before {
+  transform: translate(-50%, -50%) rotate(-98deg);
+}
+
+.input-search #search-container:hover>.nebula::before {
+  transform: translate(-50%, -50%) rotate(-120deg);
+}
+
+.input-search #search-container:hover>.stardust::before {
+  transform: translate(-50%, -50%) rotate(-97deg);
+}
+
+.input-search #search-container:hover>.cosmic-ring::before {
+  transform: translate(-50%, -50%) rotate(-110deg);
+}
+
+.input-search #search-container:focus-within>.starfield::before {
+  transform: translate(-50%, -50%) rotate(442deg);
+  transition: all 4s;
+}
+
+.input-search #search-container:focus-within>.nebula::before {
+  transform: translate(-50%, -50%) rotate(420deg);
+  transition: all 4s;
+}
+
+.input-search #search-container:focus-within>.stardust::before {
+  transform: translate(-50%, -50%) rotate(443deg);
+  transition: all 4s;
+}
+
+.input-search #search-container:focus-within>.cosmic-ring::before {
+  transform: translate(-50%, -50%) rotate(430deg);
+  transition: all 4s;
+}
+
+.input-search .nebula {
+  overflow: hidden;
+  filter: blur(30px);
+  opacity: 0.4;
+  max-height: 130px;
+  max-width: 354px;
+}
+
+.input-search .nebula:before {
+  content: "";
+  z-index: -2;
+  text-align: center;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(60deg);
+  position: absolute;
+  width: 999px;
+  height: 999px;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-image: conic-gradient(
+      #000,
+      #6C6B5A 5%,
+      #000 38%,
+      #000 50%,
+      #6C6B5A 60%,
+      #000 87%
+    );
+  transition: all 2s;
+}
+
+.input-search #wormhole-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  max-height: 40px;
+  max-width: 38px;
+  height: 100%;
+  width: 100%;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #4C3163, #05071B, #4C3163);
+  border: 1px solid transparent;
+}
+
+.input-search .wormhole-border {
+  height: 42px;
+  width: 40px;
+  position: absolute;
+  overflow: hidden;
+  top: 7px;
+  right: 7px;
+  border-radius: 10px;
+}
+
+.input-search .wormhole-border::before {
+  content: "";
+  text-align: center;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(90deg);
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  filter: brightness(1.35);
+  background-image: conic-gradient(
+      rgba(0, 0, 0, 0),
+      #A09F87,
+      rgba(0, 0, 0, 0) 50%,
+      rgba(0, 0, 0, 0) 50%,
+      #A09F87,
+      rgba(0, 0, 0, 0) 100%
+    );
+  animation: rotate 4s linear infinite;
+}
+
+.input-search #main {
+  position: relative;
+}
+
+.input-search #search-icon {
+  position: absolute;
+  left: 20px;
+  top: 15px;
+}
+
+@keyframes rotate {
+  100% {
+    transform: translate(-50%, -50%) rotate(450deg);
+  }
+}
