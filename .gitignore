@@ -1,0 +1,11 @@
+# Local configuration and secrets (copy .env.example to .env)
+.env
+.env.*
+!.env.example
+
+# Files uploaded while running the backend locally
+backend/uploads/
+
+# OS / editors
+.DS_Store
+Thumbs.db
