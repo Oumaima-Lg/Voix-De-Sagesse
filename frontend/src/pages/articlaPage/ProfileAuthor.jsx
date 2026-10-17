@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import ShinyText from "../../blocks/TextAnimations/ShinyText/ShinyText"
 import { PiUser, PiUserCircle, PiCamera, PiPencil, PiCheck, PiX } from "react-icons/pi"
-import { IoPersonOutline, IoMailOutline, IoCallOutline, IoLocationOutline } from "react-icons/io5"
+import { IoPersonOutline, IoLocationOutline } from "react-icons/io5"
 import { MdOutlineLanguage, MdOutlineNotifications, MdOutlineVisibility } from "react-icons/md"
 import profileAvatar from "../../assets/profileAvatar.jpg"
 import { errorNotification, successNotification } from "../../services/NotificationService"
@@ -150,17 +150,6 @@ const Profile = ({userId: propUserId}) => {
                                         </div>
                                 </div>
 
-                                {/* Email */}
-                                <div className="space-y-2">
-                                    <label className="flex items-center gap-2 text-[#A09F87] font-medium">
-                                        <IoMailOutline className="text-xl" />
-                                        Email
-                                    </label>
-                                        <div className="bg-[#202020] rounded-lg px-4 py-3 border-2 border-transparent">
-                                            {userProfile.email || "Non renseigné"}
-                                        </div>
-                                </div>
-
                                 {/* Nom d'utilisateur */}
                                 <div className="space-y-2">
                                     <label className="flex items-center gap-2 text-[#A09F87] font-medium">
@@ -169,17 +158,6 @@ const Profile = ({userId: propUserId}) => {
                                     </label>
                                         <div className="bg-[#202020] rounded-lg px-4 py-3 border-2 border-transparent">
                                             @{userProfile.username || "Non renseigné"}
-                                        </div>
-                                </div>
-
-                                {/* Téléphone */}
-                                <div className="space-y-2">
-                                    <label className="flex items-center gap-2 text-[#A09F87] font-medium">
-                                        <IoCallOutline className="text-xl" />
-                                        Téléphone
-                                    </label>
-                                        <div className="bg-[#202020] rounded-lg px-4 py-3 border-2 border-transparent">
-                                            {userProfile.phoneNumber || "Non renseigné"}
                                         </div>
                                 </div>
 

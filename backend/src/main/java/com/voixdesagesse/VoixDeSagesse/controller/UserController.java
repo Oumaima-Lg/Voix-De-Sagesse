@@ -97,7 +97,7 @@ public class UserController {
         List<User> followingUsers = userService.findAllFollowingUsersById(followingIds);
 
         List<UserProfileDTO> followingDTO = followingUsers.stream()
-                .map(User::toProfileDTO)
+                .map(User::toPublicProfileDTO)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(Map.of(
@@ -113,7 +113,7 @@ public class UserController {
         List<User> followers = userService.findByFollowingIdContaining(currentUser.getId());
 
         List<UserProfileDTO> followersDTO = followers.stream()
-                .map(User::toProfileDTO)
+                .map(User::toPublicProfileDTO)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(Map.of(
@@ -132,8 +132,10 @@ public class UserController {
     }
 
     @GetMapping("/profile/{userId}")
-    public ResponseEntity<UserProfileDTO> getUserProfile(@PathVariable long userId) throws ArticlaException {
-        return ResponseEntity.ok(userService.getUserProfileById(userId));
+    public ResponseEntity<UserProfileDTO> getUserProfile(@PathVariable long userId,
+            @AuthenticationPrincipal CustomUserDetails currentUser) throws ArticlaException {
+        User user = userService.getUserById(userId);
+        return ResponseEntity.ok(userId == currentUser.getId() ? user.toProfileDTO() : user.toPublicProfileDTO());
     }
 
     @PostMapping("/upload-profile-picture")

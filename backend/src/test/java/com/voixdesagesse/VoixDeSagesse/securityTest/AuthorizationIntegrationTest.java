@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
@@ -129,6 +130,19 @@ class AuthorizationIntegrationTest {
             .andExpect(status().isForbidden());
         int status = mvc.perform(get("/signals/pending").with(as(BOB_ID))).andReturn().getResponse().getStatus();
         assertTrue(status >= 400, "the old user-facing moderation endpoint must be gone, got " + status);
+    }
+
+    @Test
+    @DisplayName("Vie privée : l'email d'un auteur n'est visible que par lui-même")
+    void contactDetailsStayPrivate() throws Exception {
+        mvc.perform(get("/articles/posts").with(as(BOB_ID)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].user.id").value(ALICE_ID))
+            .andExpect(jsonPath("$[0].user.email").doesNotExist());
+        mvc.perform(get("/users/profile/" + ALICE_ID).with(as(BOB_ID)))
+            .andExpect(jsonPath("$.email").doesNotExist());
+        mvc.perform(get("/users/profile/" + ALICE_ID).with(as(ALICE_ID)))
+            .andExpect(jsonPath("$.email").value("alice@test.local"));
     }
 
     private RequestPostProcessor as(long userId) {
