@@ -1,14 +1,14 @@
 import React from 'react'
 import Header from '../homePage/Header'
 import Register from './Register'
-import Fouter from '../homePage/Fouter'
+import Footer from '../homePage/Footer'
 
 const RegisterPage = () => {
     return (
         <div className='bg-[url(/src/assets/diego.jpg)] bg-cover min-h-svh flex flex-col'>
             <Header isHidden={true} />
             <Register />
-            <Fouter></Fouter>
+            <Footer></Footer>
         </div>
     )
 }

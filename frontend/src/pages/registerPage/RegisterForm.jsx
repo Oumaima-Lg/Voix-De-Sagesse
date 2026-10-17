@@ -1,11 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useState } from 'react';
-import { registerUser } from '../../services/AuthService';
-import { signupValidation } from '../../services/FormValidation';
+import { registerUser } from '../../api/authService';
+import { signupValidation } from '../../utils/formValidation';
 import { TextInput } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
-import { errorNotification, successNotification } from '../../services/NotificationService';
+import { errorNotification, successNotification } from '../../utils/notifications';
 
 const form = {
     nom: "",

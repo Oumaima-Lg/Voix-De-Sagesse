@@ -5,7 +5,7 @@ import '@mantine/core/styles.css';
 import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import '@mantine/carousel/styles.css';
-import Store from './Store'
+import Store from './store'
 import { Provider } from 'react-redux'
 import AppRoutes from './routes/AppRoutes';
 import { BrowserRouter } from 'react-router-dom';

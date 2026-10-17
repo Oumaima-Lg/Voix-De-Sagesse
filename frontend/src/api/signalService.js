@@ -1,0 +1,11 @@
+import axiosInstance from "./axiosInstance";
+
+const base_url = "/signals";
+
+const reportArticle = async (signalData) => {
+    return axiosInstance.post(base_url, signalData)
+        .then(res => res.data)
+        .catch(error => { throw error; });
+}
+
+export { reportArticle };

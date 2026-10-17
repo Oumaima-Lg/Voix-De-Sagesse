@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import magic from '../../assets/magicBook.jpg';
-import Switch from '../../Components/Switch';
-import Card from '../../Components/CardArticle';
+import Switch from '../../components/Switch';
+import Card from '../../components/CardArticle';
 
 const Article = () => {
   const [isToggled, setIsToggled] = useState(false);

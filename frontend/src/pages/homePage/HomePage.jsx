@@ -4,7 +4,7 @@ import Accueil from './Accueil'
 import About from './About'
 import Article from './Article'
 import Contact from './Contact'
-import Fouter from './Fouter'
+import Footer from './Footer'
 
 
 const HomePage = () => {
@@ -15,7 +15,7 @@ const HomePage = () => {
             <About />
             <Article />
             <Contact />
-            <Fouter />
+            <Footer />
         </div>
     )
 }

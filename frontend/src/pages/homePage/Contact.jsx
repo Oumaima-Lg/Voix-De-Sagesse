@@ -1,8 +1,8 @@
 import React from 'react'
-import Form from '../../Components/CardContact';
+import Form from '../../components/CardContact';
 import robot from '../../assets/robot.png';
 import { motion } from 'framer-motion';
-import { fadeIn } from '../../Motions/variants';
+import { fadeIn } from '../../animations/variants';
 
 const Contact = () => {
   return (

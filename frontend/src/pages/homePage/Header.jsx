@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import arrow from '../../assets/arrow.png';
-import HeaderNav from '../../Components/HeaderNav';
+import HeaderNav from '../../components/HeaderNav';
 import menu from '../../assets/menu.png';
 import close from '../../assets/close.png';
 import { Link as LinkRouter } from "react-router-dom";

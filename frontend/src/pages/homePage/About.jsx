@@ -2,7 +2,7 @@ import React from 'react'
 import iconSagesse from '../../assets/iconSagesse.png'
 import iconHistoire from '../../assets/iconHistoire.png'
 import { motion } from 'framer-motion';
-import { fadeIn, textVariant, staggerContainer } from "../../Motions/motion";
+import { fadeIn, textVariant, staggerContainer } from "../../animations/motion";
 
 
 

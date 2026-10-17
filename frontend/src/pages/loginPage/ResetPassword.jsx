@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { Button, Modal, PasswordInput, PinInput, TextInput } from '@mantine/core';
 import { useInterval } from '@mantine/hooks';
-import { changePass, sendOtp, verifyOtp } from '../../services/AuthService';
-import { signupValidation } from '../../services/FormValidation';
-import { errorNotification, successNotification } from '../../services/NotificationService';
-import { getApiErrorMessage } from '../../services/apiError';
+import { changePass, sendOtp, verifyOtp } from '../../api/authService';
+import { signupValidation } from '../../utils/formValidation';
+import { errorNotification, successNotification } from '../../utils/notifications';
+import { getApiErrorMessage } from '../../api/apiError';
 
 const ResetPassword = (props) => {
     const [email, setEmail] = useState("");
