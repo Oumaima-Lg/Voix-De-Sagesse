@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,6 +53,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
+    private static final Map<String, String> IMAGE_EXTENSIONS = Map.of(
+            "image/jpeg", ".jpg",
+            "image/jpg", ".jpg",
+            "image/png", ".png",
+            "image/gif", ".gif",
+            "image/webp", ".webp");
 
     private static final long OTP_VALIDITY_MINUTES = 10;
     private static final int OTP_MAX_ATTEMPTS = 5;
@@ -197,12 +205,14 @@ public class UserServiceImpl implements UserService {
     public UserProfileDTO updateUserProfile(Long userId, UserProfileDTO profileDTO) throws ArticlaException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ArticlaException("USER_NOT_FOUND"));
+        // Email, picture and counters are not editable here: the picture only changes through the upload endpoint.
         user.setNom(profileDTO.getNom());
         user.setPrenom(profileDTO.getPrenom());
-        user.setProfilePicture(profileDTO.getProfilePicture());
         user.setBio(profileDTO.getBio());
-        userRepository.save(user);
-        return profileDTO;
+        user.setPhoneNumber(profileDTO.getPhoneNumber());
+        user.setLocation(profileDTO.getLocation());
+        user.setWebsite(profileDTO.getWebsite());
+        return userRepository.save(user).toProfileDTO();
     }
 
     @Override
@@ -397,9 +407,11 @@ public class UserServiceImpl implements UserService {
             Files.createDirectories(uploadPath);
         }
 
-        String originalFilename = file.getOriginalFilename();
-        String fileExtension = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf("."))
-                : ".jpg";
+        // The extension comes from the validated image type, never from the client file name, so an
+        // uploaded file can only ever be served back as an image.
+        String fileExtension = IMAGE_EXTENSIONS.get(String.valueOf(file.getContentType()).toLowerCase());
+        if (fileExtension == null)
+            throw new IOException("Unsupported image type");
         String uniqueFileName = "profile_" + userId + "_" + System.currentTimeMillis() + fileExtension;
         Path filePath = uploadPath.resolve(uniqueFileName);
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);

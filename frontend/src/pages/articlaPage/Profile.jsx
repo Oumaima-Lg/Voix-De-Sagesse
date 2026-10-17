@@ -6,6 +6,7 @@ import { IoPersonOutline, IoMailOutline, IoCallOutline, IoLocationOutline } from
 import { MdOutlineLanguage, MdOutlineNotifications, MdOutlineVisibility } from "react-icons/md"
 import profileAvatar from "../../assets/profileAvatar.jpg"
 import { errorNotification, successNotification } from "../../services/NotificationService"
+import { getApiErrorMessage } from "../../services/apiError"
 import { updateUser } from "../../Slices/UserSlice"
 import { updateUserProfile, getUserProfile, uploadProfilePicture, deleteAccount } from '../../services/UserService';
 import { LoadingOverlay } from "@mantine/core"
@@ -106,17 +107,15 @@ const Profile = () => {
 
     const handleSave = () => {
         updateUserProfile(editedUser).then((res) => {
-            console.log(res);
             dispatch(updateUser(res));
 
             setUserProfile(prev => ({
                 ...prev,
                 ...res
             }));
-            successNotification('Success', 'Profile updated successfully!');
+            successNotification('Succès', 'Profil mis à jour.');
         }).catch((err) => {
-            console.log(err);
-            errorNotification('Error', err.response.data.errorMessage);
+            errorNotification('Erreur', getApiErrorMessage(err));
         })
         setIsEditing(false)
     }
@@ -387,18 +386,10 @@ const Profile = () => {
                                         <IoMailOutline className="text-xl" />
                                         Email
                                     </label>
-                                    {isEditing ? (
-                                        <input
-                                            type="email"
-                                            value={editedUser.email}
-                                            onChange={(e) => handleInputChange("email", e.target.value)}
-                                            className="w-full bg-[#202020] border-2 border-[#4C3163] rounded-lg px-4 py-3 text-white focus:border-[#A09F87] focus:outline-none transition-colors"
-                                        />
-                                    ) : (
-                                        <div className="bg-[#202020] rounded-lg px-4 py-3 border-2 border-transparent">
-                                            {userProfile.email || "Non renseigné"}
-                                        </div>
-                                    )}
+                                    {/* The email identifies the account and cannot be changed from the profile. */}
+                                    <div className="bg-[#202020] rounded-lg px-4 py-3 border-2 border-transparent">
+                                        {userProfile.email || "Non renseigné"}
+                                    </div>
                                 </div>
 
                                 {/* Nom d'utilisateur */}

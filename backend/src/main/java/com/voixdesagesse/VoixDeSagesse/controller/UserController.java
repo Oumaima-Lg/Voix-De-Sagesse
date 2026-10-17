@@ -170,8 +170,9 @@ public class UserController {
             return ResponseEntity.ok(response);
 
         } catch (IOException e) {
+            log.error("Profile picture upload failed for user {}", currentUser.getId(), e);
             Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Erreur lors de l'upload: " + e.getMessage());
+            errorResponse.put("error", "Erreur lors de l'enregistrement de l'image.");
             errorResponse.put("success", false);
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
