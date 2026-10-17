@@ -49,7 +49,7 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest request) {
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody @Valid AuthenticationRequest request) {
         try {
             log.info("Attempting authentication for email: {}", request.getEmail());
             

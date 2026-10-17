@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -96,6 +97,24 @@ public class UserServiceImplTest {
             verify(userRepository).save(any(User.class));
             verify(passwordEncoder).encode("Password123!");
         }
+    }
+
+    @Test
+    @DisplayName("Inscription - le rôle est toujours USER, même si ADMIN est demandé")
+    void testRegisterUserIgnoresRequestedRole() throws ArticlaException {
+        registrationDTO.setAccountType(AccountType.ADMIN);
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        try (MockedStatic<Utilities> utilities = mockStatic(Utilities.class)) {
+            utilities.when(() -> Utilities.getNextSequence("users")).thenReturn(1L);
+            userService.registerUser(registrationDTO);
+        }
+
+        ArgumentCaptor<User> saved = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(saved.capture());
+        assertEquals(AccountType.USER, saved.getValue().getAccountType());
     }
 
     @Test

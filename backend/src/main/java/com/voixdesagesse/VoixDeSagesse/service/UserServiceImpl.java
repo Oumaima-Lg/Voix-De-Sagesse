@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.voixdesagesse.VoixDeSagesse.dto.AccountType;
 import com.voixdesagesse.VoixDeSagesse.dto.LoginDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.ResponseDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
@@ -76,6 +77,7 @@ public class UserServiceImpl implements UserService {
             throw new ArticlaException("USER_FOUND");
 
         userDTO.setId(Utilities.getNextSequence("users"));
+        userDTO.setAccountType(AccountType.USER);
         userDTO.setMotdepasse(passwordEncoder.encode(userDTO.getMotdepasse()));
 
         User user = userDTO.toEntity();

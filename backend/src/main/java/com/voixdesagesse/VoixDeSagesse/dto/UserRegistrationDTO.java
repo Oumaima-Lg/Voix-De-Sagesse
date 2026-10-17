@@ -1,5 +1,6 @@
 package com.voixdesagesse.VoixDeSagesse.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.voixdesagesse.VoixDeSagesse.entity.User;
 
 import jakarta.validation.constraints.Email;
@@ -30,7 +31,10 @@ public class UserRegistrationDTO {
         regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,15}$",
         message = "{user.password.invalid}"
     )
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String motdepasse;
+    // Set by the server on registration, never taken from the request body.
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private AccountType accountType;
 
     public User toEntity() {
