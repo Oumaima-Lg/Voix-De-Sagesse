@@ -24,11 +24,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.voixdesagesse.VoixDeSagesse.dto.AccountType;
-import com.voixdesagesse.VoixDeSagesse.dto.LoginDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.ResetPasswordRequest;
 import com.voixdesagesse.VoixDeSagesse.dto.ResponseDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
@@ -110,18 +108,6 @@ public class UserServiceImpl implements UserService {
         user = userRepository.save(user);
 
         return user.toRegisterDTO();
-    }
-
-    @Override
-    public UserDTO loginUser(LoginDTO loginDTO) throws ArticlaException {
-
-        User user = userRepository.findByEmail(loginDTO.getEmail())
-                .orElseThrow(() -> new ArticlaException("USER_NOT_FOUND"));
-
-        if (!passwordEncoder.matches(loginDTO.getMotdepasse(), user.getMotdepasse()))
-            throw new ArticlaException("INVALID_CREDENTIALS");
-
-        return user.toDTO();
     }
 
     @Override
@@ -223,85 +209,37 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(userId).orElseThrow(() -> new ArticlaException("USER_NOT_FOUND"));
     }
 
-    @Transactional
     @Override
-    public synchronized void addLikedArticle(Long userId, Long articleId) throws ArticlaException {
-        User user = getUserById(userId);
-        Set<Long> likedArticles = user.getLikedArticlesId();
-
-        if (likedArticles == null)
-            likedArticles = new HashSet<>();
-
-        if (likedArticles.contains(articleId))
-            throw new ArticlaException("Article déjà liké par cet utilisateur");
-
-        likedArticles.add(articleId);
-        user.setLikedArticlesId(likedArticles);
-        userRepository.save(user);
-    }
-
-    @Transactional
-    @Override
-    public synchronized void removeLikedArticle(Long userId, Long articleId) throws ArticlaException {
-        User user = getUserById(userId);
-        Set<Long> likedArticles = user.getLikedArticlesId();
-
-        if (likedArticles == null || !likedArticles.contains(articleId)) {
-            throw new ArticlaException("Article pas encore liké par cet utilisateur");
-        }
-
-        likedArticles.remove(articleId);
-        user.setLikedArticlesId(likedArticles);
-        userRepository.save(user);
-    }
-
-    @Transactional
-    @Override
-    public synchronized void incrementLikesReceived(Long userId) throws ArticlaException {
-        User user = getUserById(userId);
-
-        Long currentLikes = user.getLikesReceived();
-        if (currentLikes == null) {
-            currentLikes = 0L;
-        }
-
-        user.setLikesReceived(currentLikes + 1);
-        userRepository.save(user);
-        log.debug("INCREMENT: User " + userId + " now has " + (currentLikes + 1) + " likes received");
-    }
-
-    @Transactional
-    @Override
-    public synchronized void decrementLikesReceived(Long userId) throws ArticlaException {
-        User user = getUserById(userId);
-
-        Long currentLikes = user.getLikesReceived();
-        if (currentLikes == null || currentLikes <= 0) {
-            user.setLikesReceived(0L);
-            userRepository.save(user);
-            log.debug("DECREMENT: User " + userId + " likes already at 0, no change");
-            return;
-        }
-
-        user.setLikesReceived(currentLikes - 1);
-        userRepository.save(user);
-        log.debug("DECREMENT: User " + userId + " now has " + (currentLikes - 1) + " likes received");
+    public boolean addLikedArticle(Long userId, Long articleId) {
+        return userRepository.addLikedArticle(userId, articleId) > 0;
     }
 
     @Override
-    @Transactional
+    public boolean removeLikedArticle(Long userId, Long articleId) {
+        return userRepository.removeLikedArticle(userId, articleId) > 0;
+    }
+
+    @Override
+    public void incrementLikesReceived(Long userId) {
+        userRepository.incrementLikesReceived(userId);
+    }
+
+    @Override
+    public void decrementLikesReceived(Long userId) {
+        userRepository.decrementLikesReceived(userId);
+    }
+
+    @Override
     public void incrementContentCount(Long userId) {
         userRepository.incrementContentCount(userId);
     }
 
     @Override
-    @Transactional
     public void decrementContentCount(Long userId) {
         userRepository.decrementContentCount(userId);
     }
 
     @Override
-    @Transactional
     public void followUser(Long currentUserId, Long targetUserId) throws ArticlaException {
 
         if (currentUserId.equals(targetUserId))
@@ -322,7 +260,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public void unfollowUser(Long currentUserId, Long targetUserId) throws ArticlaException {
         if (currentUserId.equals(targetUserId))
             throw new ArticlaException("Vous ne pouvez pas vous désabonner de vous-même");
@@ -341,37 +278,31 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public void addFollowing(Long currentUserId, Long targetUserId) {
         userRepository.addFollowing(currentUserId, targetUserId);
     }
 
     @Override
-    @Transactional
     public void removeFollowing(Long currentUserId, Long targetUserId) {
         userRepository.removeFollowing(currentUserId, targetUserId);
     }
 
     @Override
-    @Transactional
     public void incrementFollowingCount(Long userId) {
         userRepository.incrementFollowingCount(userId);
     }
 
     @Override
-    @Transactional
     public void decrementFollowingCount(Long userId) {
         userRepository.decrementFollowingCount(userId);
     }
 
     @Override
-    @Transactional
     public void incrementFollowersCount(Long userId) {
         userRepository.incrementFollowersCount(userId);
     }
 
     @Override
-    @Transactional
     public void decrementFollowersCount(Long userId) {
         userRepository.decrementFollowersCount(userId);
     }
@@ -395,12 +326,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO getUserByEmail(String email) throws ArticlaException {
         return userRepository.findByEmail(email).orElseThrow(() -> new ArticlaException("USER_NOT_FOUND")).toDTO();
-    }
-
-    @Override
-    public UserProfileDTO getUserProfileById(long userId) throws ArticlaException {
-        User user = getUserById(userId);
-        return user.toProfileDTO();
     }
 
     @Override
@@ -448,7 +373,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public void saveArticle(Long userId, Long articleId) throws ArticlaException {
         if (!userRepository.existsById(userId))
             throw new ArticlaException("USER_NOT_FOUND");
@@ -458,7 +382,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public void unsaveArticle(Long userId, Long articleId) throws ArticlaException {
         if (!isArticleSaved(userId, articleId)) {
             throw new ArticlaException("Article non sauvegardé");
@@ -472,19 +395,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public void removeArticleFromAllUsersLikes(Long articleId) {
         userRepository.removeArticleFromAllUsersLikes(articleId);
     }
 
     @Override
-    @Transactional
     public void removeArticleFromAllUsersSaved(Long articleId) {
         userRepository.removeArticleFromAllUsersSaved(articleId);
     }
 
     @Override
-    @Transactional
     public void decrementLikesReceivedByAmount(Long userId, Long amount) {
         if (amount > 0) {
             userRepository.decrementLikesReceivedByAmount(userId, -amount);
@@ -492,7 +412,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public void addReportedArticle(Long userId, Long articleId) throws ArticlaException {
         User user = getUserById(userId);
         if (user.getReportedArticlesId() == null) {
@@ -503,7 +422,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public void removeReportedArticle(Long userId, Long articleId) throws ArticlaException {
         User user = getUserById(userId);
         if (user.getReportedArticlesId() != null) {
@@ -533,7 +451,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public void deleteUserAccount(Long userId) throws ArticlaException {
         log.info("Début de la suppression du compte utilisateur: {}", userId);
 

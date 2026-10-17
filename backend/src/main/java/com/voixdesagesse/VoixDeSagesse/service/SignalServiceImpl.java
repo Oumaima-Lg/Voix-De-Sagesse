@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.voixdesagesse.VoixDeSagesse.dto.SignalDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.SignalStatus;
@@ -26,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service(value = "signalService")
-@Transactional
 @Slf4j
 @RequiredArgsConstructor
 public class SignalServiceImpl implements SignalService {
@@ -41,7 +39,6 @@ public class SignalServiceImpl implements SignalService {
     private String mailFrom;
 
     @Override
-    @Transactional
     public SignalDTO reportArticle(Long reporterId, Long articleId, String reason, String description)
             throws ArticlaException {
         User reporter = userService.getUserById(reporterId);
@@ -90,7 +87,6 @@ public class SignalServiceImpl implements SignalService {
     }
 
     @Override
-    @Transactional
     public SignalDTO processSignal(Long signalId, SignalStatus status, String adminComment, Long adminId) throws ArticlaException, Exception {
         Signal signal = signalRepository.findById(signalId)
                 .orElseThrow(() -> new ArticlaException("Signal non trouvé"));
@@ -118,7 +114,6 @@ public class SignalServiceImpl implements SignalService {
         return convertToDTO(updatedSignal);
     }
 
-    @Transactional
     public Boolean sendReport(Long id, String articleName) throws Exception {
         User user = userService.getUserById(id);
         String email = user.getEmail();
@@ -205,19 +200,16 @@ public class SignalServiceImpl implements SignalService {
     }
 
     @Override
-    @Transactional
     public void deleteByArticleId(Long id) {
         signalRepository.deleteByArticleId(id);
     }
 
     @Override
-    @Transactional
     public void deleteByReporterId(Long userId) {
         signalRepository.deleteByReporterId(userId);
     }
 
     @Override
-    @Transactional
     public void deleteByReportedUserId(Long userId) {
         signalRepository.deleteByReportedUserId(userId);
     }

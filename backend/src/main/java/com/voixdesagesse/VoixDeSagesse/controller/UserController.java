@@ -1,19 +1,12 @@
 package com.voixdesagesse.VoixDeSagesse.controller;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -47,8 +40,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserController {
 
-    @Value("${file.upload-dir:uploads/profile-pictures}")
-    private String uploadDir;
 
     private final UserService userService;
 
@@ -176,36 +167,6 @@ public class UserController {
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(errorResponse);
-        }
-    }
-
-    @GetMapping("/uploads/profile-pictures/{filename}")
-    public ResponseEntity<Resource> getProfilePicture(@PathVariable String filename) {
-        try {
-            Path uploadPath = Paths.get(uploadDir);
-            Path filePath = uploadPath.resolve(filename);
-
-            if (!filePath.normalize().startsWith(uploadPath.normalize())) {
-                return ResponseEntity.badRequest().build();
-            }
-
-            Resource resource = new FileSystemResource(filePath);
-
-            if (resource.exists() && resource.isReadable()) {
-                String contentType = Files.probeContentType(filePath);
-                if (contentType == null) {
-                    contentType = "application/octet-stream";
-                }
-
-                return ResponseEntity.ok()
-                        .header(HttpHeaders.CONTENT_TYPE, contentType)
-                        .header(HttpHeaders.CACHE_CONTROL, "max-age=3600")
-                        .body(resource);
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

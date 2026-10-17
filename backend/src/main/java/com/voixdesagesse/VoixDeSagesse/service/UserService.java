@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import com.voixdesagesse.VoixDeSagesse.dto.LoginDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.ResetPasswordRequest;
 import com.voixdesagesse.VoixDeSagesse.dto.ResponseDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
@@ -25,8 +24,6 @@ public interface UserService {
 
     public UserDTO getUserByEmail(String email) throws ArticlaException;
 
-    public UserDTO loginUser(LoginDTO loginDTO) throws ArticlaException;
-
     public Boolean sendOtp(String email) throws Exception;
 
     public String verifyOtp(String email, String otp) throws ArticlaException;
@@ -37,17 +34,15 @@ public interface UserService {
 
     public User getUserById(long userId) throws ArticlaException;
 
-    public void addLikedArticle(Long currentUserId, Long articleId) throws ArticlaException;
+    // Return false when nothing changed (already liked / not liked).
+    public boolean addLikedArticle(Long currentUserId, Long articleId);
 
-    public void removeLikedArticle(Long currentUserId, Long articleId) throws ArticlaException;
+    public boolean removeLikedArticle(Long currentUserId, Long articleId);
 
-    public void incrementLikesReceived(Long userId) throws ArticlaException;
+    public void incrementLikesReceived(Long userId);
 
-    public void decrementLikesReceived(Long userId) throws ArticlaException;
+    public void decrementLikesReceived(Long userId);
 
-    public UserProfileDTO getUserProfileById(long userId) throws ArticlaException;
-
-    // public Resource getProfilePicture(String filename);
     
     public String saveProfilePicture(MultipartFile file, Long userId) throws IOException;
 

@@ -16,13 +16,14 @@ public interface UserRepository extends MongoRepository<User, Long> {
 
     public Optional<User> findByEmail(String email);
 
-    @Query("{ '_id': ?0 }")
+    // Atomic: matches only if the article is not liked yet; returns the number of updated users (0 or 1).
+    @Query("{ '_id': ?0, 'likedArticlesId': { $ne: ?1 } }")
     @Update("{ '$addToSet': { 'likedArticlesId': ?1 } }")
-    void addLikedArticle(Long userId, Long articleId);
+    long addLikedArticle(Long userId, Long articleId);
 
-    @Query("{ '_id': ?0 }")
+    @Query("{ '_id': ?0, 'likedArticlesId': ?1 }")
     @Update("{ '$pull': { 'likedArticlesId': ?1 } }")
-    void removeLikedArticle(Long userId, Long articleId);
+    long removeLikedArticle(Long userId, Long articleId);
 
     @Query("{ '_id': ?0 }")
     @Update("{ '$inc': { 'likesReceived': 1 } }")

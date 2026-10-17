@@ -3,11 +3,9 @@ package com.voixdesagesse.VoixDeSagesse.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.voixdesagesse.VoixDeSagesse.dto.ArticleType;
 import com.voixdesagesse.VoixDeSagesse.dto.HistoireDTO;
@@ -26,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-@Transactional
 @RequiredArgsConstructor
 public class ArticleServiceImpl implements ArticleService {
 
@@ -36,10 +33,8 @@ public class ArticleServiceImpl implements ArticleService {
 
     private final CommonService commonService;
 
-    private final ConcurrentHashMap<String, Long> likeOperationCache = new ConcurrentHashMap<>();
 
     @Override
-    @Transactional
     public Article createSagesseArticle(SagesseDTO sagesseDTO) throws ArticlaException {
         Article article = sagesseDTO.toEntity();
         article.setId(Utilities.getNextSequence("articles"));
@@ -55,7 +50,6 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    @Transactional
     public Article createHistoireArticle(HistoireDTO histoireDTO) throws ArticlaException {
         Article article = histoireDTO.toEntity();
         article.setId(Utilities.getNextSequence("articles"));
@@ -200,96 +194,27 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    @Transactional
-    public synchronized void likeArticle(Long articleId, Long currentUserId) throws ArticlaException {
-        String cacheKey = articleId + "-" + currentUserId;
-
-        if (likeOperationCache.containsKey(cacheKey)) {
-            long lastOperation = likeOperationCache.get(cacheKey);
-            if (System.currentTimeMillis() - lastOperation < 1000) {
-                throw new ArticlaException("Opération trop rapide, veuillez patienter");
-            }
-        }
-
-        likeOperationCache.put(cacheKey, System.currentTimeMillis());
-
-        try {
-            User currentUser = userService.getUserById(currentUserId);
-            Set<Long> likedArticles = currentUser.getLikedArticlesId();
-
-            if (likedArticles != null && likedArticles.contains(articleId))
-                throw new ArticlaException("Article déjà liké");
-
-            Article article = articleRepository.findById(articleId)
-                    .orElseThrow(() -> new ArticlaException("Article not found"));
-
-            Long authorId = article.getUserId();
-
-            articleRepository.incrementLikes(articleId);
-            userService.addLikedArticle(currentUserId, articleId);
-            userService.incrementLikesReceived(authorId);
-
-        } finally {
-            new Thread(() -> {
-                try {
-                    Thread.sleep(2000);
-                    likeOperationCache.remove(cacheKey);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }).start();
-        }
+    public void likeArticle(Long articleId, Long currentUserId) throws ArticlaException {
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new ArticlaException("Article introuvable"));
+        // Recorded atomically: a double click cannot count the like twice.
+        if (!userService.addLikedArticle(currentUserId, articleId))
+            throw new ArticlaException("Article déjà liké");
+        articleRepository.incrementLikes(articleId);
+        userService.incrementLikesReceived(article.getUserId());
     }
 
     @Override
-    @Transactional
-    public synchronized void unlikeArticle(Long articleId, Long currentUserId) throws ArticlaException {
-        String cacheKey = articleId + "-" + currentUserId + "-unlike";
-
-        if (likeOperationCache.containsKey(cacheKey)) {
-            long lastOperation = likeOperationCache.get(cacheKey);
-            if (System.currentTimeMillis() - lastOperation < 1000) {
-                throw new ArticlaException("Opération trop rapide, veuillez patienter");
-            }
-        }
-
-        likeOperationCache.put(cacheKey, System.currentTimeMillis());
-
-        try {
-
-            User currentUser = userService.getUserById(currentUserId);
-            Set<Long> likedArticles = currentUser.getLikedArticlesId();
-
-            if (likedArticles == null || !likedArticles.contains(articleId)) {
-                throw new ArticlaException("Article pas encore liké");
-            }
-
-            Article article = articleRepository.findById(articleId)
-                    .orElseThrow(() -> new ArticlaException("Article introuvable"));
-
-            Long authorId = article.getUserId();
-
-            if (article.getLikes() > 0) {
-                articleRepository.decrementLikes(articleId);
-            }
-            userService.removeLikedArticle(currentUserId, articleId);
-            userService.decrementLikesReceived(authorId);
-
-        } finally {
-
-            new Thread(() -> {
-                try {
-                    Thread.sleep(2000); 
-                    likeOperationCache.remove(cacheKey);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }).start();
-        }
+    public void unlikeArticle(Long articleId, Long currentUserId) throws ArticlaException {
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new ArticlaException("Article introuvable"));
+        if (!userService.removeLikedArticle(currentUserId, articleId))
+            throw new ArticlaException("Article pas encore liké");
+        articleRepository.decrementLikes(articleId);
+        userService.decrementLikesReceived(article.getUserId());
     }
 
     @Override
-    @Transactional
     public void deleteArticle(Long articleId, Long currentUserId) throws ArticlaException {
         Article article = articleRepository.findByIdAndUserId(articleId, currentUserId)
                 .orElseThrow(
@@ -379,7 +304,6 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    @Transactional
     public void deleteByUserId(Long userId) {
         articleRepository.deleteByUserId(userId);
     }

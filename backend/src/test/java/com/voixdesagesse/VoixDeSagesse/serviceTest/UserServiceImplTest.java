@@ -57,7 +57,6 @@ public class UserServiceImplTest {
 
     private User user;
     private UserRegistrationDTO registrationDTO;
-    private LoginDTO loginDTO;
 
     @BeforeEach
     void setUp() {
@@ -78,9 +77,6 @@ public class UserServiceImplTest {
 
         ReflectionTestUtils.setField(userService, "mailFrom", "no-reply@test.local");
 
-        loginDTO = new LoginDTO();
-        loginDTO.setEmail("test@example.com");
-        loginDTO.setMotdepasse("Password123!");
     }
 
     @Test
@@ -135,48 +131,6 @@ public class UserServiceImplTest {
             () -> userService.registerUser(registrationDTO));
         assertEquals("USER_FOUND", exception.getMessage());
         verify(userRepository, never()).save(any(User.class));
-    }
-
-    @Test
-    @DisplayName("Test connexion utilisateur - succès")
-    void testLoginUserSuccess() throws ArticlaException {
-        // Given
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
-
-        // When
-        UserDTO result = userService.loginUser(loginDTO);
-
-        // Then
-        assertNotNull(result);
-        assertEquals(user.getId(), result.getId());
-        assertEquals(user.getEmail(), result.getEmail());
-        verify(passwordEncoder).matches("Password123!", "encodedPassword");
-    }
-
-    @Test
-    @DisplayName("Test connexion utilisateur - utilisateur non trouvé")
-    void testLoginUserNotFound() {
-        // Given
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-
-        // When & Then
-        ArticlaException exception = assertThrows(ArticlaException.class,
-            () -> userService.loginUser(loginDTO));
-        assertEquals("USER_NOT_FOUND", exception.getMessage());
-    }
-
-    @Test
-    @DisplayName("Test connexion utilisateur - mot de passe incorrect")
-    void testLoginUserInvalidPassword() {
-        // Given
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
-
-        // When & Then
-        ArticlaException exception = assertThrows(ArticlaException.class,
-            () -> userService.loginUser(loginDTO));
-        assertEquals("INVALID_CREDENTIALS", exception.getMessage());
     }
 
     @Test

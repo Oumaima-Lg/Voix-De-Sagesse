@@ -69,15 +69,6 @@ public class JwtHelper {
         }
     }
 
-    public String generateToken(String username) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
-    }
-
-    public String generateToken(Map<String, Object> extraClaims, String username) {
-        return createToken(extraClaims, username);
-    }
-
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
@@ -112,32 +103,6 @@ public class JwtHelper {
     public Boolean validateToken(String token) {
         try {
             return !isTokenExpired(token);
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public String extractTokenFromHeader(String authHeader) {
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);
-        }
-        return null;
-    }
-
-    public Long getTokenValidityTime(String token) {
-        try {
-            Date expiration = extractExpiration(token);
-            return expiration.getTime() - System.currentTimeMillis();
-        } catch (Exception e) {
-            return 0L;
-        }
-    }
-
-    public Boolean canTokenBeRefreshed(String token) {
-        try {
-            Date expiration = extractExpiration(token);
-            Date maxRefreshDate = new Date(expiration.getTime() + (7 * 24 * 60 * 60 * 1000));
-            return new Date().before(maxRefreshDate);
         } catch (Exception e) {
             return false;
         }

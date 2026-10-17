@@ -110,6 +110,16 @@ class AuthorizationIntegrationTest {
     }
 
     @Test
+    @DisplayName("Liker deux fois : le like n'est compté qu'une fois")
+    void doubleLikeCountsOnce() throws Exception {
+        mvc.perform(post("/articles/" + ALICE_ARTICLE_ID + "/like").with(as(BOB_ID))).andExpect(status().isOk());
+        mvc.perform(post("/articles/" + ALICE_ARTICLE_ID + "/like").with(as(BOB_ID))).andExpect(status().isBadRequest());
+
+        assertEquals(1L, articleRepository.findById(ALICE_ARTICLE_ID).orElseThrow().getLikes());
+        assertEquals(1L, userRepository.findById(ALICE_ID).orElseThrow().getLikesReceived());
+    }
+
+    @Test
     @DisplayName("Profil : la mise à jour ne touche que le compte connecté")
     void updateProfileOnlyChangesCurrentUser() throws Exception {
         String body = "{\"id\":" + ALICE_ID + ",\"nom\":\"Pirate\",\"prenom\":\"Bob\",\"bio\":\"\"}";
