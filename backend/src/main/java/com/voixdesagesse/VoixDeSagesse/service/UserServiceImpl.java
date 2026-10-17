@@ -65,6 +65,9 @@ public class UserServiceImpl implements UserService {
     private static final int OTP_MAX_ATTEMPTS = 5;
     private static final long OTP_RESEND_DELAY_SECONDS = 60;
 
+    @Value("${app.mail.from}")
+    private String mailFrom;
+
     @Value("${file.upload-dir:uploads/profile-pictures}")
     private String uploadDir;
 
@@ -143,7 +146,7 @@ public class UserServiceImpl implements UserService {
         OTP otp = new OTP(email, genOtp, LocalDateTime.now());
         otpRepository.save(otp);
         message.setText(Data.getMessageBody(genOtp, user.getNom(), user.getPrenom()), true);
-        message.setFrom("laghjibioumaima2003@gmail.com");
+        message.setFrom(mailFrom);
         mailSender.send(mm);
         return true;
     }

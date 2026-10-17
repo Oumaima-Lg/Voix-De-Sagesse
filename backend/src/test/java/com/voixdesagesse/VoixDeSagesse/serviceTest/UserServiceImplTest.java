@@ -76,6 +76,8 @@ public class UserServiceImplTest {
         registrationDTO.setMotdepasse("Password123!");
         registrationDTO.setAccountType(AccountType.USER);
 
+        ReflectionTestUtils.setField(userService, "mailFrom", "no-reply@test.local");
+
         loginDTO = new LoginDTO();
         loginDTO.setEmail("test@example.com");
         loginDTO.setMotdepasse("Password123!");
