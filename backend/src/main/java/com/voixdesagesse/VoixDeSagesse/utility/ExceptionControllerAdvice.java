@@ -1,10 +1,11 @@
 package com.voixdesagesse.VoixDeSagesse.utility;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -22,7 +23,7 @@ import jakarta.validation.ConstraintViolationException;
 public class ExceptionControllerAdvice {
 
     @Autowired
-    private Environment environment;
+    private MessageSource messageSource;
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorInfo> generalException(Exception exception) {
@@ -33,7 +34,8 @@ public class ExceptionControllerAdvice {
 
     @ExceptionHandler(ArticlaException.class)
     public ResponseEntity<ErrorInfo> generalException(ArticlaException exception) {
-        String msg = environment.getProperty(exception.getMessage());
+        // Known keys (USER_NOT_FOUND...) are translated from messages.properties; other messages are already readable.
+        String msg = messageSource.getMessage(exception.getMessage(), null, exception.getMessage(), Locale.FRENCH);
         ErrorInfo error = new ErrorInfo(msg, HttpStatus.INTERNAL_SERVER_ERROR.value(), LocalDateTime.now());
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }

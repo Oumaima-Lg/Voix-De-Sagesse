@@ -1,10 +1,12 @@
 package com.voixdesagesse.VoixDeSagesse.service;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.voixdesagesse.VoixDeSagesse.dto.AccountType;
 import com.voixdesagesse.VoixDeSagesse.dto.LoginDTO;
+import com.voixdesagesse.VoixDeSagesse.dto.ResetPasswordRequest;
 import com.voixdesagesse.VoixDeSagesse.dto.ResponseDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserDTO;
 import com.voixdesagesse.VoixDeSagesse.dto.UserProfileDTO;
@@ -49,6 +52,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
+    private static final long OTP_VALIDITY_MINUTES = 10;
+    private static final int OTP_MAX_ATTEMPTS = 5;
+    private static final long OTP_RESEND_DELAY_SECONDS = 60;
 
     @Value("${file.upload-dir:uploads/profile-pictures}")
     private String uploadDir;
@@ -108,7 +115,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Boolean sendOtp(String email) throws Exception {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new ArticlaException("USER_NOT_FOUND"));
+        Optional<User> found = userRepository.findByEmail(email);
+        if (found.isEmpty()) {
+            // Same answer as for a known address, so this endpoint cannot be used to find accounts.
+            log.info("OTP requested for an unknown email");
+            return true;
+        }
+        User user = found.get();
+        Optional<OTP> previous = otpRepository.findById(email);
+        if (previous.isPresent()
+                && previous.get().getCreationTime().isAfter(LocalDateTime.now().minusSeconds(OTP_RESEND_DELAY_SECONDS)))
+            throw new ArticlaException("OTP_TOO_SOON");
+
         MimeMessage mm = mailSender.createMimeMessage();
         MimeMessageHelper message = new MimeMessageHelper(mm, true);
         message.setTo(email);
@@ -123,27 +141,52 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean verifyOtp(String email, String otp) throws ArticlaException {
+    public String verifyOtp(String email, String otp) throws ArticlaException {
         OTP otpEntity = otpRepository.findById(email).orElseThrow(() -> new ArticlaException("OTP_NOT_FOUND"));
+        if (isExpired(otpEntity) || otpEntity.getOtpCode() == null)
+            throw new ArticlaException("OTP_NOT_FOUND");
 
-        if (!otpEntity.getOtpCode().equals((otp)))
+        if (!otpEntity.getOtpCode().equals(otp)) {
+            otpEntity.setAttempts(otpEntity.getAttempts() + 1);
+            if (otpEntity.getAttempts() >= OTP_MAX_ATTEMPTS) {
+                otpRepository.delete(otpEntity);
+                throw new ArticlaException("OTP_TOO_MANY_ATTEMPTS");
+            }
+            otpRepository.save(otpEntity);
             throw new ArticlaException("OTP_INCORRECT");
-        return true;
+        }
 
+        String resetToken = Utilities.generateResetToken();
+        otpEntity.setOtpCode(null);
+        otpEntity.setResetToken(resetToken);
+        otpRepository.save(otpEntity);
+        return resetToken;
     }
 
     @Override
-    public ResponseDTO changePassword(LoginDTO loginDTO) throws ArticlaException {
-        User user = userRepository.findByEmail(loginDTO.getEmail())
+    public ResponseDTO changePassword(ResetPasswordRequest request) throws ArticlaException {
+        OTP otpEntity = otpRepository.findById(request.email())
+                .filter(otp -> otp.getResetToken() != null && !isExpired(otp))
+                .filter(otp -> MessageDigest.isEqual(
+                        otp.getResetToken().getBytes(StandardCharsets.UTF_8),
+                        request.resetToken().getBytes(StandardCharsets.UTF_8)))
+                .orElseThrow(() -> new ArticlaException("RESET_TOKEN_INVALID"));
+
+        User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ArticlaException("USER_NOT_FOUND"));
-        user.setMotdepasse(passwordEncoder.encode(loginDTO.getMotdepasse()));
+        user.setMotdepasse(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
-        return new ResponseDTO("Password changed successfully.");
+        otpRepository.delete(otpEntity);
+        return new ResponseDTO("Mot de passe modifié avec succès.");
+    }
+
+    private boolean isExpired(OTP otp) {
+        return otp.getCreationTime().isBefore(LocalDateTime.now().minusMinutes(OTP_VALIDITY_MINUTES));
     }
 
     @Scheduled(fixedRate = 60000)
     public void removeExpiredOTPs() {
-        LocalDateTime expiry = LocalDateTime.now().minusMinutes(5);
+        LocalDateTime expiry = LocalDateTime.now().minusMinutes(OTP_VALIDITY_MINUTES);
         List<OTP> expiredOTPs = otpRepository.findByCreationTimeBefore(expiry);
         if (!expiredOTPs.isEmpty()) {
             otpRepository.deleteAll(expiredOTPs);

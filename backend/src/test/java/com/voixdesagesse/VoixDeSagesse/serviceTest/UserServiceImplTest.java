@@ -194,13 +194,24 @@ public class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Test envoi OTP - utilisateur non trouvé")
-    void testSendOtpUserNotFound() {
-        // Given
+    @DisplayName("Envoi OTP - email inconnu : même réponse, aucun email envoyé")
+    void testSendOtpUserNotFound() throws Exception {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-        // When & Then
-        assertThrows(ArticlaException.class, () -> userService.sendOtp("test@example.com"));
+        assertTrue(userService.sendOtp("unknown@example.com"));
+        verify(otpRepository, never()).save(any(OTP.class));
+        verify(mailSender, never()).send(any(MimeMessage.class));
+    }
+
+    @Test
+    @DisplayName("Envoi OTP - refusé si un code a été envoyé il y a moins d'une minute")
+    void testSendOtpTooSoon() {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(otpRepository.findById(anyString()))
+            .thenReturn(Optional.of(new OTP("test@example.com", "123456", LocalDateTime.now().minusSeconds(20))));
+
+        ArticlaException exception = assertThrows(ArticlaException.class, () -> userService.sendOtp("test@example.com"));
+        assertEquals("OTP_TOO_SOON", exception.getMessage());
         verify(mailSender, never()).send(any(MimeMessage.class));
     }
 
@@ -212,10 +223,36 @@ public class UserServiceImplTest {
         when(otpRepository.findById(anyString())).thenReturn(Optional.of(otp));
 
         // When
-        Boolean result = userService.verifyOtp("test@example.com", "123456");
+        String resetToken = userService.verifyOtp("test@example.com", "123456");
 
-        // Then
-        assertTrue(result);
+        // Then: a reset token is issued and the code cannot be reused
+        assertNotNull(resetToken);
+        assertEquals(resetToken, otp.getResetToken());
+        assertNull(otp.getOtpCode());
+        verify(otpRepository).save(otp);
+    }
+
+    @Test
+    @DisplayName("Vérification OTP - code expiré")
+    void testVerifyOtpExpired() {
+        OTP otp = new OTP("test@example.com", "123456", LocalDateTime.now().minusMinutes(11));
+        when(otpRepository.findById(anyString())).thenReturn(Optional.of(otp));
+
+        ArticlaException exception = assertThrows(ArticlaException.class,
+            () -> userService.verifyOtp("test@example.com", "123456"));
+        assertEquals("OTP_NOT_FOUND", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Vérification OTP - le code est supprimé après 5 essais incorrects")
+    void testVerifyOtpTooManyAttempts() {
+        OTP otp = new OTP("test@example.com", "654321", LocalDateTime.now(), 4, null);
+        when(otpRepository.findById(anyString())).thenReturn(Optional.of(otp));
+
+        ArticlaException exception = assertThrows(ArticlaException.class,
+            () -> userService.verifyOtp("test@example.com", "123456"));
+        assertEquals("OTP_TOO_MANY_ATTEMPTS", exception.getMessage());
+        verify(otpRepository).delete(otp);
     }
 
     @Test
@@ -241,24 +278,52 @@ public class UserServiceImplTest {
         ArticlaException exception = assertThrows(ArticlaException.class,
             () -> userService.verifyOtp("test@example.com", "123456"));
         assertEquals("OTP_INCORRECT", exception.getMessage());
+        assertEquals(1, otp.getAttempts());
+        verify(otpRepository).save(otp);
     }
 
     @Test
     @DisplayName("Test changement de mot de passe - succès")
     void testChangePasswordSuccess() throws ArticlaException {
-        // Given
+        // Given: the OTP was verified and a reset token issued
+        OTP otp = new OTP("test@example.com", null, LocalDateTime.now(), 0, "reset-token");
+        when(otpRepository.findById(anyString())).thenReturn(Optional.of(otp));
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(passwordEncoder.encode(anyString())).thenReturn("newEncodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         // When
-        ResponseDTO result = userService.changePassword(loginDTO);
+        ResponseDTO result = userService.changePassword(
+            new ResetPasswordRequest("test@example.com", "reset-token", "Password123!"));
 
         // Then
         assertNotNull(result);
-        assertEquals("Password changed successfully.", result.getMessage());
         verify(userRepository).save(any(User.class));
         verify(passwordEncoder).encode("Password123!");
+        verify(otpRepository).delete(otp);
+    }
+
+    @Test
+    @DisplayName("Changement de mot de passe - refusé sans code vérifié")
+    void testChangePasswordWithoutVerifiedOtp() {
+        when(otpRepository.findById(anyString())).thenReturn(Optional.empty());
+
+        ArticlaException exception = assertThrows(ArticlaException.class, () -> userService.changePassword(
+            new ResetPasswordRequest("test@example.com", "anything", "Password123!")));
+        assertEquals("RESET_TOKEN_INVALID", exception.getMessage());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("Changement de mot de passe - refusé avec un mauvais jeton")
+    void testChangePasswordWrongToken() {
+        OTP otp = new OTP("test@example.com", null, LocalDateTime.now(), 0, "reset-token");
+        when(otpRepository.findById(anyString())).thenReturn(Optional.of(otp));
+
+        ArticlaException exception = assertThrows(ArticlaException.class, () -> userService.changePassword(
+            new ResetPasswordRequest("test@example.com", "forged-token", "Password123!")));
+        assertEquals("RESET_TOKEN_INVALID", exception.getMessage());
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
