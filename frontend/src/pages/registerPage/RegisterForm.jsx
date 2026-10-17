@@ -36,7 +36,7 @@ const RegisterForm = () => {
         if (name === "motdepasse" && data.confirmerMotdepasse !== "") {
             if (data.confirmerMotdepasse !== value) {
                 console.log("dans if", formError);
-                setFormError({ ...formError, confirmerMotdepasse: "Passwords do not match." });
+                setFormError({ ...formError, confirmerMotdepasse: "Les mots de passe ne correspondent pas." });
             }
 
             else
@@ -46,7 +46,7 @@ const RegisterForm = () => {
 
         if (name === "confirmerMotdepasse") {
             if (data.motdepasse !== value)
-                setFormError({ ...formError, [name]: "Passwords do not match." });
+                setFormError({ ...formError, [name]: "Les mots de passe ne correspondent pas." });
             else
                 setFormError({ ...formError, [name]: "" });
         }
@@ -65,13 +65,13 @@ const RegisterForm = () => {
         if (name === "motdepasse" && newData.confirmerMotdepasse !== "") {
             newErrors.confirmerMotdepasse =
                 newData.confirmerMotdepasse !== value ?
-                    "Passwords do not match." : "";
+                    "Les mots de passe ne correspondent pas." : "";
         }
 
         if (name === "confirmerMotdepasse") {
             newErrors.confirmerMotdepasse =
                 newData.motdepasse !== value ?
-                    "Passwords do not match." : "";
+                    "Les mots de passe ne correspondent pas." : "";
         }
 
         setFormError(newErrors);
@@ -88,7 +88,7 @@ const RegisterForm = () => {
 
             if (key === "confirmerMotdepasse") {
                 if (data[key] !== data["motdepasse"]) {
-                    newFormError[key] = "Passwords do not match.";
+                    newFormError[key] = "Les mots de passe ne correspondent pas.";
                 }
             } else {
                 newFormError[key] = signupValidation(key, data[key]);
@@ -105,7 +105,7 @@ const RegisterForm = () => {
             registerUser(data).then((res) => {
                 console.log(res);
                 setData(form);
-                successNotification('Success', 'Inscription réussie !');
+                successNotification('Succès', 'Inscription réussie !');
                 
                 setTimeout( () => {
                     navigate("/auth/login")
@@ -113,7 +113,9 @@ const RegisterForm = () => {
 
             }).catch((err) => {
                 console.log(err);
-                errorNotification('Failed',  err.response.data.errorMessage);
+                errorNotification("Échec de l'inscription", err.response
+                    ? err.response.data?.errorMessage || "Erreur lors de l'inscription."
+                    : 'Impossible de contacter le serveur. Réessayez plus tard.');
                 
             });
         }
@@ -123,23 +125,25 @@ const RegisterForm = () => {
 
     return (
         <StyledWrapper>
-            <div className="mx-auto  p-14">
-                <div className='card mx-auto border-4 border-image-gradient sm:px-9 sm:py-4 px-4 py-2 flex flex-col md:gap-10 sm:gap-8 gap-6'>
-                    <h4 className="text-gradient lg:text-4xl sm:text-3xl text-xl text-center lg:px-20 px-10 pt-2">Créer un compte</h4>
-                    <form className='flex flex-col md:gap-4 gap-2'>
+            <div className="mx-auto px-4">
+                <div className='card w-[min(92vw,26rem)] mx-auto border-4 border-image-gradient sm:px-8 px-4 py-4 flex flex-col gap-4'>
+                    <h4 className="text-gradient sm:text-3xl text-2xl text-center pt-2">Créer un compte</h4>
+                    <form className='flex flex-col gap-3'>
                         {/* <input autoComplete="off" value={data.prenom} onChange={handleChange} id="prenom" name="prenom" type="text" placeholder="Prénom" className="bg-none border-0 outline-0 text-sm sm:text-lg text-[#d3d3d3] lg:w-sm w-auto " /> */}
-                        <TextInput error={formError.prenom} size='lg' placeholder="Prénom" value={data.prenom} onChange={handleChange} name="prenom" />
-                        <TextInput
-                            error={formError.nom}
-                            size='lg'
-                            placeholder="Nom de famille"
-                            value={data.nom}
-                            onChange={handleChange}
-                            name="nom"
-                        /> 
+                        <div className='grid sm:grid-cols-2 gap-3'>
+                            <TextInput error={formError.prenom} size='md' placeholder="Prénom" value={data.prenom} onChange={handleChange} name="prenom" />
+                            <TextInput
+                                error={formError.nom}
+                                size='md'
+                                placeholder="Nom de famille"
+                                value={data.nom}
+                                onChange={handleChange}
+                                name="nom"
+                            />
+                        </div>
                         <TextInput
                             error={formError.email}
-                            size='lg'
+                            size='md'
                             placeholder="Email"
                             value={data.email}
                             onChange={handleChange}
@@ -147,25 +151,26 @@ const RegisterForm = () => {
                         />
                         <TextInput
                             error={formError.motdepasse}
-                            size='lg'
+                            size='md'
                             placeholder="Mot de passe"
+                            type="password"
                             value={data.motdepasse}
                             onChange={handleChange}
                             name="motdepasse"
                         />
                         <TextInput
                             error={formError.confirmerMotdepasse}
-                            size='lg'
+                            size='md'
                             placeholder="Confirmez le mot de passe"
+                            type="password"
                             value={data.confirmerMotdepasse}
                             onChange={handleChange}
                             name="confirmerMotdepasse"
-                            whithAsterik
                         />
                         <div>
-                            <button className="btn btn-border-gradient text-amber-50! mb-6!" onClick={handleSubmit} >S'inscrire</button>
-                            <div className='h-0.5 mb-6 bg-gradient-to-br from-[#4C3163] to-[#A09F87]' />
-                            <span className="block mb-6! border-b-1 max-w-max mx-auto cursor-pointer" onClick={ () => {navigate("/auth/login"); setFormError(form); setData(form)} }>Vous avez déja un compte ?</span>
+                            <button className="btn btn-border-gradient text-amber-50! mb-3!" onClick={handleSubmit} >S'inscrire</button>
+                            <div className='h-0.5 mb-3 bg-gradient-to-br from-[#4C3163] to-[#A09F87]' />
+                            <span className="block mb-3! border-b-1 max-w-max mx-auto cursor-pointer" onClick={ () => {navigate("/auth/login"); setFormError(form); setData(form)} }>Vous avez déjà un compte ?</span>
                         </div>
 
                     </form>
@@ -195,7 +200,7 @@ const StyledWrapper = styled.div`
 
   /*Buttons*/
   .btn {
-   margin: 1rem;
+   margin: 0.75rem;
    border: none;
    border-radius: 4px;
    font-weight: bold;
