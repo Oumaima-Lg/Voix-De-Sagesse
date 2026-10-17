@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import arrow from '../../assets/arrow.png';
 import HeaderNav from '../../Components/HeaderNav';
 import menu from '../../assets/menu.png';

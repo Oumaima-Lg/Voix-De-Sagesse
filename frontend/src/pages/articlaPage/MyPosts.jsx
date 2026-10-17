@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft, Heart, MessageCircle, Share2, MoreHorizontal, Bookmark, Trash2, Plus } from "lucide-react"
+import { ArrowLeft, Heart, MessageCircle, Bookmark, Trash2, Plus } from "lucide-react"
 import { FaQuoteLeft, FaHeart, FaBookmark } from "react-icons/fa"
 import { BiBook } from "react-icons/bi"
 import { LoadingOverlay } from "@mantine/core"
 import { useSelector } from "react-redux"
 import { getMyPosts, likeArticle, unlikeArticle, deleteArticle } from "../../services/ArticleService"
 import { saveArticle, unsaveArticle } from "../../services/UserService"
-import { addComment, getCommentsByArticle, deleteComment } from "../../services/CommentService" 
+import { addComment, getCommentsByArticle, deleteComment } from "../../services/CommentService"
 import { errorNotification, successNotification } from "../../services/NotificationService"
 import profileAvatar from "../../assets/profileAvatar.jpg"
 import { fileUrl } from "../../config"
@@ -16,7 +16,6 @@ const MyPosts = () => {
     const navigate = useNavigate()
     const [commentInputs, setCommentInputs] = useState({})
     const [postComments, setPostComments] = useState({}) 
-    const [showDropdown, setShowDropdown] = useState(null)
     const [showComments, setShowComments] = useState({}) 
     const [commentLoading, setCommentLoading] = useState({}) 
     const [deleteCommentLoading, setDeleteCommentLoading] = useState({}) 
@@ -31,7 +30,6 @@ const MyPosts = () => {
         setLoading(true);
         getMyPosts()
             .then((data) => {
-                console.log('Mes postes:', data);
                 setPosts(data.myPosts || []);
                 setLoading(false);
             })
@@ -72,7 +70,7 @@ const MyPosts = () => {
         setCommentLoading((prev) => ({ ...prev, [articleId]: true }))
 
         try {
-            const response = await addComment(articleId, content.trim())
+            await addComment(articleId, content.trim())
 
             await loadComments(articleId)
 
@@ -95,7 +93,6 @@ const MyPosts = () => {
             setShowComments((prev) => ({ ...prev, [articleId]: true }))
 
             successNotification('Succès', 'Commentaire ajouté avec succès')
-            console.log("Commentaire ajouté et liste rechargée pour article:", articleId)
         } catch (err) {
             console.error("Erreur lors de l'ajout du commentaire:", err)
             errorNotification('Erreur', err.response?.data?.error || 'Impossible d\'ajouter le commentaire')
@@ -241,7 +238,6 @@ const MyPosts = () => {
                 await deleteArticle(articleId);
                 setPosts(prev => prev.filter(poste => poste.article.id !== articleId));
                 successNotification('Succès', 'Article supprimé avec succès');
-                setShowDropdown(null);
             } catch (err) {
                 console.error('Erreur lors de la suppression:', err);
                 errorNotification('Erreur', err.response?.data?.error || 'Impossible de supprimer l\'article');
@@ -455,10 +451,6 @@ const MyPosts = () => {
                                             <MessageCircle className="w-4 h-4" />
                                             {poste.article.comments}
                                         </button>
-                                        {/* <button className="flex items-center gap-2 text-[#A09F87] hover:text-white transition-colors">
-                                            <Share2 className="w-4 h-4" />
-                                            {poste.article.shares}
-                                        </button> */}
                                     </div>
                                 </div>
 

@@ -4,7 +4,6 @@ import LoginPage from '../pages/loginPage/LoginPage'
 import RegisterPage from '../pages/registerPage/RegisterPage'
 import ArticlaPage from '../pages/articlaPage/ArticlaPage'
 import { Routes, Route,  } from 'react-router-dom';
-import { useSelector } from 'react-redux'
 import ArticleTypeSelection from '../pages/articlaPage/ArticleTypeSelection'
 import CreateArticleForm from '../pages/articlaPage/CreateArticle'
 import ArticleFeed from '../pages/articlaPage/ArticleFeed'
@@ -18,13 +17,10 @@ import AdminDashboard from '../pages/adminPage/AdminDashboard'
 
 
 const AppRoutes = () => {
-    const user = useSelector((state) => state.user);
-
     return (
         <AuthChecker>
             <Routes>
                 <Route path="/" element={<HomePage />} />
-                {/* <Route path="/auth/login" element={user ? <Navigate to="/articla" /> : <LoginPage />} /> */}
                 <Route path="/auth/login" element={
                     <PublicRoute>
                         <LoginPage />
@@ -35,7 +31,6 @@ const AppRoutes = () => {
                         <RegisterPage />
                     </PublicRoute>
                 } />
-                {/* <Route path="/auth/register" element={user ? <Navigate to="/articla" /> : <RegisterPage />} /> */}
                 <Route path="/articla" element={
                     <ProtectedRoute>
                         <ArticlaPage />
@@ -86,32 +81,12 @@ const AppRoutes = () => {
                         <AdminDashboard />
                     </AdminRoute>
                 } />
-                {/* <Route path="/admin/users" element={
-                    <AdminRoute>
-                        <UserManagement />
-                    </AdminRoute>
-                } /> */}
-                {/* <Route path="/articla" element={<ArticlaPage />} /> */}
-                {/* <Route path="/articla/topArticla" element={<ArticlaPage />} /> */}
-                {/* <Route path="/articla/article" element={<ArticleFeed />} /> */}
-                {/* <Route path="/articla/nouveauArticle" element={<ArticleTypeSelection />} /> */}
-                {/* <Route path="/articla/creerArticle" element={<CreateArticleForm />} /> */}
-                {/* <Route path="/articla/profile" element={<ArticlaPage />} /> */}
-                {/* <Route path="/articla/poste/profile/:id" element={<ProfileAuthor />} /> */}
-                {/* <Route path="/saved-articles" element={<SavedArticles />} /> */}
-                {/* <Route path="/articla/my-posts" element={<MyPosts />} /> */}
                 {/* ✅ Route catch-all pour 404 - DOIT ÊTRE EN DERNIER */}
                 <Route path="*" element={<NotFoundPage />} />
 
                 {/* ✅ Redirection par défaut */}
-                {/* <Route path="/" element={<Navigate to="/articla" replace />} /> */}
 
                 {/* ✅ Route 404 */}
-                {/* <Route path="*" element={
-                    <ProtectedRoute>
-                        <NotFound />
-                    </ProtectedRoute>
-                } /> */}
             </Routes>
         </AuthChecker>
     )

@@ -31,11 +31,9 @@ axiosInstance.interceptors.request.use(
     const userData = localStorage.getItem("user");
 
     if (token && !userData) {
-      console.log('Token exists but no user data - clearing token');
       localStorage.removeItem("token");
       store.dispatch(removeJwt());
     } else if (!token && userData) {
-      console.log('User data exists but no token - clearing user');
       localStorage.removeItem("user");
       store.dispatch(removeUser());
     }
@@ -72,7 +70,6 @@ axiosInstance.interceptors.response.use(
             const userData = localStorage.getItem('user');
 
             if (!token && !userData) {
-              console.log('401 received but token and user already cleared. Assuming voluntary logout or already handled.');
               return Promise.reject(error);
             }
 

@@ -1,25 +1,21 @@
-import { useState, useEffect, useRef } from "react"
-import { useSelector, useDispatch } from "react-redux"
+import { useState, useEffect } from "react"
 import ShinyText from "../../blocks/TextAnimations/ShinyText/ShinyText"
-import { PiUser, PiUserCircle, PiCamera, PiPencil, PiCheck, PiX } from "react-icons/pi"
+import { PiUser, PiUserCircle } from "react-icons/pi"
 import { IoPersonOutline, IoLocationOutline } from "react-icons/io5"
-import { MdOutlineLanguage, MdOutlineNotifications, MdOutlineVisibility } from "react-icons/md"
+import { MdOutlineLanguage } from "react-icons/md"
 import profileAvatar from "../../assets/profileAvatar.jpg"
-import { errorNotification, successNotification } from "../../services/NotificationService"
-import { updateUser } from "../../Slices/UserSlice"
-import { updateUserProfile, getUserProfile, uploadProfilePicture } from '../../services/UserService';
+import { getUserProfile } from '../../services/UserService';
 import { LoadingOverlay } from "@mantine/core"
 import { useParams } from "react-router-dom";
 import { fileUrl } from "../../config"
 
 
-const Profile = ({userId: propUserId}) => {
+const ProfileAuthor = ({userId: propUserId}) => {
 
     const { id } = useParams(); 
     const userId = propUserId || id; 
 
     const [loading, setLoading] = useState(true);
-    const [uploadingImage, setUploadingImage] = useState(false);
 
     const [userProfile, setUserProfile] = useState(null);
 
@@ -27,7 +23,6 @@ const Profile = ({userId: propUserId}) => {
         setLoading(true);
         getUserProfile(userId)
             .then((data) => {
-                console.log(data);
                 setUserProfile(data);
                 setLoading(false);
             })
@@ -35,7 +30,7 @@ const Profile = ({userId: propUserId}) => {
                 setLoading(false);
                 console.error(err);
             });
-    }, []);
+    }, [userId]);
 
 
     if (!userProfile) {
@@ -54,7 +49,7 @@ const Profile = ({userId: propUserId}) => {
     return (
         <div className="pt-26 px-4 lg:px-8">
             <LoadingOverlay
-                visible={loading || uploadingImage}
+                visible={loading}
                 zIndex={1000}
                 overlayProps={{ radius: 'sm', blur: 2 }}
                 loaderProps={{ color: '#A09F87', type: 'bars' }}
@@ -215,4 +210,4 @@ const Profile = ({userId: propUserId}) => {
     )
 }
 
-export default Profile
+export default ProfileAuthor

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft, Heart, MessageCircle, Share2, UserPlus, MoreHorizontal, Bookmark, Trash2 } from "lucide-react"
+import { ArrowLeft, Heart, MessageCircle, UserPlus, Trash2 } from "lucide-react"
 import { FaQuoteLeft, FaHeart, FaBookmark } from "react-icons/fa"
 import { BiBook } from "react-icons/bi"
 import { LoadingOverlay } from "@mantine/core"
 import { useSelector } from "react-redux"
 import { getSavedArticles, likeArticle, unlikeArticle } from "../../services/ArticleService"
 import { followUser, unfollowUser, unsaveArticle } from "../../services/UserService"
-import { addComment, getCommentsByArticle, deleteComment } from "../../services/CommentService" 
+import { addComment, getCommentsByArticle, deleteComment } from "../../services/CommentService"
 import { errorNotification, successNotification } from "../../services/NotificationService"
 import profileAvatar from "../../assets/profileAvatar.jpg"
 import { Link } from "react-router-dom";
@@ -17,7 +17,6 @@ const SavedArticles = () => {
     const navigate = useNavigate()
     const [commentInputs, setCommentInputs] = useState({})
     const [postComments, setPostComments] = useState({}) 
-    const [showDropdown, setShowDropdown] = useState(null)
     const [showComments, setShowComments] = useState({})
     const [commentLoading, setCommentLoading] = useState({}) 
     const [deleteCommentLoading, setDeleteCommentLoading] = useState({}) 
@@ -32,7 +31,6 @@ const SavedArticles = () => {
         setLoading(true);
         getSavedArticles()
             .then((data) => {
-                console.log('Articles sauvegardés:', data);
                 setPosts(data.savedArticles || []);
                 setLoading(false);
             })
@@ -72,7 +70,7 @@ const SavedArticles = () => {
         setCommentLoading((prev) => ({ ...prev, [articleId]: true }))
 
         try {
-            const response = await addComment(articleId, content.trim())
+            await addComment(articleId, content.trim())
 
             await loadComments(articleId)
 
@@ -95,7 +93,6 @@ const SavedArticles = () => {
             setShowComments((prev) => ({ ...prev, [articleId]: true }))
 
             successNotification('Succès', 'Commentaire ajouté avec succès')
-            console.log("Commentaire ajouté et liste rechargée pour article:", articleId)
         } catch (err) {
             console.error("Erreur lors de l'ajout du commentaire:", err)
             errorNotification('Erreur', err.response?.data?.error || 'Impossible d\'ajouter le commentaire')
@@ -373,24 +370,6 @@ const SavedArticles = () => {
                                             )}
                                         </button>
 
-                                        {/* <div className="relative">
-                                            <button
-                                                onClick={() => setShowDropdown(showDropdown === poste.article.id ? null : poste.article.id)}
-                                                className="text-[#A09F87] hover:text-white p-1"
-                                            >
-                                                <MoreHorizontal className="w-4 h-4" />
-                                            </button>
-                                            {showDropdown === poste.article.id && (
-                                                <div className="absolute right-0 mt-2 w-32 bg-[#202020] border border-[#4C3163] rounded shadow-lg z-10">
-                                                    <button className="w-full text-left px-3 py-2 text-white hover:bg-[#4C3163] text-sm">
-                                                        Signaler
-                                                    </button>
-                                                    <button className="w-full text-left px-3 py-2 text-white hover:bg-[#4C3163] text-sm">
-                                                        Masquer
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div> */}
                                     </div>
                                 </div>
                             </div>
@@ -467,10 +446,6 @@ const SavedArticles = () => {
                                             <MessageCircle className="w-4 h-4" />
                                             {poste.article.comments}
                                         </button>
-                                        {/* <button className="flex items-center gap-2 text-[#A09F87] hover:text-white transition-colors">
-                                            <Share2 className="w-4 h-4" />
-                                            {poste.article.shares}
-                                        </button> */}
                                     </div>
                                 </div>
 

@@ -4,33 +4,6 @@ import robot from '../../assets/robot.png';
 import { motion } from 'framer-motion';
 import { fadeIn } from '../../Motions/variants';
 
-// import Spline from '@splinetool/react-spline';
-
-// export function Robot() {
-//   return (
-//     <Spline scene="https://prod.spline.design/cR5-Bt1zqpwklbuh/scene.splinecode" />
-//   );
-// }
-
-// import Spline from '@splinetool/react-spline';
-
-// export function AppSpline() {
-//   return (
-//     <Spline scene="https://prod.spline.design/tArGKfoMGH3aCNk3/scene.splinecode" />
-//   );
-// }
-
-import Spline from '@splinetool/react-spline';
-
-export function AppSpline() {
-  return (
-    <Spline scene="https://prod.spline.design/VbFDnYNrBVOXKv9u/scene.splinecode" />
-  );
-}
-
-
-
-
 const Contact = () => {
   return (
     <section id='Contact' className='section text-white border-1 border-white/0'>
@@ -73,9 +46,6 @@ const Contact = () => {
             </motion.div>
           </div>
         </div>
-        {/* <div className='hidden xl:block border-7 border-amber-600 w-1/4 h-[400px]  overflow-hidden'>
-          <AppSpline />
-        </div> */}
       </div>
     </section>
   )

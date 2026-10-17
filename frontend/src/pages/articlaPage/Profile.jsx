@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import ShinyText from "../../blocks/TextAnimations/ShinyText/ShinyText"
 import { PiUser, PiUserCircle, PiCamera, PiPencil, PiCheck, PiX, PiWarning, PiTrash } from "react-icons/pi"
@@ -32,7 +32,6 @@ const Profile = () => {
         setLoading(true);
         getUserProfile(user.id)
             .then((data) => {
-                console.log(data);
                 setUserProfile(data);
                 setEditedUser({
                     id: data.id || "",
@@ -190,8 +189,6 @@ const Profile = () => {
 
             const response = await uploadProfilePicture(formData);
 
-            console.log('Response from backend:', response);
-            console.log('Profile picture URL:', response.profilePictureUrl);
 
             setUserProfile(prev => ({
                 ...prev,

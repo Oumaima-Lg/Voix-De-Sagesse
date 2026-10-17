@@ -1,22 +1,6 @@
 import { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
-import { 
-    AlertTriangle, 
-    Eye, 
-    Check, 
-    X, 
-    Clock, 
-    User, 
-    FileText, 
-    Calendar, 
-    Filter,
-    Search,
-    ChevronLeft,
-    ChevronRight,
-    Tag,
-    BookOpen,
-    Quote
-} from "lucide-react"
+import { AlertTriangle, Eye, Check, X, Clock, Search, ChevronLeft, ChevronRight, Tag, BookOpen, Quote } from "lucide-react"
 import { getAllSignals, processSignal } from "../../services/AdminService"
 import { errorNotification, successNotification } from "../../services/NotificationService"
 

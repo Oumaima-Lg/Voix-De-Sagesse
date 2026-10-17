@@ -1,9 +1,8 @@
 import { useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
-import { ArrowLeft, Send, Tag, User, Quote, BookOpen } from "lucide-react"
+import { ArrowLeft, Send, Tag, Quote, BookOpen } from "lucide-react"
 import { FaQuoteLeft } from "react-icons/fa"
 import { BiBook } from "react-icons/bi"
-import { useSelector } from "react-redux"
 import { createHistoireArticle, createSagesseArticle } from "../../services/ArticleService"
 import { errorNotification, successNotification } from "../../services/NotificationService"
 
@@ -26,7 +25,6 @@ const CreateArticleForm = () => {
   const [formData, setFormData] = useState(form)
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const user = useSelector((state) => state.user)
 
   const handleBack = () => {
     navigate("/articla/nouveauArticle")

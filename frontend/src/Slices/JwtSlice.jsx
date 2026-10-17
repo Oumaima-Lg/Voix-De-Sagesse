@@ -1,6 +1,5 @@
 
 import { createSlice } from "@reduxjs/toolkit";
-import { getItem, setItem, removeItem } from "../services/LocalStorageService";
 
 const initialState = localStorage.getItem("token") || "";
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft, Heart, MessageCircle, Share2, UserPlus, MoreHorizontal, Bookmark, Trash2 } from "lucide-react"
+import { ArrowLeft, Heart, MessageCircle, UserPlus, MoreHorizontal, Bookmark, Trash2 } from "lucide-react"
 import { FaQuoteLeft, FaHeart, FaBookmark } from "react-icons/fa"
 import { BiBook } from "react-icons/bi"
 import { LoadingOverlay } from "@mantine/core"
@@ -15,7 +15,7 @@ import ScrollToTop from "./ScrollToTop"
 import { reportArticle } from "../../services/SignalService"
 import { fileUrl } from "../../config"
 
-const posteFeed = () => {
+const ArticleFeed = () => {
   const navigate = useNavigate()
   const [commentInputs, setCommentInputs] = useState({})
   const [postComments, setPostComments] = useState({})
@@ -45,7 +45,6 @@ const posteFeed = () => {
     setLoading(true)
     DisplayPosts()
       .then((data) => {
-        console.log(data)
         setAllPosts(data)
         setPosts(data)
         setLoading(false)
@@ -71,7 +70,6 @@ const posteFeed = () => {
     try {
       const searchResults = await searchArticles(filters)
       setPosts(searchResults)
-      console.log(`Recherche terminée - ${searchResults.length} résultats trouvés`)
     } catch (error) {
       console.error("Erreur lors de la recherche:", error)
       setPosts(allPosts)
@@ -108,7 +106,7 @@ const posteFeed = () => {
     setCommentLoading((prev) => ({ ...prev, [articleId]: true }))
 
     try {
-      const response = await addComment(articleId, content.trim())
+      await addComment(articleId, content.trim())
       await loadComments(articleId)
 
       setPosts((prev) =>
@@ -142,7 +140,7 @@ const posteFeed = () => {
     setDeleteCommentLoading((prev) => ({ ...prev, [commentId]: true }))
 
     try {
-      const response = await deleteComment(commentId)
+      await deleteComment(commentId)
       setPostComments((prev) => ({
         ...prev,
         [articleId]: prev[articleId]?.filter((comment) => comment.id !== commentId) || [],
@@ -482,9 +480,6 @@ const posteFeed = () => {
                             >
                               Signaler
                             </button>
-                            {/* <button className="w-full text-left px-3 py-2 text-white hover:bg-[#4C3163] text-sm">
-                              Masquer
-                            </button> */}
                           </div>
                         )}
                       </div>
@@ -762,4 +757,4 @@ const posteFeed = () => {
   )
 }
 
-export default posteFeed
+export default ArticleFeed

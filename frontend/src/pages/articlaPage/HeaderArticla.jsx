@@ -3,13 +3,10 @@ import React, { useState } from 'react'
 import arrow from '../../assets/arrow.png';
 import { Link as LinkRouter, useNavigate } from "react-router-dom";
 import vector from '../../assets/Vector.png';
-import oumi from '../../assets/oumi.png';
 import PermIdentityIcon from '@mui/icons-material/PermIdentity';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { useDispatch, useSelector } from 'react-redux';
-import { removeUser } from '../../Slices/UserSlice';
-import MenuBar from "./MenuBar";
+import { useSelector } from 'react-redux';
 import profileAvatar from "../../assets/profileAvatar.jpg"
 import { useAuth } from '../../hooks/useAuth';
 import { fileUrl } from "../../config"
@@ -20,7 +17,6 @@ import { fileUrl } from "../../config"
 const HeaderArticla = () => {
     const navigate = useNavigate();
     const [toggle, setToggle] = useState(false);
-    const dispatch = useDispatch();
     const user = useSelector((state) => state.user);
     const { logout } = useAuth();
 
@@ -52,9 +48,6 @@ const HeaderArticla = () => {
                             </span>
                         </LinkRouter>
                     </div>
-                    {/* <div>
-                        <MenuBar />
-                    </div> */}
                     <div className='text-white flex  items-center xs:gap-6 gap-4 bg-[#202020] pl-4 rounded-l-[8px] relative'>
                         <div>
                             <img src={vector} alt="" className='cursor-pointer hover:scale-110 transform-gpu'

@@ -63,13 +63,11 @@ export const AuthChecker = ({ children }) => {
     let redirectMessage = '';
 
     if (!token && userData) {
-      console.log('AuthChecker: Token removed but user data exists - clearing user and redirecting');
       clearAuth('Token manquant, reconnexion nécessaire');
       redirectMessage = 'Session expirée, veuillez vous reconnecter';
       needsRedirect = true;
     }
     else if (token && !userData) {
-      console.log('AuthChecker: User removed but token exists - clearing token and redirecting');
       clearAuth('Données utilisateur manquantes, reconnexion nécessaire');
       redirectMessage = 'Session expirée, veuillez vous reconnecter';
       needsRedirect = true;
@@ -77,7 +75,6 @@ export const AuthChecker = ({ children }) => {
     else if (token && userData && !user?.id) {
       try {
         const parsedUser = JSON.parse(userData);
-        console.log('AuthChecker: Restoring user to Redux from localStorage');
         dispatch({ type: 'user/setUser', payload: parsedUser });
         dispatch({ type: 'jwt/setJwt', payload: token }); 
       } catch (error) {
@@ -88,13 +85,11 @@ export const AuthChecker = ({ children }) => {
       }
     }
     else if (user?.id && !token) {
-      console.log('AuthChecker: User in Redux but no token - clearing user');
       clearAuth('Incohérence: Utilisateur en Redux sans token');
       redirectMessage = 'Session expirée, veuillez vous reconnecter';
       needsRedirect = true;
     }
     else if (jwt && !token) {
-      console.log('AuthChecker: JWT in Redux but not in localStorage - clearing JWT');
       clearAuth('Incohérence: JWT en Redux sans token dans localStorage');
       redirectMessage = 'Session expirée, veuillez vous reconnecter';
       needsRedirect = true;

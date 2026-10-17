@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Search, Filter, X } from "lucide-react"
 
-const SearchBar = ({ onSearch, onFilterChange, currentFilters }) => {
+const SearchBar = ({ onSearch, currentFilters }) => {
   const [searchText, setSearchText] = useState("")
   const [showFilters, setShowFilters] = useState(false)
   const [selectedType, setSelectedType] = useState(currentFilters?.type || "")

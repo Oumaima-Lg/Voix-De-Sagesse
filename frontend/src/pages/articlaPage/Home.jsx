@@ -2,20 +2,15 @@ import React from 'react'
 
 import Loader from '../../Components/Loader'
 import fireHuman from '../../assets/fireHuman.png'
-import Cube from '../../Components/Cube'
 import Article from '../../assets/Article.png'
-import nvArticle from '../../assets/nvArticle.png'
-import articlePerso from '../../assets/articlePerso.png'
 import { PiArticleLight, PiStarLight } from "react-icons/pi";
 import { IoCreateOutline } from "react-icons/io5";
 import { PiArchiveLight } from "react-icons/pi";
 import ShinyText from '../../blocks/TextAnimations/ShinyText/ShinyText';
 import { Link as LinkRouter } from "react-router-dom";
-import { BiCollapseHorizontal } from "react-icons/bi";
-import Switch from '../../Components/SideButton';
 import { BsLayoutSidebarInset } from "react-icons/bs";
 import { useDisclosure } from '@mantine/hooks';
-import { Drawer, Button, BackgroundImage } from '@mantine/core';
+import { Drawer } from '@mantine/core';
 import { IconXboxX } from '@tabler/icons-react';
 
 
@@ -85,9 +80,6 @@ const Home = () => {
             </div>
 
 
-            {/* <Button variant="default" onClick={open}>
-                Open Drawer
-            </Button> */}
             <Drawer
                 opened={opened}
                 onClose={close}
@@ -181,7 +173,6 @@ const Home = () => {
 
             <div className='w-full pt-10 sm:pt-0  sm:w-5/6 flex flex-col  gap-6 lg:gap-10 px-5'>
                 <div className='pt-5 text-center  text-gradient charm xl:text-6xl text-3xl leading-tight '>
-                    {/* <ShinyText text=" BIENVENUE OUMAIMA LAGHJIBI" disabled={false} speed={3} className='' /> */}
                     <ShinyText text={"BIENVENUE " + user.nom.toUpperCase() + " " + user.prenom.toUpperCase()} disabled={false} speed={3} className='' />
                 </div>
                 <div className='flex lg:flex-row flex-col justify-between size-full'>

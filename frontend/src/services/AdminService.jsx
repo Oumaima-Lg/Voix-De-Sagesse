@@ -1,4 +1,3 @@
-import axios from "axios";
 import axiosInstance from "../Interceptor/AxiosInterceptor";
 
 const base_url = "/admin/";

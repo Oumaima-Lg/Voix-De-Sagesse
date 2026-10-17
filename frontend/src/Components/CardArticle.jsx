@@ -10,7 +10,6 @@ import picExperience4 from '../assets/formes-geometriques-3d-en-arriere-plan-nat
 import picExperience5 from '../assets/rendu-d-une-personne-avec-des-personnalites-differentes.jpg'
 import Tilt from 'react-parallax-tilt';
 import { Carousel } from '@mantine/carousel';
-// import classes from '../semiComponents/module.css'
 
 let citations = [
   {
@@ -179,32 +178,6 @@ let experiences2 = [
   }
 ];
 
-// let experiences2 = [
-//   {
-//     title: 'Les cicatrices invisibles',
-//     content: "Je me souviens du jour où tout a changé. C'était une journée comme une autre, ou du moins, je le croyais. Je me suis réveillée, préparée pour une journée de travail, et j'ai pris mon café habituel. Tout semblait normal, mais quelque chose dans l'air était différent. Une tension que je ne pouvais pas expliquer. Une peur sourde, là, au fond de moi, que je n'avais jamais vraiment remarquée auparavant.",
-//     star: '★ ★ ★ ★ ★ ★',
-//     userName: 'Lina Mine',
-//     userImage: user1,
-//     image: picExperience,
-//   },
-//   {
-//     title: 'Les cicatrices invisibles',
-//     content: "Je me souviens du jour où tout a changé. C'était une journée comme une autre, ou du moins, je le croyais. Je me suis réveillée, préparée pour une journée de travail, et j'ai pris mon café habituel. Tout semblait normal, mais quelque chose dans l'air était différent. Une tension que je ne pouvais pas expliquer. Une peur sourde, là, au fond de moi, que je n'avais jamais vraiment remarquée auparavant.",
-//     star: '★ ★ ★ ★ ★ ★',
-//     userName: 'Lina Mine',
-//     userImage: user1,
-//     image: picExperience,
-//   },
-//   {
-//     title: 'Les cicatrices invisibles',
-//     content: "Je me souviens du jour où tout a changé. C'était une journée comme une autre, ou du moins, je le croyais. Je me suis réveillée, préparée pour une journée de travail, et j'ai pris mon café habituel. Tout semblait normal, mais quelque chose dans l'air était différent. Une tension que je ne pouvais pas expliquer. Une peur sourde, là, au fond de moi, que je n'avais jamais vraiment remarquée auparavant.",
-//     star: '★ ★ ★ ★ ★ ★',
-//     userName: 'Lina Mine',
-//     userImage: user1,
-//     image: picExperience,
-//   },
-// ];
 
 const CitationCard = ({ content, star, emptyStar, user, image }) => (
   <Tilt className="card px-2 pb-6 pt-8 justify-center flex-col gap-y-4">
