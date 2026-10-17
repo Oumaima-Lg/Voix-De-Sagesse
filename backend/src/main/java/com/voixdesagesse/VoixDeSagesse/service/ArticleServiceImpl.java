@@ -249,7 +249,7 @@ public class ArticleServiceImpl implements ArticleService {
         if (likeOperationCache.containsKey(cacheKey)) {
             long lastOperation = likeOperationCache.get(cacheKey);
             if (System.currentTimeMillis() - lastOperation < 1000) {
-                throw new RuntimeException("Opération trop rapide, veuillez patienter");
+                throw new ArticlaException("Opération trop rapide, veuillez patienter");
             }
         }
 
@@ -261,11 +261,11 @@ public class ArticleServiceImpl implements ArticleService {
             Set<Long> likedArticles = currentUser.getLikedArticlesId();
 
             if (likedArticles == null || !likedArticles.contains(articleId)) {
-                throw new RuntimeException("Article pas encore liké");
+                throw new ArticlaException("Article pas encore liké");
             }
 
             Article article = articleRepository.findById(articleId)
-                    .orElseThrow(() -> new RuntimeException("Article not found"));
+                    .orElseThrow(() -> new ArticlaException("Article introuvable"));
 
             Long authorId = article.getUserId();
 

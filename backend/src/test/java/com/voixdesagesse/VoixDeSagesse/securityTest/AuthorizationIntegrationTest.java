@@ -92,10 +92,9 @@ class AuthorizationIntegrationTest {
     @Test
     @DisplayName("Supprimer : impossible de supprimer l'article d'un autre utilisateur")
     void cannotDeleteSomeoneElsesArticle() throws Exception {
-        int status = mvc.perform(delete("/articles/" + ALICE_ARTICLE_ID).with(as(BOB_ID)))
-            .andReturn().getResponse().getStatus();
+        mvc.perform(delete("/articles/" + ALICE_ARTICLE_ID).with(as(BOB_ID)))
+            .andExpect(status().isBadRequest());
 
-        assertTrue(status >= 400, "expected an error status, got " + status);
         assertTrue(articleRepository.existsById(ALICE_ARTICLE_ID));
     }
 
@@ -130,8 +129,8 @@ class AuthorizationIntegrationTest {
             .andExpect(status().isForbidden());
         mvc.perform(get("/admin/users").with(as(BOB_ID)))
             .andExpect(status().isForbidden());
-        int status = mvc.perform(get("/signals/pending").with(as(BOB_ID))).andReturn().getResponse().getStatus();
-        assertTrue(status >= 400, "the old user-facing moderation endpoint must be gone, got " + status);
+        mvc.perform(get("/signals/pending").with(as(BOB_ID)))
+            .andExpect(status().isNotFound());
     }
 
     @Test

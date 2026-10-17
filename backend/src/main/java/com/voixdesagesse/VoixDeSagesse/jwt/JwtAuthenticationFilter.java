@@ -46,9 +46,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 username = this.jwtHelper.extractUsername(token);
             } catch (IllegalArgumentException e) {
-                log.warn("Illegal Argument while fetching username for token: {}", token.substring(0, 10) + "...");
+                log.debug("Unreadable JWT");
             } catch (ExpiredJwtException e) {
-                log.warn("JWT token is expired for user: {}", e.getClaims().getSubject());
+                log.debug("Expired JWT");
            
             } catch (MalformedJwtException e) {
                  log.warn("Malformed JWT token detected");
@@ -57,7 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 log.debug("Authorization header is missing or invalid");
             }
         } else {
-            log.info("Invalid Header Value !! ");
+            log.trace("No bearer token on {}", request.getRequestURI());
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

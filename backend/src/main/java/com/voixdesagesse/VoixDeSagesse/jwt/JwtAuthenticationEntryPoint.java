@@ -1,13 +1,16 @@
 package com.voixdesagesse.VoixDeSagesse.jwt;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.time.LocalDateTime;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.voixdesagesse.VoixDeSagesse.utility.ErrorInfo;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +20,12 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+    private final ObjectMapper objectMapper;
+
+    public JwtAuthenticationEntryPoint(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
     
     private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationEntryPoint.class);
 
@@ -24,24 +33,13 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response, 
                         AuthenticationException authException) throws IOException, ServletException {
         
-        log.warn("Unauthorized access attempt to {} from IP: {} - Reason: {}", 
-                request.getRequestURI(), 
-                request.getRemoteAddr(),
-                authException.getMessage());
-        
+        log.debug("Unauthenticated request to {}", request.getRequestURI());
+
+        // Same shape as the other API errors (see ExceptionControllerAdvice).
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-
-        String jsonResponse = String.format(
-            "{\"error\": \"Unauthorized\", \"message\": \"%s\", \"status\": 401, \"timestamp\": \"%s\", \"path\": \"%s\"}", 
-            authException.getMessage(),
-            java.time.Instant.now().toString(),
-            request.getRequestURI()
-        );
-        
-        PrintWriter writer = response.getWriter();
-        writer.write(jsonResponse);
-        writer.flush();
+        objectMapper.writeValue(response.getWriter(),
+                new ErrorInfo("Authentification requise.", HttpServletResponse.SC_UNAUTHORIZED, LocalDateTime.now()));
     }
 }

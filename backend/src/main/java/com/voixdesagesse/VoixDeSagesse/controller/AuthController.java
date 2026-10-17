@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.validation.annotation.Validated;
@@ -73,12 +72,7 @@ public class AuthController {
         } catch (BadCredentialsException e) {
             loginAttemptService.loginFailed(attemptKey);
             log.warn("Failed login attempt from {}", httpRequest.getRemoteAddr());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body("Invalid credentials");
-        } catch (AuthenticationException e) {
-            log.error("Authentication error for email: {}", request.getEmail(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Authentication failed");
+            throw new ArticlaException("INVALID_CREDENTIALS");
         }
     }
 
