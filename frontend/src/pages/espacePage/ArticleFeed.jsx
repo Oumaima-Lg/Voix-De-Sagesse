@@ -502,9 +502,8 @@ const ArticleFeed = () => {
                 {poste.article.type === "SAGESSE" ? (
                   <div className="space-y-3">
                     <blockquote className="text-white text-lg italic leading-relaxed border-l-4 border-[#A09F87] pl-4">
-                      "{poste.article.content} s"
+                      "{poste.article.content}"
                     </blockquote>
-                    {poste.username && <p className="text-[#A09F87] text-right">— {poste.user.username}</p>}
                     {poste.article.source && <p className="text-gray-400 text-sm">{poste.article.source}</p>}
                   </div>
                 ) : (
@@ -596,7 +595,7 @@ const ArticleFeed = () => {
                               <span className="text-[#A09F87] text-xs">@{comment.user.username}</span>
                               <span className="text-gray-400 text-xs">• {comment.createdAt}</span>
 
-                              {comment.user.id === user.id && (
+                              {(comment.user.id === user.id || poste.user.id === user.id) && (
                                 <button
                                   onClick={() => handleDeleteComment(comment.id, poste.article.id)}
                                   disabled={deleteCommentLoading[comment.id]}

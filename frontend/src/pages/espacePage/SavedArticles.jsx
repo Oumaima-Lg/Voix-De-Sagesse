@@ -392,8 +392,7 @@ const SavedArticles = () => {
                                         <blockquote className="text-white text-lg italic leading-relaxed border-l-4 border-[#A09F87] pl-4">
                                             "{poste.article.content}"
                                         </blockquote>
-                                        {poste.username && <p className="text-[#A09F87] text-right">— {poste.user.username}</p>}
-                                        {poste.article.source && <p className="text-gray-400 text-sm">{poste.article.source}</p>}
+                                                                                {poste.article.source && <p className="text-gray-400 text-sm">{poste.article.source}</p>}
                                     </div>
                                 ) : (
                                     <div className="space-y-4">

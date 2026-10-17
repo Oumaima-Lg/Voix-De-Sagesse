@@ -21,9 +21,6 @@ public interface CommentRepository extends MongoRepository<Comment, Long> {
     @Query("{ 'userId': ?0, 'isDeleted': { $ne: true } }")
     List<Comment> findByUserIdAndIsDeletedFalse(Long userId);
     
-    @Query("{ 'id': ?0, 'userId': ?1, 'isDeleted': { $ne: true } }")
-    Comment findByIdAndUserIdAndIsDeletedFalse(Long commentId, Long userId);
-    
     @Query("{ 'articleId': ?0 }")
     List<Comment> findByArticleId(Long articleId);
 

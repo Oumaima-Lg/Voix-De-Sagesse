@@ -78,20 +78,22 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void deleteComment(Long commentId, Long userId) throws VoixDeSagesseException {
-        Comment comment = commentRepository.findByIdAndUserIdAndIsDeletedFalse(commentId, userId);
-        if (comment == null) {
-            throw new VoixDeSagesseException("Commentaire introuvable ou vous n'êtes pas autorisé à le supprimer");
-        }
-        comment.setIsDeleted(true);
-        commentRepository.save(comment);
-
+        Comment comment = commentRepository.findById(commentId)
+                .filter(c -> !Boolean.TRUE.equals(c.getIsDeleted()))
+                .orElseThrow(() -> new VoixDeSagesseException("Commentaire introuvable"));
         Article article = articleRepository.findById(comment.getArticleId())
                 .orElseThrow(() -> new VoixDeSagesseException("Article introuvable"));
+
+        // A comment can be deleted by its author or by the author of the article it was posted on.
+        if (!comment.getUserId().equals(userId) && article.getUserId() != userId)
+            throw new VoixDeSagesseException("Vous n'êtes pas autorisé à supprimer ce commentaire");
+
+        comment.setIsDeleted(true);
+        commentRepository.save(comment);
 
         article.setComments(Math.max(0, article.getComments() - 1));
         articleRepository.save(article);
 
-        System.out.println("Commentaire supprimé: " + commentId + " par utilisateur: " + userId);
     }
 
     @Scheduled(cron = "0 0 2 * * ?")
