@@ -93,7 +93,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErrorInfo> handleUploadTooLarge(MaxUploadSizeExceededException exception) {
-        return error(HttpStatus.PAYLOAD_TOO_LARGE, "Le fichier ne doit pas dépasser 5 Mo.");
+        return error(HttpStatus.CONTENT_TOO_LARGE, "Le fichier ne doit pas dépasser 5 Mo.");
     }
 
     @ExceptionHandler(Exception.class)

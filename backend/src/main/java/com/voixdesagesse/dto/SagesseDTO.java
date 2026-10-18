@@ -35,7 +35,7 @@ public class SagesseDTO {
     
     // Set by the server from the JWT, never taken from the request body.
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private long userId;
+    private Long userId;
 
     public Article toEntity() {
         Article article = new Article();

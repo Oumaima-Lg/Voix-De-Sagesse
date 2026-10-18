@@ -21,7 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -150,7 +150,7 @@ class AuthorizationIntegrationTest {
         String json = mvc.perform(post("/comments/article/" + ALICE_ARTICLE_ID).with(as(authorId))
                 .contentType(MediaType.APPLICATION_JSON).content("{\"content\":\"Un commentaire\"}"))
             .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        return new com.fasterxml.jackson.databind.ObjectMapper().readTree(json).get("comment").get("id").asLong();
+        return new tools.jackson.databind.json.JsonMapper().readTree(json).get("comment").get("id").asLong();
     }
 
     @Test

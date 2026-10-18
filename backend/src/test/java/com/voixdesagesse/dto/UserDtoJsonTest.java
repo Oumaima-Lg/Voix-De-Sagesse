@@ -7,11 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 class UserDtoJsonTest {
 
-    private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+    private final JsonMapper mapper = new JsonMapper();
 
     @Test
     @DisplayName("Le hash du mot de passe n'est jamais sérialisé dans les réponses")

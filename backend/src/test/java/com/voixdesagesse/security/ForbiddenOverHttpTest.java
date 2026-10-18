@@ -15,7 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+
 import com.voixdesagesse.dto.AccountType;
 import com.voixdesagesse.entity.User;
 import com.voixdesagesse.repository.UserRepository;
@@ -56,13 +57,13 @@ class ForbiddenOverHttpTest {
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString("{\"email\":\"forbidden@test.local\",\"password\":\"Secret123!\"}"))
                 .build(), HttpResponse.BodyHandlers.ofString());
-        String jwt = objectMapper.readTree(login.body()).get("jwt").asText();
+        String jwt = objectMapper.readTree(login.body()).get("jwt").asString();
 
         HttpResponse<String> admin = client.send(HttpRequest.newBuilder(uri("/admin/users"))
                 .header("Authorization", "Bearer " + jwt).GET().build(), HttpResponse.BodyHandlers.ofString());
 
         assertEquals(403, admin.statusCode());
-        assertEquals("Accès refusé.", objectMapper.readTree(admin.body()).get("errorMessage").asText());
+        assertEquals("Accès refusé.", objectMapper.readTree(admin.body()).get("errorMessage").asString());
     }
 
     private URI uri(String path) {
