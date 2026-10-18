@@ -14,7 +14,7 @@ public interface SignalService {
 
     List<SignalDTO> getPendingSignals() throws VoixDeSagesseException;
 
-    SignalDTO processSignal(Long signalId, SignalStatus status, String adminComment, Long adminId) throws VoixDeSagesseException, Exception;
+    SignalDTO processSignal(Long signalId, SignalStatus status, String adminComment, Long adminId) throws VoixDeSagesseException;
 
     long getTotalSignals();
 

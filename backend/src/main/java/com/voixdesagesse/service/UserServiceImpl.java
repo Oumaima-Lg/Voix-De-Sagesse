@@ -17,9 +17,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailException;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,6 +32,7 @@ import com.voixdesagesse.dto.UserProfileDTO;
 import com.voixdesagesse.dto.UserRegistrationDTO;
 import com.voixdesagesse.entity.Article;
 import com.voixdesagesse.mail.EmailTemplates;
+import com.voixdesagesse.mail.MailService;
 import com.voixdesagesse.entity.OTP;
 import com.voixdesagesse.entity.PendingRegistration;
 import com.voixdesagesse.entity.User;
@@ -46,8 +44,6 @@ import com.voixdesagesse.repository.SignalRepository;
 import com.voixdesagesse.repository.UserRepository;
 import com.voixdesagesse.utility.Utilities;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,9 +63,6 @@ public class UserServiceImpl implements UserService {
     private static final int OTP_MAX_ATTEMPTS = 5;
     private static final long OTP_RESEND_DELAY_SECONDS = 60;
 
-    @Value("${app.mail.from}")
-    private String mailFrom;
-
     @Value("${file.upload-dir:uploads/profile-pictures}")
     private String uploadDir;
 
@@ -77,7 +70,7 @@ public class UserServiceImpl implements UserService {
     private final OTPRepository otpRepository;
     private final PendingRegistrationRepository pendingRegistrationRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JavaMailSender mailSender;
+    private final MailService mailService;
     private final CommonService commonService;
     private final SignalRepository signalRepository;
     private final ArticleRepository articleRepository;
@@ -107,7 +100,7 @@ public class UserServiceImpl implements UserService {
                 passwordEncoder.encode(userDTO.getMotdepasse()), code, LocalDateTime.now(), 0);
         pendingRegistrationRepository.save(pending);
         try {
-            sendHtmlEmail(email, "Confirmez votre inscription - Voix De Sagesse",
+            mailService.sendHtml(email, "Confirmez votre inscription - Voix De Sagesse",
                     EmailTemplates.registrationCode(code, pending.getNom(), pending.getPrenom()));
         } catch (VoixDeSagesseException e) {
             // Without the email the code is useless: let the user try again right away.
@@ -176,29 +169,13 @@ public class UserServiceImpl implements UserService {
         OTP otp = new OTP(email, genOtp, LocalDateTime.now());
         otpRepository.save(otp);
         try {
-            sendHtmlEmail(email, "Votre code de vérification - Voix De Sagesse",
+            mailService.sendHtml(email, "Votre code de vérification - Voix De Sagesse",
                     EmailTemplates.otpCode(genOtp, user.getNom(), user.getPrenom()));
         } catch (VoixDeSagesseException e) {
             otpRepository.delete(otp);
             throw e;
         }
         return true;
-    }
-
-    // Any sending failure is reported to the client as MAIL_FAILED; the details stay in the logs.
-    private void sendHtmlEmail(String to, String subject, String html) throws VoixDeSagesseException {
-        try {
-            MimeMessage mm = mailSender.createMimeMessage();
-            MimeMessageHelper message = new MimeMessageHelper(mm, true);
-            message.setTo(to);
-            message.setSubject(subject);
-            message.setText(html, true);
-            message.setFrom(mailFrom);
-            mailSender.send(mm);
-        } catch (MessagingException | MailException e) {
-            log.error("Could not send email", e);
-            throw new VoixDeSagesseException("MAIL_FAILED");
-        }
     }
 
     @Override

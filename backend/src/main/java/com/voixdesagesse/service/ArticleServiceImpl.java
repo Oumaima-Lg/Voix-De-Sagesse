@@ -12,11 +12,13 @@ import com.voixdesagesse.dto.HistoireDTO;
 import com.voixdesagesse.dto.PostInteractionDTO;
 import com.voixdesagesse.dto.PosteDTO;
 import com.voixdesagesse.dto.SagesseDTO;
+import com.voixdesagesse.dto.SignalStatus;
 import com.voixdesagesse.dto.UserProfileDTO;
 import com.voixdesagesse.entity.Article;
 import com.voixdesagesse.entity.User;
 import com.voixdesagesse.exception.VoixDeSagesseException;
 import com.voixdesagesse.repository.ArticleRepository;
+import com.voixdesagesse.repository.SignalRepository;
 import com.voixdesagesse.utility.Utilities;
 
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,8 @@ public class ArticleServiceImpl implements ArticleService {
     private final UserService userService;
 
     private final CommonService commonService;
+
+    private final SignalRepository signalRepository;
 
 
     @Override
@@ -223,6 +227,8 @@ public class ArticleServiceImpl implements ArticleService {
         userService.decrementContentCount(currentUserId);
         commonService.deleteAllCommentsByArticle(articleId);
         articleRepository.deleteById(articleId);
+        // Reports still waiting on it have nothing left to review (when the admin deletes it, they are already settled).
+        signalRepository.settlePendingByArticleId(articleId, SignalStatus.CLOSED, LocalDateTime.now(), null);
 
         log.info("Article supprimé - ID: %d, Likes: %d, Commentaires: %d, Partages: %d%n",
                 articleId, likesCount, commentsCount, sharesCount);

@@ -48,6 +48,7 @@ public class GlobalExceptionHandler {
             Map.entry("ALREADY_FOLLOWING", HttpStatus.CONFLICT),
             Map.entry("NOT_FOLLOWING", HttpStatus.CONFLICT),
             Map.entry("ALREADY_REPORTED", HttpStatus.CONFLICT),
+            Map.entry("SIGNAL_ALREADY_PROCESSED", HttpStatus.CONFLICT),
             Map.entry("OTP_TOO_SOON", HttpStatus.TOO_MANY_REQUESTS),
             Map.entry("LOGIN_BLOCKED", HttpStatus.TOO_MANY_REQUESTS),
             Map.entry("MAIL_FAILED", HttpStatus.SERVICE_UNAVAILABLE));

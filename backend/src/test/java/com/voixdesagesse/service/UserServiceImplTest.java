@@ -4,11 +4,11 @@ import com.voixdesagesse.entity.OTP;
 import com.voixdesagesse.entity.PendingRegistration;
 import com.voixdesagesse.entity.User;
 import com.voixdesagesse.exception.VoixDeSagesseException;
+import com.voixdesagesse.mail.MailService;
 import com.voixdesagesse.repository.OTPRepository;
 import com.voixdesagesse.repository.PendingRegistrationRepository;
 import com.voixdesagesse.repository.UserRepository;
 import com.voixdesagesse.utility.Utilities;
-import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -19,8 +19,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mail.MailSendException;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -52,10 +50,7 @@ public class UserServiceImplTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private JavaMailSender mailSender;
-
-    @Mock
-    private MimeMessage mimeMessage;
+    private MailService mailService;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -80,7 +75,6 @@ public class UserServiceImplTest {
         registrationDTO.setMotdepasse("Password123!");
         registrationDTO.setAccountType(AccountType.USER);
 
-        ReflectionTestUtils.setField(userService, "mailFrom", "no-reply@test.local");
 
     }
 
@@ -89,7 +83,6 @@ public class UserServiceImplTest {
     void testStartRegistrationSendsCodeOnly() throws VoixDeSagesseException {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
-        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
 
         userService.startRegistration(registrationDTO);
 
@@ -97,41 +90,40 @@ public class UserServiceImplTest {
         verify(pendingRegistrationRepository).save(pending.capture());
         assertEquals("encodedPassword", pending.getValue().getMotdepasse());
         assertTrue(pending.getValue().getOtpCode().matches("[0-9]{6}"));
-        verify(mailSender).send(any(MimeMessage.class));
+        verify(mailService).sendHtml(eq("test@example.com"), anyString(), anyString());
         verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
     @DisplayName("Inscription - email déjà utilisé : aucun code envoyé")
-    void testStartRegistrationUserAlreadyExists() {
+    void testStartRegistrationUserAlreadyExists() throws Exception {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
             () -> userService.startRegistration(registrationDTO));
         assertEquals("USER_FOUND", exception.getMessage());
         verify(pendingRegistrationRepository, never()).save(any(PendingRegistration.class));
-        verify(mailSender, never()).send(any(MimeMessage.class));
+        verify(mailService, never()).sendHtml(anyString(), anyString(), anyString());
     }
 
     @Test
     @DisplayName("Inscription - refusée si un code a été envoyé il y a moins d'une minute")
-    void testStartRegistrationTooSoon() {
+    void testStartRegistrationTooSoon() throws Exception {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         when(pendingRegistrationRepository.findById(anyString())).thenReturn(Optional.of(pending(LocalDateTime.now().minusSeconds(20), 0)));
 
         VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
             () -> userService.startRegistration(registrationDTO));
         assertEquals("OTP_TOO_SOON", exception.getMessage());
-        verify(mailSender, never()).send(any(MimeMessage.class));
+        verify(mailService, never()).sendHtml(anyString(), anyString(), anyString());
     }
 
     @Test
     @DisplayName("Inscription - si l'email ne part pas, l'inscription en attente est supprimée")
-    void testStartRegistrationMailFailure() {
+    void testStartRegistrationMailFailure() throws Exception {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
-        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-        doThrow(new MailSendException("SMTP down")).when(mailSender).send(any(MimeMessage.class));
+        doThrow(new VoixDeSagesseException("MAIL_FAILED")).when(mailService).sendHtml(anyString(), anyString(), anyString());
 
         VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
             () -> userService.startRegistration(registrationDTO));
@@ -204,7 +196,6 @@ public class UserServiceImplTest {
     void testSendOtpSuccess() throws Exception {
         // Given
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
-        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
         when(otpRepository.save(any(OTP.class))).thenReturn(new OTP());
 
         try (MockedStatic<Utilities> utilities = mockStatic(Utilities.class)) {
@@ -216,7 +207,7 @@ public class UserServiceImplTest {
             // Then
             assertTrue(result);
             verify(otpRepository).save(any(OTP.class));
-            verify(mailSender).send(any(MimeMessage.class));
+            verify(mailService).sendHtml(eq("test@example.com"), anyString(), anyString());
         }
     }
 
@@ -227,19 +218,19 @@ public class UserServiceImplTest {
 
         assertTrue(userService.sendOtp("unknown@example.com"));
         verify(otpRepository, never()).save(any(OTP.class));
-        verify(mailSender, never()).send(any(MimeMessage.class));
+        verify(mailService, never()).sendHtml(anyString(), anyString(), anyString());
     }
 
     @Test
     @DisplayName("Envoi OTP - refusé si un code a été envoyé il y a moins d'une minute")
-    void testSendOtpTooSoon() {
+    void testSendOtpTooSoon() throws Exception {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(otpRepository.findById(anyString()))
             .thenReturn(Optional.of(new OTP("test@example.com", "123456", LocalDateTime.now().minusSeconds(20))));
 
         VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class, () -> userService.sendOtp("test@example.com"));
         assertEquals("OTP_TOO_SOON", exception.getMessage());
-        verify(mailSender, never()).send(any(MimeMessage.class));
+        verify(mailService, never()).sendHtml(anyString(), anyString(), anyString());
     }
 
     @Test
