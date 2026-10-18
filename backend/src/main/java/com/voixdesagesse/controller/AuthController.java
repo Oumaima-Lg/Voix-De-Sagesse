@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.voixdesagesse.dto.OtpRequest;
 import com.voixdesagesse.dto.OtpVerificationResponse;
 import com.voixdesagesse.dto.ResetPasswordRequest;
@@ -32,6 +36,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@Tag(name = "Authentification")
+// Public routes: no JWT needed.
+@SecurityRequirements
 @RestController
 @Validated
 @RequestMapping("/auth")
@@ -49,6 +56,7 @@ public class AuthController {
     private final UserService userService;
     private final LoginAttemptService loginAttemptService;
 
+    @Operation(summary = "Se connecter : renvoie un jeton JWT")
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody @Valid AuthenticationRequest request,
             HttpServletRequest httpRequest) throws VoixDeSagesseException {
@@ -76,6 +84,7 @@ public class AuthController {
     }
 
     // Step 1: emails a code. Nothing is created in `users` yet.
+    @Operation(summary = "Inscription, étape 1 : envoie un code par email")
     @PostMapping("/register")
     public ResponseEntity<ResponseDTO> registerUser(@RequestBody @Valid UserRegistrationDTO registerDTO)
             throws VoixDeSagesseException {
@@ -83,18 +92,21 @@ public class AuthController {
     }
 
     // Step 2: the code proves the address belongs to the user; the account is created.
+    @Operation(summary = "Inscription, étape 2 : vérifie le code et crée le compte")
     @PostMapping("/register/verify")
     public ResponseEntity<UserRegistrationDTO> confirmRegistration(@RequestBody @Valid VerifyOtpRequest request)
             throws VoixDeSagesseException {
         return new ResponseEntity<>(userService.confirmRegistration(request.email(), request.otp()), HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Mot de passe oublié, étape 3 : enregistre le nouveau mot de passe")
     @PostMapping("/password/reset")
     public ResponseEntity<ResponseDTO> changePassword(@RequestBody @Valid ResetPasswordRequest request)
             throws VoixDeSagesseException {
         return ResponseEntity.ok(userService.changePassword(request));
     }
 
+    @Operation(summary = "Mot de passe oublié, étape 1 : envoie un code par email")
     @PostMapping("/password/otp")
     public ResponseEntity<ResponseDTO> sendOtp(@RequestBody @Valid OtpRequest request) throws VoixDeSagesseException {
         userService.sendOtp(request.email());
@@ -102,6 +114,7 @@ public class AuthController {
     }
 
     // POST so the code never ends up in URLs or access logs.
+    @Operation(summary = "Mot de passe oublié, étape 2 : vérifie le code")
     @PostMapping("/password/otp/verify")
     public ResponseEntity<OtpVerificationResponse> verifyOtp(@RequestBody @Valid VerifyOtpRequest request)
             throws VoixDeSagesseException {
