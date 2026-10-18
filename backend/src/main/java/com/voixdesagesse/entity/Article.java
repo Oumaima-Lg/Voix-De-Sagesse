@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.voixdesagesse.dto.ArticleType;
 import com.voixdesagesse.dto.CategoryType;
+import com.voixdesagesse.utility.Utilities;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -40,4 +41,8 @@ public class Article {
      
     private long userId;
 
+    // How the article is named in emails and notifications: its title, or the start of its text (wisdoms have no title).
+    public String label() {
+        return title != null && !title.isBlank() ? title : Utilities.excerpt(content, 60);
+    }
 }

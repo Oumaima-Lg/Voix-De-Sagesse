@@ -31,6 +31,8 @@ public class CommentServiceImpl implements CommentService {
 
     private final UserService userService;
 
+    private final NotificationService notificationService;
+
     @Override
     public CommentDTO addComment(Long articleId, Long userId, String content) throws VoixDeSagesseException {
         Article article = articleRepository.findById(articleId)
@@ -51,6 +53,7 @@ public class CommentServiceImpl implements CommentService {
 
         article.setComments(article.getComments() + 1);
         articleRepository.save(article);
+        notificationService.articleCommented(article, savedComment);
 
         return convertToDTO(savedComment, user);
     }
@@ -90,6 +93,7 @@ public class CommentServiceImpl implements CommentService {
 
         comment.setIsDeleted(true);
         commentRepository.save(comment);
+        notificationService.commentDeleted(commentId);
 
         article.setComments(Math.max(0, article.getComments() - 1));
         articleRepository.save(article);

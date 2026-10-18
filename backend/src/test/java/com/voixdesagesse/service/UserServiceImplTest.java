@@ -52,6 +52,9 @@ public class UserServiceImplTest {
     @Mock
     private MailService mailService;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private UserServiceImpl userService;
 

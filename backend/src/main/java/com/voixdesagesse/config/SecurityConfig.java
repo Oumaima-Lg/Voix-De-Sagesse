@@ -67,7 +67,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/uploads/profile-pictures/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/articles/**", "/comments/**", "/users/**", "/signals/**").hasAuthority("ROLE_USER")
+                        .requestMatchers("/articles/**", "/comments/**", "/users/**", "/signals/**", "/notifications/**").hasAuthority("ROLE_USER")
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

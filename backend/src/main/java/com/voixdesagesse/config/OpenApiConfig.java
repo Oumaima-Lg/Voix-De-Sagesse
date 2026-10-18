@@ -35,6 +35,7 @@ public class OpenApiConfig {
                         new Tag().name("Articles").description("Publier, lire, aimer et rechercher des articles."),
                         new Tag().name("Commentaires").description("Commenter les articles."),
                         new Tag().name("Utilisateurs").description("Profil, abonnements et favoris."),
+                        new Tag().name("Notifications").description("Réactions des autres utilisateurs et décisions de modération."),
                         new Tag().name("Signalements").description("Signaler un article inapproprié."),
                         new Tag().name("Administration").description("Réservé aux comptes ADMIN.")));
     }
