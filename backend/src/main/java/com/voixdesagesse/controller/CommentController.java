@@ -3,7 +3,6 @@ package com.voixdesagesse.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,89 +36,39 @@ public class CommentController {
     
     @Operation(summary = "Commenter un article")
     @PostMapping("/article/{articleId}")
-    public ResponseEntity<?> addComment(@PathVariable Long articleId, @RequestBody Map<String, String> request) {
-        try {
-            User currentUser = userService.getCurrentUser();
-            String content = request.get("content");
-            
-            if (content == null || content.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of(
-                    "error", "Le contenu du commentaire est requis",
-                    "success", false
-                ));
-            }
-            
-            CommentDTO comment = commentService.addComment(articleId, currentUser.getId(), content);
-            
-            return ResponseEntity.ok(Map.of(
-                "comment", comment,
-                "message", "Commentaire ajouté avec succès",
-                "success", true
-            ));
-            
-        } catch (VoixDeSagesseException e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "error", e.getMessage(),
-                "success", false
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                "error", "Erreur interne du serveur",
-                "success", false
-            ));
-        }
+    public ResponseEntity<?> addComment(@PathVariable Long articleId, @RequestBody Map<String, String> request)
+            throws VoixDeSagesseException {
+        User currentUser = userService.getCurrentUser();
+        CommentDTO comment = commentService.addComment(articleId, currentUser.getId(), request.get("content"));
+
+        return ResponseEntity.ok(Map.of(
+            "comment", comment,
+            "message", "Commentaire ajouté avec succès",
+            "success", true
+        ));
     }
-    
+
     @Operation(summary = "Commentaires d'un article")
     @GetMapping("/article/{articleId}")
-    public ResponseEntity<?> getCommentsByArticle(@PathVariable Long articleId) {
-        try {
-            List<CommentDTO> comments = commentService.getCommentsByArticle(articleId);
-            
-            return ResponseEntity.ok(Map.of(
-                "comments", comments,
-                "count", comments.size(),
-                "success", true
-            ));
-            
-        } catch (VoixDeSagesseException e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "error", e.getMessage(),
-                "success", false
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                "error", "Erreur interne du serveur",
-                "success", false
-            ));
-        }
+    public ResponseEntity<?> getCommentsByArticle(@PathVariable Long articleId) throws VoixDeSagesseException {
+        List<CommentDTO> comments = commentService.getCommentsByArticle(articleId);
+
+        return ResponseEntity.ok(Map.of(
+            "comments", comments,
+            "count", comments.size(),
+            "success", true
+        ));
     }
-    
 
     @Operation(summary = "Supprimer un commentaire (par son auteur ou l'auteur de l'article)")
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<?> deleteComment(@PathVariable Long commentId) {
-        try {
-            User currentUser = userService.getCurrentUser();
-            commentService.deleteComment(commentId, currentUser.getId());
-            
-            return ResponseEntity.ok(Map.of(
-                "message", "Commentaire supprimé avec succès",
-                "success", true
-            ));
-            
-        } catch (VoixDeSagesseException e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "error", e.getMessage(),
-                "success", false
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                "error", "Erreur interne du serveur",
-                "success", false
-            ));
-        }
-    }
-    
+    public ResponseEntity<?> deleteComment(@PathVariable Long commentId) throws VoixDeSagesseException {
+        User currentUser = userService.getCurrentUser();
+        commentService.deleteComment(commentId, currentUser.getId());
 
+        return ResponseEntity.ok(Map.of(
+            "message", "Commentaire supprimé avec succès",
+            "success", true
+        ));
+    }
 }

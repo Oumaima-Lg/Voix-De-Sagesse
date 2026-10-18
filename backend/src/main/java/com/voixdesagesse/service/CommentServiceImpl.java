@@ -34,15 +34,15 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentDTO addComment(Long articleId, Long userId, String content) throws VoixDeSagesseException {
         Article article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new VoixDeSagesseException("Article introuvable"));
+                .orElseThrow(() -> new VoixDeSagesseException("ARTICLE_NOT_FOUND"));
 
         User user = userService.getUserById(userId);
         if (content == null || content.trim().isEmpty()) {
-            throw new VoixDeSagesseException("Le commentaire ne peut pas être vide");
+            throw new VoixDeSagesseException("COMMENT_EMPTY");
         }
 
         if (content.trim().length() > 500) {
-            throw new VoixDeSagesseException("Le commentaire ne peut pas dépasser 500 caractères");
+            throw new VoixDeSagesseException("COMMENT_TOO_LONG");
         }
 
         Comment comment = new Comment(articleId, userId, content.trim());
@@ -58,7 +58,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<CommentDTO> getCommentsByArticle(Long articleId) throws VoixDeSagesseException {
         if (!articleRepository.existsById(articleId)) {
-            throw new VoixDeSagesseException("Article introuvable");
+            throw new VoixDeSagesseException("ARTICLE_NOT_FOUND");
         }
 
         List<Comment> comments = commentRepository.findByArticleIdAndIsDeletedFalse(articleId);
@@ -80,13 +80,13 @@ public class CommentServiceImpl implements CommentService {
     public void deleteComment(Long commentId, Long userId) throws VoixDeSagesseException {
         Comment comment = commentRepository.findById(commentId)
                 .filter(c -> !Boolean.TRUE.equals(c.getIsDeleted()))
-                .orElseThrow(() -> new VoixDeSagesseException("Commentaire introuvable"));
+                .orElseThrow(() -> new VoixDeSagesseException("COMMENT_NOT_FOUND"));
         Article article = articleRepository.findById(comment.getArticleId())
-                .orElseThrow(() -> new VoixDeSagesseException("Article introuvable"));
+                .orElseThrow(() -> new VoixDeSagesseException("ARTICLE_NOT_FOUND"));
 
         // A comment can be deleted by its author or by the author of the article it was posted on.
         if (!comment.getUserId().equals(userId) && article.getUserId() != userId)
-            throw new VoixDeSagesseException("Vous n'êtes pas autorisé à supprimer ce commentaire");
+            throw new VoixDeSagesseException("COMMENT_DELETE_FORBIDDEN");
 
         comment.setIsDeleted(true);
         commentRepository.save(comment);
