@@ -10,8 +10,16 @@ const loginUser = async (user) => {
         .catch(error => { throw error; });
 };
 
+// Sign-up step 1: emails a 6-digit code. The account only exists once the code is confirmed.
 const registerUser = async (user) => {
     return axios.post(`${base_url}register`, user)
+        .then(res => res.data)
+        .catch(error => { throw error; });
+};
+
+// Sign-up step 2: creates the account.
+const verifyRegistration = async (email, otp) => {
+    return axios.post(`${base_url}register/verify`, { email, otp })
         .then(res => res.data)
         .catch(error => { throw error; });
 };
@@ -36,4 +44,4 @@ const changePass=async(email, resetToken, newPassword) => {
 }
 
 
-export { loginUser, registerUser, sendOtp, verifyOtp, changePass };
+export { loginUser, registerUser, verifyRegistration, sendOtp, verifyOtp, changePass };
