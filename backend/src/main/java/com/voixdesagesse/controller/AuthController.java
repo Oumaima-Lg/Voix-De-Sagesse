@@ -75,11 +75,18 @@ public class AuthController {
         }
     }
 
+    // Step 1: emails a code. Nothing is created in `users` yet.
     @PostMapping("/register")
-    public ResponseEntity<UserRegistrationDTO> registerUser(@RequestBody @Valid UserRegistrationDTO registerDTO)
+    public ResponseEntity<ResponseDTO> registerUser(@RequestBody @Valid UserRegistrationDTO registerDTO)
             throws VoixDeSagesseException {
+        return new ResponseEntity<>(userService.startRegistration(registerDTO), HttpStatus.ACCEPTED);
+    }
 
-        return new ResponseEntity<>(userService.registerUser(registerDTO), HttpStatus.CREATED);
+    // Step 2: the code proves the address belongs to the user; the account is created.
+    @PostMapping("/register/verify")
+    public ResponseEntity<UserRegistrationDTO> confirmRegistration(@RequestBody @Valid VerifyOtpRequest request)
+            throws VoixDeSagesseException {
+        return new ResponseEntity<>(userService.confirmRegistration(request.email(), request.otp()), HttpStatus.CREATED);
     }
 
     @PostMapping("/password/reset")
@@ -89,7 +96,7 @@ public class AuthController {
     }
 
     @PostMapping("/password/otp")
-    public ResponseEntity<ResponseDTO> sendOtp(@RequestBody @Valid OtpRequest request) throws Exception {
+    public ResponseEntity<ResponseDTO> sendOtp(@RequestBody @Valid OtpRequest request) throws VoixDeSagesseException {
         userService.sendOtp(request.email());
         return ResponseEntity.ok(new ResponseDTO("Si un compte existe avec cet email, un code vient d'être envoyé."));
     }
