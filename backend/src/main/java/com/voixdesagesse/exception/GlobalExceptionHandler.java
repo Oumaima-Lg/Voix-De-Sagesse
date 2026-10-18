@@ -37,7 +37,8 @@ public class GlobalExceptionHandler {
             "USER_NOT_FOUND", HttpStatus.NOT_FOUND,
             "INVALID_CREDENTIALS", HttpStatus.UNAUTHORIZED,
             "OTP_TOO_SOON", HttpStatus.TOO_MANY_REQUESTS,
-            "LOGIN_BLOCKED", HttpStatus.TOO_MANY_REQUESTS);
+            "LOGIN_BLOCKED", HttpStatus.TOO_MANY_REQUESTS,
+            "MAIL_FAILED", HttpStatus.SERVICE_UNAVAILABLE);
 
     private final MessageSource messageSource;
 

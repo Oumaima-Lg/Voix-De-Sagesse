@@ -1,7 +1,6 @@
 package com.voixdesagesse.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.voixdesagesse.entity.User;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -23,6 +22,7 @@ public class UserRegistrationDTO {
     @NotBlank(message = "{user.firstname.absent}")
     private String prenom;
 
+    @NotBlank(message = "{user.email.required}")
     @Email(message = "{user.email.absent}")
     private String email;
 
@@ -37,15 +37,4 @@ public class UserRegistrationDTO {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private AccountType accountType;
 
-    public User toEntity() {
-        User user = new User();
-        user.setId(this.id);
-        user.setNom(this.nom);
-        user.setPrenom(this.prenom);
-        user.setEmail(this.email);
-        user.setMotdepasse(this.motdepasse);
-        user.setAccountType(this.accountType);
-        return user;
-    }
-    
 }

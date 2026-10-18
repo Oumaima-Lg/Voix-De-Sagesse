@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -35,14 +36,17 @@ import com.voixdesagesse.dto.UserRegistrationDTO;
 import com.voixdesagesse.entity.Article;
 import com.voixdesagesse.mail.EmailTemplates;
 import com.voixdesagesse.entity.OTP;
+import com.voixdesagesse.entity.PendingRegistration;
 import com.voixdesagesse.entity.User;
 import com.voixdesagesse.exception.VoixDeSagesseException;
 import com.voixdesagesse.repository.ArticleRepository;
 import com.voixdesagesse.repository.OTPRepository;
+import com.voixdesagesse.repository.PendingRegistrationRepository;
 import com.voixdesagesse.repository.SignalRepository;
 import com.voixdesagesse.repository.UserRepository;
 import com.voixdesagesse.utility.Utilities;
 
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +75,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final OTPRepository otpRepository;
+    private final PendingRegistrationRepository pendingRegistrationRepository;
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender mailSender;
     private final CommonService commonService;
@@ -86,17 +91,60 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserRegistrationDTO registerUser(UserRegistrationDTO userDTO) throws VoixDeSagesseException {
-
-        Optional<User> optional = userRepository.findByEmail(userDTO.getEmail());
-        if (optional.isPresent())
+    public ResponseDTO startRegistration(UserRegistrationDTO userDTO) throws VoixDeSagesseException {
+        String email = userDTO.getEmail();
+        if (userRepository.findByEmail(email).isPresent())
             throw new VoixDeSagesseException("USER_FOUND");
 
-        userDTO.setId(Utilities.getNextSequence("users"));
-        userDTO.setAccountType(AccountType.USER);
-        userDTO.setMotdepasse(passwordEncoder.encode(userDTO.getMotdepasse()));
+        Optional<PendingRegistration> previous = pendingRegistrationRepository.findById(email);
+        if (previous.isPresent()
+                && previous.get().getCreationTime().isAfter(LocalDateTime.now().minusSeconds(OTP_RESEND_DELAY_SECONDS)))
+            throw new VoixDeSagesseException("OTP_TOO_SOON");
 
-        User user = userDTO.toEntity();
+        // Signing up again replaces the previous pending sign-up (new code, new details).
+        String code = Utilities.generateOTP();
+        PendingRegistration pending = new PendingRegistration(email, userDTO.getNom(), userDTO.getPrenom(),
+                passwordEncoder.encode(userDTO.getMotdepasse()), code, LocalDateTime.now(), 0);
+        pendingRegistrationRepository.save(pending);
+        try {
+            sendHtmlEmail(email, "Confirmez votre inscription - Voix De Sagesse",
+                    EmailTemplates.registrationCode(code, pending.getNom(), pending.getPrenom()));
+        } catch (VoixDeSagesseException e) {
+            // Without the email the code is useless: let the user try again right away.
+            pendingRegistrationRepository.delete(pending);
+            throw e;
+        }
+        return new ResponseDTO("Un code de vérification a été envoyé à votre adresse email.");
+    }
+
+    @Override
+    public UserRegistrationDTO confirmRegistration(String email, String otp) throws VoixDeSagesseException {
+        PendingRegistration pending = pendingRegistrationRepository.findById(email)
+                .filter(p -> !isExpired(p.getCreationTime()))
+                .orElseThrow(() -> new VoixDeSagesseException("OTP_NOT_FOUND"));
+
+        if (!pending.getOtpCode().equals(otp)) {
+            pending.setAttempts(pending.getAttempts() + 1);
+            if (pending.getAttempts() >= OTP_MAX_ATTEMPTS) {
+                pendingRegistrationRepository.delete(pending);
+                throw new VoixDeSagesseException("OTP_TOO_MANY_ATTEMPTS");
+            }
+            pendingRegistrationRepository.save(pending);
+            throw new VoixDeSagesseException("OTP_INCORRECT");
+        }
+
+        pendingRegistrationRepository.delete(pending);
+        // The address may have been registered by another sign-up in the meantime.
+        if (userRepository.findByEmail(email).isPresent())
+            throw new VoixDeSagesseException("USER_FOUND");
+
+        User user = new User();
+        user.setId(Utilities.getNextSequence("users"));
+        user.setNom(pending.getNom());
+        user.setPrenom(pending.getPrenom());
+        user.setEmail(email);
+        user.setMotdepasse(pending.getMotdepasse());
+        user.setAccountType(AccountType.USER);
         user.setUsername(user.getPrenom());
         user.setFollowersCount(0L);
         user.setContentCount(0L);
@@ -111,7 +159,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean sendOtp(String email) throws Exception {
+    public Boolean sendOtp(String email) throws VoixDeSagesseException {
         Optional<User> found = userRepository.findByEmail(email);
         if (found.isEmpty()) {
             // Same answer as for a known address, so this endpoint cannot be used to find accounts.
@@ -124,23 +172,39 @@ public class UserServiceImpl implements UserService {
                 && previous.get().getCreationTime().isAfter(LocalDateTime.now().minusSeconds(OTP_RESEND_DELAY_SECONDS)))
             throw new VoixDeSagesseException("OTP_TOO_SOON");
 
-        MimeMessage mm = mailSender.createMimeMessage();
-        MimeMessageHelper message = new MimeMessageHelper(mm, true);
-        message.setTo(email);
-        message.setSubject("Votre code de vérification - Voix De Sagesse");
         String genOtp = Utilities.generateOTP();
         OTP otp = new OTP(email, genOtp, LocalDateTime.now());
         otpRepository.save(otp);
-        message.setText(EmailTemplates.otpCode(genOtp, user.getNom(), user.getPrenom()), true);
-        message.setFrom(mailFrom);
-        mailSender.send(mm);
+        try {
+            sendHtmlEmail(email, "Votre code de vérification - Voix De Sagesse",
+                    EmailTemplates.otpCode(genOtp, user.getNom(), user.getPrenom()));
+        } catch (VoixDeSagesseException e) {
+            otpRepository.delete(otp);
+            throw e;
+        }
         return true;
+    }
+
+    // Any sending failure is reported to the client as MAIL_FAILED; the details stay in the logs.
+    private void sendHtmlEmail(String to, String subject, String html) throws VoixDeSagesseException {
+        try {
+            MimeMessage mm = mailSender.createMimeMessage();
+            MimeMessageHelper message = new MimeMessageHelper(mm, true);
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(html, true);
+            message.setFrom(mailFrom);
+            mailSender.send(mm);
+        } catch (MessagingException | MailException e) {
+            log.error("Could not send email", e);
+            throw new VoixDeSagesseException("MAIL_FAILED");
+        }
     }
 
     @Override
     public String verifyOtp(String email, String otp) throws VoixDeSagesseException {
         OTP otpEntity = otpRepository.findById(email).orElseThrow(() -> new VoixDeSagesseException("OTP_NOT_FOUND"));
-        if (isExpired(otpEntity) || otpEntity.getOtpCode() == null)
+        if (isExpired(otpEntity.getCreationTime()) || otpEntity.getOtpCode() == null)
             throw new VoixDeSagesseException("OTP_NOT_FOUND");
 
         if (!otpEntity.getOtpCode().equals(otp)) {
@@ -163,7 +227,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseDTO changePassword(ResetPasswordRequest request) throws VoixDeSagesseException {
         OTP otpEntity = otpRepository.findById(request.email())
-                .filter(otp -> otp.getResetToken() != null && !isExpired(otp))
+                .filter(otp -> otp.getResetToken() != null && !isExpired(otp.getCreationTime()))
                 .filter(otp -> MessageDigest.isEqual(
                         otp.getResetToken().getBytes(StandardCharsets.UTF_8),
                         request.resetToken().getBytes(StandardCharsets.UTF_8)))
@@ -177,8 +241,8 @@ public class UserServiceImpl implements UserService {
         return new ResponseDTO("Mot de passe modifié avec succès.");
     }
 
-    private boolean isExpired(OTP otp) {
-        return otp.getCreationTime().isBefore(LocalDateTime.now().minusMinutes(OTP_VALIDITY_MINUTES));
+    private boolean isExpired(LocalDateTime creationTime) {
+        return creationTime.isBefore(LocalDateTime.now().minusMinutes(OTP_VALIDITY_MINUTES));
     }
 
     @Scheduled(fixedRate = 60000)
@@ -187,6 +251,10 @@ public class UserServiceImpl implements UserService {
         List<OTP> expiredOTPs = otpRepository.findByCreationTimeBefore(expiry);
         if (!expiredOTPs.isEmpty()) {
             otpRepository.deleteAll(expiredOTPs);
+        }
+        List<PendingRegistration> expiredSignUps = pendingRegistrationRepository.findByCreationTimeBefore(expiry);
+        if (!expiredSignUps.isEmpty()) {
+            pendingRegistrationRepository.deleteAll(expiredSignUps);
         }
     }
 

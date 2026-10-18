@@ -20,11 +20,14 @@ public interface UserService {
 
     public User getCurrentUser() throws VoixDeSagesseException;
 
-    public UserRegistrationDTO  registerUser(UserRegistrationDTO userDTO) throws VoixDeSagesseException;
+    // Sign-up in two steps: a code is emailed first, the account is created once the code is confirmed.
+    public ResponseDTO startRegistration(UserRegistrationDTO userDTO) throws VoixDeSagesseException;
+
+    public UserRegistrationDTO confirmRegistration(String email, String otp) throws VoixDeSagesseException;
 
     public UserDTO getUserByEmail(String email) throws VoixDeSagesseException;
 
-    public Boolean sendOtp(String email) throws Exception;
+    public Boolean sendOtp(String email) throws VoixDeSagesseException;
 
     public String verifyOtp(String email, String otp) throws VoixDeSagesseException;
 

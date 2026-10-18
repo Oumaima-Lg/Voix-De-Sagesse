@@ -1,9 +1,11 @@
 package com.voixdesagesse.service;
 import com.voixdesagesse.dto.*;
 import com.voixdesagesse.entity.OTP;
+import com.voixdesagesse.entity.PendingRegistration;
 import com.voixdesagesse.entity.User;
 import com.voixdesagesse.exception.VoixDeSagesseException;
 import com.voixdesagesse.repository.OTPRepository;
+import com.voixdesagesse.repository.PendingRegistrationRepository;
 import com.voixdesagesse.repository.UserRepository;
 import com.voixdesagesse.utility.Utilities;
 import jakarta.mail.internet.MimeMessage;
@@ -17,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -41,6 +44,9 @@ public class UserServiceImplTest {
 
     @Mock
     private OTPRepository otpRepository;
+
+    @Mock
+    private PendingRegistrationRepository pendingRegistrationRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -79,57 +85,118 @@ public class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Test enregistrement utilisateur - succès")
-    void testRegisterUserSuccess() throws VoixDeSagesseException {
-        // Given
+    @DisplayName("Inscription - envoie un code sans créer le compte")
+    void testStartRegistrationSendsCodeOnly() throws VoixDeSagesseException {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
-        when(userRepository.save(any(User.class))).thenReturn(user);
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
 
-        try (MockedStatic<Utilities> utilities = mockStatic(Utilities.class)) {
-            utilities.when(() -> Utilities.getNextSequence("users")).thenReturn(1L);
+        userService.startRegistration(registrationDTO);
 
-            // When
-            UserRegistrationDTO result = userService.registerUser(registrationDTO);
-
-            // Then
-            assertNotNull(result);
-            assertEquals(user.getId(), result.getId());
-            assertEquals(user.getNom(), result.getNom());
-            verify(userRepository).save(any(User.class));
-            verify(passwordEncoder).encode("Password123!");
-        }
+        ArgumentCaptor<PendingRegistration> pending = ArgumentCaptor.forClass(PendingRegistration.class);
+        verify(pendingRegistrationRepository).save(pending.capture());
+        assertEquals("encodedPassword", pending.getValue().getMotdepasse());
+        assertTrue(pending.getValue().getOtpCode().matches("[0-9]{6}"));
+        verify(mailSender).send(any(MimeMessage.class));
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
-    @DisplayName("Inscription - le rôle est toujours USER, même si ADMIN est demandé")
-    void testRegisterUserIgnoresRequestedRole() throws VoixDeSagesseException {
-        registrationDTO.setAccountType(AccountType.ADMIN);
+    @DisplayName("Inscription - email déjà utilisé : aucun code envoyé")
+    void testStartRegistrationUserAlreadyExists() {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
+            () -> userService.startRegistration(registrationDTO));
+        assertEquals("USER_FOUND", exception.getMessage());
+        verify(pendingRegistrationRepository, never()).save(any(PendingRegistration.class));
+        verify(mailSender, never()).send(any(MimeMessage.class));
+    }
+
+    @Test
+    @DisplayName("Inscription - refusée si un code a été envoyé il y a moins d'une minute")
+    void testStartRegistrationTooSoon() {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(pendingRegistrationRepository.findById(anyString())).thenReturn(Optional.of(pending(LocalDateTime.now().minusSeconds(20), 0)));
+
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
+            () -> userService.startRegistration(registrationDTO));
+        assertEquals("OTP_TOO_SOON", exception.getMessage());
+        verify(mailSender, never()).send(any(MimeMessage.class));
+    }
+
+    @Test
+    @DisplayName("Inscription - si l'email ne part pas, l'inscription en attente est supprimée")
+    void testStartRegistrationMailFailure() {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doThrow(new MailSendException("SMTP down")).when(mailSender).send(any(MimeMessage.class));
+
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
+            () -> userService.startRegistration(registrationDTO));
+        assertEquals("MAIL_FAILED", exception.getMessage());
+        verify(pendingRegistrationRepository).delete(any(PendingRegistration.class));
+    }
+
+    @Test
+    @DisplayName("Confirmation - le bon code crée le compte, toujours avec le rôle USER")
+    void testConfirmRegistrationCreatesUser() throws VoixDeSagesseException {
+        PendingRegistration pending = pending(LocalDateTime.now(), 0);
+        when(pendingRegistrationRepository.findById(anyString())).thenReturn(Optional.of(pending));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         try (MockedStatic<Utilities> utilities = mockStatic(Utilities.class)) {
             utilities.when(() -> Utilities.getNextSequence("users")).thenReturn(1L);
-            userService.registerUser(registrationDTO);
+            userService.confirmRegistration("test@example.com", "123456");
         }
 
         ArgumentCaptor<User> saved = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(saved.capture());
         assertEquals(AccountType.USER, saved.getValue().getAccountType());
+        assertEquals("encodedPassword", saved.getValue().getMotdepasse());
+        verify(pendingRegistrationRepository).delete(pending);
     }
 
     @Test
-    @DisplayName("Test enregistrement utilisateur - utilisateur déjà existant")
-    void testRegisterUserAlreadyExists() {
-        // Given
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+    @DisplayName("Confirmation - un mauvais code ne crée pas le compte")
+    void testConfirmRegistrationWrongCode() {
+        PendingRegistration pending = pending(LocalDateTime.now(), 0);
+        when(pendingRegistrationRepository.findById(anyString())).thenReturn(Optional.of(pending));
 
-        // When & Then
         VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
-            () -> userService.registerUser(registrationDTO));
-        assertEquals("USER_FOUND", exception.getMessage());
+            () -> userService.confirmRegistration("test@example.com", "654321"));
+        assertEquals("OTP_INCORRECT", exception.getMessage());
+        assertEquals(1, pending.getAttempts());
         verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("Confirmation - l'inscription est annulée après 5 essais incorrects")
+    void testConfirmRegistrationTooManyAttempts() {
+        PendingRegistration pending = pending(LocalDateTime.now(), 4);
+        when(pendingRegistrationRepository.findById(anyString())).thenReturn(Optional.of(pending));
+
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
+            () -> userService.confirmRegistration("test@example.com", "654321"));
+        assertEquals("OTP_TOO_MANY_ATTEMPTS", exception.getMessage());
+        verify(pendingRegistrationRepository).delete(pending);
+    }
+
+    @Test
+    @DisplayName("Confirmation - code expiré")
+    void testConfirmRegistrationExpired() {
+        when(pendingRegistrationRepository.findById(anyString())).thenReturn(Optional.of(pending(LocalDateTime.now().minusMinutes(11), 0)));
+
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
+            () -> userService.confirmRegistration("test@example.com", "123456"));
+        assertEquals("OTP_NOT_FOUND", exception.getMessage());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    private PendingRegistration pending(LocalDateTime creationTime, int attempts) {
+        return new PendingRegistration("test@example.com", "Test", "User", "encodedPassword", "123456", creationTime, attempts);
     }
 
     @Test
@@ -302,6 +369,17 @@ public class UserServiceImplTest {
 
         // Then
         verify(otpRepository).deleteAll(expiredOTPs);
+    }
+
+    @Test
+    @DisplayName("Les inscriptions jamais confirmées sont supprimées après 10 minutes")
+    void testRemoveExpiredPendingRegistrations() {
+        List<PendingRegistration> expired = List.of(pending(LocalDateTime.now().minusMinutes(11), 0));
+        when(pendingRegistrationRepository.findByCreationTimeBefore(any(LocalDateTime.class))).thenReturn(expired);
+
+        userService.removeExpiredOTPs();
+
+        verify(pendingRegistrationRepository).deleteAll(expired);
     }
 
     @Test
