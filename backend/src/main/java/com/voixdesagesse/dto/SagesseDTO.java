@@ -2,6 +2,8 @@ package com.voixdesagesse.dto;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -31,7 +33,8 @@ public class SagesseDTO {
     @Size(min = 1, message = "Au moins un tag est requis")
     private Set<String> tags;
     
-    @NotNull(message = "L'ID utilisateur est obligatoire")
+    // Set by the server from the JWT, never taken from the request body.
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private long userId;
 
     public Article toEntity() {

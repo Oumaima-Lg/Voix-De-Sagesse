@@ -43,12 +43,12 @@ public class SignalServiceImpl implements SignalService {
             throws VoixDeSagesseException {
         User reporter = userService.getUserById(reporterId);
         Article article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new VoixDeSagesseException("Article non trouvé"));
+                .orElseThrow(() -> new VoixDeSagesseException("ARTICLE_NOT_FOUND"));
 
         User reportedUser = userService.getUserById(article.getUserId());
 
         if (signalRepository.existsByReporterIdAndArticleId(reporterId, articleId)) {
-            throw new VoixDeSagesseException("Vous avez déjà signalé cet article");
+            throw new VoixDeSagesseException("ALREADY_REPORTED");
         }
 
         Signal signal = new Signal();
@@ -81,7 +81,7 @@ public class SignalServiceImpl implements SignalService {
     @Override
     public SignalDTO processSignal(Long signalId, SignalStatus status, String adminComment, Long adminId) throws VoixDeSagesseException, Exception {
         Signal signal = signalRepository.findById(signalId)
-                .orElseThrow(() -> new VoixDeSagesseException("Signal non trouvé"));
+                .orElseThrow(() -> new VoixDeSagesseException("SIGNAL_NOT_FOUND"));
 
         signal.setStatus(status);
         signal.setAdminComment(adminComment);

@@ -311,16 +311,16 @@ public class UserServiceImpl implements UserService {
     public void followUser(Long currentUserId, Long targetUserId) throws VoixDeSagesseException {
 
         if (currentUserId.equals(targetUserId))
-            throw new VoixDeSagesseException("Vous ne pouvez pas vous suivre vous-même");
+            throw new VoixDeSagesseException("SELF_FOLLOW");
 
         if (!userRepository.existsById(currentUserId))
-            throw new VoixDeSagesseException("Utilisateur actuel introuvable");
+            throw new VoixDeSagesseException("USER_NOT_FOUND");
 
         if (!userRepository.existsById(targetUserId))
-            throw new VoixDeSagesseException("Utilisateur cible introuvable");
+            throw new VoixDeSagesseException("USER_NOT_FOUND");
 
         if (isFollowing(currentUserId, targetUserId))
-            throw new VoixDeSagesseException("Vous suivez déjà cet utilisateur");
+            throw new VoixDeSagesseException("ALREADY_FOLLOWING");
 
         addFollowing(currentUserId, targetUserId);
         incrementFollowingCount(currentUserId);
@@ -330,10 +330,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public void unfollowUser(Long currentUserId, Long targetUserId) throws VoixDeSagesseException {
         if (currentUserId.equals(targetUserId))
-            throw new VoixDeSagesseException("Vous ne pouvez pas vous désabonner de vous-même");
+            throw new VoixDeSagesseException("SELF_FOLLOW");
 
         if (!isFollowing(currentUserId, targetUserId))
-            throw new VoixDeSagesseException("Vous ne suivez pas cet utilisateur");
+            throw new VoixDeSagesseException("NOT_FOLLOWING");
 
         removeFollowing(currentUserId, targetUserId);
         decrementFollowingCount(currentUserId);
@@ -445,14 +445,14 @@ public class UserServiceImpl implements UserService {
         if (!userRepository.existsById(userId))
             throw new VoixDeSagesseException("USER_NOT_FOUND");
         if (isArticleSaved(userId, articleId))
-            throw new VoixDeSagesseException("Article déjà sauvegardé");
+            throw new VoixDeSagesseException("ALREADY_SAVED");
         userRepository.addSavedArticle(userId, articleId);
     }
 
     @Override
     public void unsaveArticle(Long userId, Long articleId) throws VoixDeSagesseException {
         if (!isArticleSaved(userId, articleId)) {
-            throw new VoixDeSagesseException("Article non sauvegardé");
+            throw new VoixDeSagesseException("NOT_SAVED");
         }
         userRepository.removeSavedArticle(userId, articleId);
     }

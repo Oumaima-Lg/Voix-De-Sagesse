@@ -54,32 +54,19 @@ public class AdminController {
 
     @Operation(summary = "Liste des signalements")
     @GetMapping("/signals")
-    public ResponseEntity<?> getAllSignals() {
-        try {
-            log.info("Admin fetching all signals");
-            List<SignalDTO> signals = adminService.getAllSignals();
-            return ResponseEntity.ok(signals);
-        } catch (VoixDeSagesseException e) {
-            log.error("Error fetching signals: " + e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<List<SignalDTO>> getAllSignals() throws VoixDeSagesseException {
+        log.info("Admin fetching all signals");
+        return ResponseEntity.ok(adminService.getAllSignals());
     }
 
     @Operation(summary = "Traiter un signalement (statut et commentaire de l'admin)")
     @PutMapping("/signals/{signalId}/process")
-    public ResponseEntity<?> processSignal(
+    public ResponseEntity<SignalDTO> processSignal(
             @PathVariable Long signalId,
             @RequestParam SignalStatus status,
             @RequestParam(required = false) String adminComment,
-            @AuthenticationPrincipal CustomUserDetails currentUser) throws Exception  {
-        try {
-            log.info("Admin processing signal: {}", signalId);
-            SignalDTO processedSignal = adminService.processSignal(signalId, status, adminComment, currentUser.getId());
-            return ResponseEntity.ok(processedSignal);
-        } catch (VoixDeSagesseException e) {
-            log.error("Error processing signal: " + e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+            @AuthenticationPrincipal CustomUserDetails currentUser) throws Exception {
+        log.info("Admin processing signal: {}", signalId);
+        return ResponseEntity.ok(adminService.processSignal(signalId, status, adminComment, currentUser.getId()));
     }
-
 }

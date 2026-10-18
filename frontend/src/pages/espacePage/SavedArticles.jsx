@@ -5,6 +5,7 @@ import { FaBookmark } from "react-icons/fa"
 import { LoadingOverlay } from "@mantine/core"
 import { getSavedArticles } from "../../api/articleService"
 import { errorNotification } from "../../utils/notifications"
+import { getApiErrorMessage } from "../../api/apiError"
 import { usePostInteractions } from "../../hooks/usePostInteractions"
 import PostCard, { FollowButton, UnsaveButton } from "../../components/posts/PostCard"
 
@@ -25,7 +26,7 @@ const SavedArticles = () => {
             .catch((err) => {
                 setLoading(false);
                 console.error(err);
-                errorNotification('Erreur', 'Impossible de charger les articles sauvegardés');
+                errorNotification('Erreur', getApiErrorMessage(err, 'Impossible de charger les articles sauvegardés'));
             });
     }, []);
 

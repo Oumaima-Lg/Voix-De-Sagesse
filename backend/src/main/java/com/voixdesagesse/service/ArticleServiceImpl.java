@@ -67,7 +67,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public Article getArticleById(Long articleId) throws VoixDeSagesseException {
         return articleRepository.findById(articleId)
-                .orElseThrow(() -> new VoixDeSagesseException("Article non trouvé"));
+                .orElseThrow(() -> new VoixDeSagesseException("ARTICLE_NOT_FOUND"));
     }
 
     @Override
@@ -186,10 +186,10 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public void likeArticle(Long articleId, Long currentUserId) throws VoixDeSagesseException {
         Article article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new VoixDeSagesseException("Article introuvable"));
+                .orElseThrow(() -> new VoixDeSagesseException("ARTICLE_NOT_FOUND"));
         // Recorded atomically: a double click cannot count the like twice.
         if (!userService.addLikedArticle(currentUserId, articleId))
-            throw new VoixDeSagesseException("Article déjà liké");
+            throw new VoixDeSagesseException("ALREADY_LIKED");
         articleRepository.incrementLikes(articleId);
         userService.incrementLikesReceived(article.getUserId());
     }
@@ -197,9 +197,9 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public void unlikeArticle(Long articleId, Long currentUserId) throws VoixDeSagesseException {
         Article article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new VoixDeSagesseException("Article introuvable"));
+                .orElseThrow(() -> new VoixDeSagesseException("ARTICLE_NOT_FOUND"));
         if (!userService.removeLikedArticle(currentUserId, articleId))
-            throw new VoixDeSagesseException("Article pas encore liké");
+            throw new VoixDeSagesseException("NOT_LIKED");
         articleRepository.decrementLikes(articleId);
         userService.decrementLikesReceived(article.getUserId());
     }
@@ -207,8 +207,8 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public void deleteArticle(Long articleId, Long currentUserId) throws VoixDeSagesseException {
         Article article = articleRepository.findByIdAndUserId(articleId, currentUserId)
-                .orElseThrow(
-                        () -> new VoixDeSagesseException("Article introuvable ou vous n'êtes pas autorisé à le supprimer"));
+                // Same answer whether the article does not exist or belongs to someone else.
+                .orElseThrow(() -> new VoixDeSagesseException("ARTICLE_NOT_FOUND"));
 
         Long likesCount = article.getLikes();
         Long commentsCount = article.getComments();

@@ -93,7 +93,7 @@ class AuthorizationIntegrationTest {
     @DisplayName("Supprimer : impossible de supprimer l'article d'un autre utilisateur")
     void cannotDeleteSomeoneElsesArticle() throws Exception {
         mvc.perform(delete("/articles/" + ALICE_ARTICLE_ID).with(as(BOB_ID)))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isNotFound());
 
         assertTrue(articleRepository.existsById(ALICE_ARTICLE_ID));
     }
@@ -113,7 +113,7 @@ class AuthorizationIntegrationTest {
     @DisplayName("Liker deux fois : le like n'est compté qu'une fois")
     void doubleLikeCountsOnce() throws Exception {
         mvc.perform(post("/articles/" + ALICE_ARTICLE_ID + "/like").with(as(BOB_ID))).andExpect(status().isOk());
-        mvc.perform(post("/articles/" + ALICE_ARTICLE_ID + "/like").with(as(BOB_ID))).andExpect(status().isBadRequest());
+        mvc.perform(post("/articles/" + ALICE_ARTICLE_ID + "/like").with(as(BOB_ID))).andExpect(status().isConflict());
 
         assertEquals(1L, articleRepository.findById(ALICE_ARTICLE_ID).orElseThrow().getLikes());
         assertEquals(1L, userRepository.findById(ALICE_ID).orElseThrow().getLikesReceived());
@@ -138,7 +138,7 @@ class AuthorizationIntegrationTest {
         saveUser(CAROL_ID, "carol@test.local");
         long byBob = addComment(BOB_ID), byBob2 = addComment(BOB_ID), byCarol = addComment(CAROL_ID);
 
-        mvc.perform(delete("/comments/" + byBob).with(as(CAROL_ID))).andExpect(status().isBadRequest());
+        mvc.perform(delete("/comments/" + byBob).with(as(CAROL_ID))).andExpect(status().isForbidden());
         mvc.perform(delete("/comments/" + byBob).with(as(BOB_ID))).andExpect(status().isOk());
         mvc.perform(delete("/comments/" + byBob2).with(as(ALICE_ID))).andExpect(status().isOk());
         mvc.perform(delete("/comments/" + byCarol).with(as(ALICE_ID))).andExpect(status().isOk());

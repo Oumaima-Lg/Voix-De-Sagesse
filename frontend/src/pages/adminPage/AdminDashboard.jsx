@@ -2,6 +2,8 @@ import { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import { useAuth } from "../../hooks/useAuth"
 import { getAllUsers, getDashboardStats } from "../../api/adminService"
+import { getApiErrorMessage } from "../../api/apiError"
+import { errorNotification } from "../../utils/notifications"
 import profileAvatar from "../../assets/profileAvatar.webp"
 import Signals from "./Signals"
 import {
@@ -94,14 +96,9 @@ const AdminDashboard = () => {
 
     const loadDashboardStats = async () => {
         try {
-            const data = await getDashboardStats()
-            setDashboardStats({
-                ...data,
-                totalSignals: 47, 
-                pendingSignals: 12,
-            })
+            setDashboardStats(await getDashboardStats())
         } catch (error) {
-            console.error("Erreur lors du chargement des statistiques:", error)
+            errorNotification("Erreur", getApiErrorMessage(error, "Impossible de charger les statistiques"))
         }
     }
 
@@ -125,7 +122,7 @@ const AdminDashboard = () => {
             }))
             setUsers(formattedUsers)
         } catch (error) {
-            console.error("Erreur lors du chargement des utilisateurs:", error)
+            errorNotification("Erreur", getApiErrorMessage(error, "Impossible de charger les utilisateurs"))
         } finally {
             setIsLoading(false)
         }

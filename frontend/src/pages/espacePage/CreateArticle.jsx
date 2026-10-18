@@ -5,6 +5,7 @@ import { FaQuoteLeft } from "react-icons/fa"
 import { BiBook } from "react-icons/bi"
 import { createHistoireArticle, createSagesseArticle } from "../../api/articleService"
 import { errorNotification, successNotification } from "../../utils/notifications"
+import { getApiErrorMessage } from "../../api/apiError"
 
 const CreateArticleForm = () => {
   const navigate = useNavigate()
@@ -130,8 +131,7 @@ const CreateArticleForm = () => {
       }, 2000)
     } catch (err) {
       console.error(err)
-      const errorMessage = err.response?.data?.error || err.response?.data?.errorMessage || 'Une erreur est survenue'
-      errorNotification('Erreur', errorMessage)
+      errorNotification('Erreur', getApiErrorMessage(err, 'Une erreur est survenue'))
     } finally {
       setIsSubmitting(false)
     }

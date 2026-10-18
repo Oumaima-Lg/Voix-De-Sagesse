@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,9 +29,7 @@ import com.voixdesagesse.security.CustomUserDetails;
 import com.voixdesagesse.service.ArticleService;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RequiredArgsConstructor
 @Tag(name = "Articles")
 @RestController
@@ -43,44 +40,18 @@ public class ArticleController {
 
     @Operation(summary = "Publier une sagesse (citation, proverbe…)")
     @PostMapping("/sagesse")
-    public ResponseEntity<?> createSagesseArticle(@Valid @RequestBody SagesseDTO sagesseDTO, BindingResult result,
-            @AuthenticationPrincipal CustomUserDetails currentUser) {
-        try {
-            if (result.hasErrors()) {
-                StringBuilder errorMessage = new StringBuilder();
-                result.getFieldErrors().forEach(error -> 
-                    errorMessage.append(error.getField()).append(": ").append(error.getDefaultMessage()).append("; ")
-                );
-                return ResponseEntity.badRequest().body(Map.of("errorMessage", errorMessage.toString()));
-            }
-
-            sagesseDTO.setUserId(currentUser.getId());
-            Article article = articleService.createSagesseArticle(sagesseDTO);
-            return new ResponseEntity<>(article, HttpStatus.CREATED);
-        } catch (VoixDeSagesseException e) {
-            return ResponseEntity.badRequest().body(Map.of("errorMessage", e.getMessage()));
-        }
+    public ResponseEntity<Article> createSagesseArticle(@Valid @RequestBody SagesseDTO sagesseDTO,
+            @AuthenticationPrincipal CustomUserDetails currentUser) throws VoixDeSagesseException {
+        sagesseDTO.setUserId(currentUser.getId());
+        return new ResponseEntity<>(articleService.createSagesseArticle(sagesseDTO), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Publier une histoire (expérience personnelle)")
     @PostMapping("/histoire")
-    public ResponseEntity<?> createHistoireArticle(@Valid @RequestBody HistoireDTO histoireDTO, BindingResult result,
-            @AuthenticationPrincipal CustomUserDetails currentUser) {
-        try {
-            if (result.hasErrors()) {
-                StringBuilder errorMessage = new StringBuilder();
-                result.getFieldErrors().forEach(error -> 
-                    errorMessage.append(error.getField()).append(": ").append(error.getDefaultMessage()).append("; ")
-                );
-                return ResponseEntity.badRequest().body(Map.of("errorMessage", errorMessage.toString()));
-            }
-
-            histoireDTO.setUserId(currentUser.getId());
-            Article article = articleService.createHistoireArticle(histoireDTO);
-            return new ResponseEntity<>(article, HttpStatus.CREATED);
-        } catch (VoixDeSagesseException e) {
-            return ResponseEntity.badRequest().body(Map.of("errorMessage", e.getMessage()));
-        }
+    public ResponseEntity<Article> createHistoireArticle(@Valid @RequestBody HistoireDTO histoireDTO,
+            @AuthenticationPrincipal CustomUserDetails currentUser) throws VoixDeSagesseException {
+        histoireDTO.setUserId(currentUser.getId());
+        return new ResponseEntity<>(articleService.createHistoireArticle(histoireDTO), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Fil d'actualité : tous les articles avec leur auteur")
@@ -147,19 +118,10 @@ public class ArticleController {
 
     @Operation(summary = "Rechercher des articles par texte et par type")
     @GetMapping("/search")
-    public ResponseEntity<?> searchArticles(
+    public ResponseEntity<List<PosteDTO>> searchArticles(
             @AuthenticationPrincipal CustomUserDetails currentUser,
             @RequestParam(required = false) String searchText,
             @RequestParam(required = false) String type) throws VoixDeSagesseException {
-        
-        try {
-            List<PosteDTO> searchResults = articleService.searchArticles(currentUser.getId(), searchText, type);
-            
-            return ResponseEntity.ok(searchResults);
-        } catch (VoixDeSagesseException e) {
-            log.error("Erreur lors de la recherche d'articles: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Erreur lors de la recherche", "message", e.getMessage()));
-        }
+        return ResponseEntity.ok(articleService.searchArticles(currentUser.getId(), searchText, type));
     }
 }

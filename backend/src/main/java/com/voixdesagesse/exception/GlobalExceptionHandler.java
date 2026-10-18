@@ -32,13 +32,25 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 
     // HTTP status of the known business error keys; any other VoixDeSagesseException is a bad request.
-    private static final Map<String, HttpStatus> STATUS_BY_KEY = Map.of(
-            "USER_FOUND", HttpStatus.CONFLICT,
-            "USER_NOT_FOUND", HttpStatus.NOT_FOUND,
-            "INVALID_CREDENTIALS", HttpStatus.UNAUTHORIZED,
-            "OTP_TOO_SOON", HttpStatus.TOO_MANY_REQUESTS,
-            "LOGIN_BLOCKED", HttpStatus.TOO_MANY_REQUESTS,
-            "MAIL_FAILED", HttpStatus.SERVICE_UNAVAILABLE);
+    private static final Map<String, HttpStatus> STATUS_BY_KEY = Map.ofEntries(
+            Map.entry("INVALID_CREDENTIALS", HttpStatus.UNAUTHORIZED),
+            Map.entry("COMMENT_DELETE_FORBIDDEN", HttpStatus.FORBIDDEN),
+            Map.entry("USER_NOT_FOUND", HttpStatus.NOT_FOUND),
+            Map.entry("ARTICLE_NOT_FOUND", HttpStatus.NOT_FOUND),
+            Map.entry("COMMENT_NOT_FOUND", HttpStatus.NOT_FOUND),
+            Map.entry("SIGNAL_NOT_FOUND", HttpStatus.NOT_FOUND),
+            // Conflicts with the current state: already done, or nothing to undo.
+            Map.entry("USER_FOUND", HttpStatus.CONFLICT),
+            Map.entry("ALREADY_LIKED", HttpStatus.CONFLICT),
+            Map.entry("NOT_LIKED", HttpStatus.CONFLICT),
+            Map.entry("ALREADY_SAVED", HttpStatus.CONFLICT),
+            Map.entry("NOT_SAVED", HttpStatus.CONFLICT),
+            Map.entry("ALREADY_FOLLOWING", HttpStatus.CONFLICT),
+            Map.entry("NOT_FOLLOWING", HttpStatus.CONFLICT),
+            Map.entry("ALREADY_REPORTED", HttpStatus.CONFLICT),
+            Map.entry("OTP_TOO_SOON", HttpStatus.TOO_MANY_REQUESTS),
+            Map.entry("LOGIN_BLOCKED", HttpStatus.TOO_MANY_REQUESTS),
+            Map.entry("MAIL_FAILED", HttpStatus.SERVICE_UNAVAILABLE));
 
     private final MessageSource messageSource;
 
