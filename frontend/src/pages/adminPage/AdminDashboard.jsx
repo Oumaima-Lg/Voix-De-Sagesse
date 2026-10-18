@@ -62,32 +62,24 @@ const AdminDashboard = () => {
         {
             title: "Utilisateurs Total",
             value: dashboardStats.totalUsers.toLocaleString(),
-            change: "+12%",
-            trend: "up",
             icon: Users,
             color: "from-blue-500 via-purple-500 to-pink-500",
         },
         {
             title: "Articles Publiés",
             value: dashboardStats.totalArticles.toLocaleString(),
-            change: "+8%",
-            trend: "up",
             icon: FileText,
             color: "from-green-500 to-emerald-500",
         },
         {
             title: "Signalements Total",
             value: dashboardStats.totalSignals,
-            change: "+15%",
-            trend: "up",
             icon: AlertTriangle,
             color: "from-orange-500 to-red-500",
         },
         {
             title: "Signalements en Attente",
             value: dashboardStats.pendingSignals,
-            change: "+5%",
-            trend: "up",
             icon: BarChart3,
             color: "from-purple-500 to-indigo-500",
         },
@@ -402,18 +394,9 @@ const AdminDashboard = () => {
                                             <p className="text-sm font-semibold text-[#A09F87]/80 mb-2 group-hover:text-[#A09F87] transition-colors">
                                                 {stat.title}
                                             </p>
-                                            <p className="text-3xl font-bold text-white mb-2 group-hover:scale-105 transition-transform duration-300">
+                                            <p className="text-3xl font-bold text-white group-hover:scale-105 transition-transform duration-300">
                                                 {stat.value}
                                             </p>
-                                            <div className="flex items-center">
-                                                <span
-                                                    className={`text-sm font-bold px-2 py-1 rounded-full ${stat.trend === "up" ? "text-emerald-300 bg-emerald-900/50" : "text-red-300 bg-red-900/50"
-                                                        }`}
-                                                >
-                                                    {stat.change}
-                                                </span>
-                                                <span className="text-xs text-[#A09F87]/60 ml-2 font-medium">vs mois dernier</span>
-                                            </div>
                                         </div>
                                         <div className="w-14 h-14 bg-gradient-to-br from-[#A09F87] to-[#4C3163] rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 animate-pulse-gentle">
                                             <IconComponent className="w-7 h-7 text-white" />
