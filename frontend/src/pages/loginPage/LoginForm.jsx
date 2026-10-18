@@ -140,7 +140,7 @@ const LoginForm = () => {
         <>
             <div className='login-form'>
                 <div className="mx-auto px-4">
-                    <div className='card w-[min(92vw,26rem)] mx-auto border-4 border-image-gradient sm:px-8 px-4 py-4 flex flex-col gap-4'>
+                    <div className='card w-[min(100vw_-_2rem,26rem)] mx-auto border-4 border-image-gradient sm:px-8 px-4 py-4 flex flex-col gap-4'>
                         <h4 className="text-gradient sm:text-3xl text-2xl text-center pt-2">Se Connecter</h4>
 
                         {urlMessage && (
