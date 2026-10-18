@@ -35,15 +35,15 @@ const SearchBar = ({ onSearch, currentFilters }) => {
     <div className="w-full max-w-2xl mx-auto mb-6">
       <div className="relative">
         <div className="flex items-center bg-gradient-to-r from-[#202020] to-[#2a2a2a] border-2 border-[#4C3163] rounded-lg overflow-hidden shadow-lg">
-          <div className="flex-1 flex items-center">
-            <Search className="w-5 h-5 text-[#A09F87] ml-4 mr-3" />
+          <div className="flex-1 min-w-0 flex items-center">
+            <Search className="w-5 h-5 shrink-0 text-[#A09F87] ml-3 mr-2 sm:ml-4 sm:mr-3" />
             <input
               type="text"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Rechercher dans les articles..."
-              className="flex-1 bg-transparent text-white placeholder:text-gray-400 py-3 pr-4 outline-none"
+              className="flex-1 min-w-0 bg-transparent text-white placeholder:text-gray-400 py-3 pr-2 sm:pr-4 outline-none"
             />
           </div>
           
@@ -59,9 +59,12 @@ const SearchBar = ({ onSearch, currentFilters }) => {
           
           <button
             onClick={handleSearch}
-            className="bg-[#A09F87] hover:bg-[#A09F87]/80 text-[#171717] px-6 py-3 font-medium transition-colors"
+            className="bg-[#A09F87] hover:bg-[#A09F87]/80 text-[#171717] px-3 sm:px-6 py-3 font-medium transition-colors"
+            aria-label="Rechercher"
           >
-            Rechercher
+            {/* Icon only on phones, text from sm up */}
+            <Search className="w-5 h-5 sm:hidden" />
+            <span className="hidden sm:inline">Rechercher</span>
           </button>
         </div>
 
@@ -77,7 +80,7 @@ const SearchBar = ({ onSearch, currentFilters }) => {
               </button>
             </div>
             
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => setSelectedType("")}
                 className={`px-4 py-2 rounded-lg transition-colors ${
