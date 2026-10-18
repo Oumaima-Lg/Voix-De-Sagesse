@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import profileAvatar from "../../assets/profileAvatar.webp"
 import { useAuth } from '../../hooks/useAuth';
 import { fileUrl } from "../../config"
+import NotificationBell from "../../components/notifications/NotificationBell"
 
 
 
@@ -46,38 +47,41 @@ const HeaderEspace = () => {
                             </span>
                         </LinkRouter>
                     </div>
-                    <div className='text-white flex  items-center xs:gap-6 gap-4 bg-[#202020] pl-4 rounded-l-[8px] relative'>
-                        <div>
-                            <img src={vector} alt="" className='cursor-pointer hover:scale-110 transform-gpu'
-                                onClick={() => setToggle(!toggle)}
-                            />
-                        </div>
-                        <div className='sm:text-sm text-xs text-center'>{user.nom + " " + user.prenom}</div>
-                        <div className=''>
-                            <img src={user.profilePicture ?
-                                (fileUrl(user.profilePicture) 
-                                ) : profileAvatar} alt="" 
-                                className="size-10 border-[#A09F87] object-cover"/>
-                        </div>
+                    <div className='flex items-center sm:gap-3 gap-2'>
+                        <NotificationBell variant="tab" />
+                        <div className='text-white flex  items-center xs:gap-6 gap-4 bg-[#202020] pl-4 rounded-l-[8px] relative'>
+                            <div>
+                                <img src={vector} alt="" className='cursor-pointer hover:scale-110 transform-gpu'
+                                    onClick={() => setToggle(!toggle)}
+                                />
+                            </div>
+                            <div className='sm:text-sm text-xs text-center'>{user.nom + " " + user.prenom}</div>
+                            <div className=''>
+                                <img src={user.profilePicture ?
+                                    (fileUrl(user.profilePicture) 
+                                    ) : profileAvatar} alt="" 
+                                    className="size-10 border-[#A09F87] object-cover"/>
+                            </div>
 
-                        <div className={`${toggle ? "flex" : "hidden"} absolute top-13 right-0 left-0 h-50 py-6 px-2 flex-col justify-between bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] border-3 border-[#202020] rounded-lg`}>
-                            <div className='flex gap-2 items-center cursor-pointer hover:scale-105 transform-gpu hover:text-[#A09F87]'>
-                                <div className='text-xl'>
-                                    <PermIdentityIcon />
+                            <div className={`${toggle ? "flex" : "hidden"} absolute top-13 right-0 left-0 h-50 py-6 px-2 flex-col justify-between bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] border-3 border-[#202020] rounded-lg`}>
+                                <div className='flex gap-2 items-center cursor-pointer hover:scale-105 transform-gpu hover:text-[#A09F87]'>
+                                    <div className='text-xl'>
+                                        <PermIdentityIcon />
+                                    </div>
+                                    <div className='text-md font-medium ' onClick={handleProfile}>Votre Profil</div>
                                 </div>
-                                <div className='text-md font-medium ' onClick={handleProfile}>Votre Profil</div>
-                            </div>
-                            <div className='flex gap-2 items-center  cursor-pointer hover:scale-105 transform-gpu hover:text-[#A09F87]'>
-                                <div className='text-xl'>
-                                    <BookmarkBorderIcon />
+                                <div className='flex gap-2 items-center  cursor-pointer hover:scale-105 transform-gpu hover:text-[#A09F87]'>
+                                    <div className='text-xl'>
+                                        <BookmarkBorderIcon />
+                                    </div>
+                                    <div className='text-md font-medium' onClick={handleFavoris}>Vos Favoris</div>
                                 </div>
-                                <div className='text-md font-medium' onClick={handleFavoris}>Vos Favoris</div>
-                            </div>
-                            <div className='flex gap-2 items-center cursor-pointer  text-orange-600 hover:scale-105 transform-gpu hover:text-[#A09F87]'>
-                                <div className='pl-1 text-xl' >
-                                    <LogoutIcon />
+                                <div className='flex gap-2 items-center cursor-pointer  text-orange-600 hover:scale-105 transform-gpu hover:text-[#A09F87]'>
+                                    <div className='pl-1 text-xl' >
+                                        <LogoutIcon />
+                                    </div>
+                                    <div className='text-md xs:font-medium font-normal' onClick={handleLogout}>Déconnexion</div>
                                 </div>
-                                <div className='text-md xs:font-medium font-normal' onClick={handleLogout}>Déconnexion</div>
                             </div>
                         </div>
                     </div>

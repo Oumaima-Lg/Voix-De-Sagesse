@@ -33,6 +33,7 @@ public class SignalServiceImpl implements SignalService {
     private final ArticleService articleService;
     private final ArticleRepository articleRepository;
     private final MailService mailService;
+    private final NotificationService notificationService;
 
     @Override
     public SignalDTO reportArticle(Long reporterId, Long articleId, String reason, String description)
@@ -100,6 +101,7 @@ public class SignalServiceImpl implements SignalService {
             if (article.isPresent()) {
                 articleService.deleteArticle(article.get().getId(), article.get().getUserId());
                 log.info("Article supprimé - ID: {}", signal.getArticleId());
+                notificationService.articleRemoved(article.get());
                 notifyAuthor(article.get());
             }
         }
@@ -113,18 +115,10 @@ public class SignalServiceImpl implements SignalService {
         try {
             User author = userService.getUserById(article.getUserId());
             mailService.sendHtml(author.getEmail(), "[Avertissement] Votre article a été supprimé suite à des signalements",
-                    EmailTemplates.articleDeleted(author.getNom(), author.getPrenom(), describe(article)));
+                    EmailTemplates.articleDeleted(author.getNom(), author.getPrenom(), article.label()));
         } catch (VoixDeSagesseException e) {
             log.warn("Author of deleted article {} not notified: {}", article.getId(), e.getMessage());
         }
-    }
-
-    // How the article is named to its author: its title, or the start of its text (wisdoms have no title).
-    static String describe(Article article) {
-        if (article.getTitle() != null && !article.getTitle().isBlank())
-            return article.getTitle();
-        String content = article.getContent() == null ? "" : article.getContent().strip();
-        return content.length() <= 80 ? content : content.substring(0, 80).strip() + "…";
     }
 
     private SignalDTO convertToDTO(Signal signal) {

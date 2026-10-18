@@ -10,6 +10,7 @@ import { usePostInteractions } from "../../hooks/usePostInteractions"
 import PostCard, { FollowButton, SaveButton, ReportMenu } from "../../components/posts/PostCard"
 import SearchBar from "./SearchBar"
 import ScrollToTop from "./ScrollToTop"
+import NotificationBell from "../../components/notifications/NotificationBell"
 
 const ArticleFeed = () => {
   const navigate = useNavigate()
@@ -119,7 +120,7 @@ const ArticleFeed = () => {
         <h1 className="text-2xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#A09F87] to-white">
           POSTES PARTAGÉS
         </h1>
-        <div></div>
+        <NotificationBell />
       </div>
 
       <SearchBar

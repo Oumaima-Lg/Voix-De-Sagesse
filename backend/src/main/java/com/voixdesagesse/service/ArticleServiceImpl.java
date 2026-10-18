@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.voixdesagesse.dto.ArticleType;
 import com.voixdesagesse.dto.HistoireDTO;
+import com.voixdesagesse.dto.NotificationType;
 import com.voixdesagesse.dto.PostInteractionDTO;
 import com.voixdesagesse.dto.PosteDTO;
 import com.voixdesagesse.dto.SagesseDTO;
@@ -36,6 +37,8 @@ public class ArticleServiceImpl implements ArticleService {
     private final CommonService commonService;
 
     private final SignalRepository signalRepository;
+
+    private final NotificationService notificationService;
 
 
     @Override
@@ -196,6 +199,7 @@ public class ArticleServiceImpl implements ArticleService {
             throw new VoixDeSagesseException("ALREADY_LIKED");
         articleRepository.incrementLikes(articleId);
         userService.incrementLikesReceived(article.getUserId());
+        notificationService.articleLiked(article, currentUserId);
     }
 
     @Override
@@ -206,6 +210,7 @@ public class ArticleServiceImpl implements ArticleService {
             throw new VoixDeSagesseException("NOT_LIKED");
         articleRepository.decrementLikes(articleId);
         userService.decrementLikesReceived(article.getUserId());
+        notificationService.withdraw(NotificationType.LIKE, article.getUserId(), currentUserId, articleId);
     }
 
     @Override
@@ -227,6 +232,7 @@ public class ArticleServiceImpl implements ArticleService {
         userService.decrementContentCount(currentUserId);
         commonService.deleteAllCommentsByArticle(articleId);
         articleRepository.deleteById(articleId);
+        notificationService.articleDeleted(articleId);
         // Reports still waiting on it have nothing left to review (when the admin deletes it, they are already settled).
         signalRepository.settlePendingByArticleId(articleId, SignalStatus.CLOSED, LocalDateTime.now(), null);
 

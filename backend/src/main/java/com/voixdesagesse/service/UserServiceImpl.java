@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.voixdesagesse.dto.AccountType;
+import com.voixdesagesse.dto.NotificationType;
 import com.voixdesagesse.dto.ResetPasswordRequest;
 import com.voixdesagesse.dto.ResponseDTO;
 import com.voixdesagesse.dto.UserDTO;
@@ -71,6 +72,7 @@ public class UserServiceImpl implements UserService {
     private final PendingRegistrationRepository pendingRegistrationRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
+    private final NotificationService notificationService;
     private final CommonService commonService;
     private final SignalRepository signalRepository;
     private final ArticleRepository articleRepository;
@@ -302,6 +304,7 @@ public class UserServiceImpl implements UserService {
         addFollowing(currentUserId, targetUserId);
         incrementFollowingCount(currentUserId);
         incrementFollowersCount(targetUserId);
+        notificationService.userFollowed(targetUserId, currentUserId);
     }
 
     @Override
@@ -315,6 +318,7 @@ public class UserServiceImpl implements UserService {
         removeFollowing(currentUserId, targetUserId);
         decrementFollowingCount(currentUserId);
         decrementFollowersCount(targetUserId);
+        notificationService.withdraw(NotificationType.FOLLOW, targetUserId, currentUserId, null);
     }
 
     @Override
@@ -421,9 +425,12 @@ public class UserServiceImpl implements UserService {
     public void saveArticle(Long userId, Long articleId) throws VoixDeSagesseException {
         if (!userRepository.existsById(userId))
             throw new VoixDeSagesseException("USER_NOT_FOUND");
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new VoixDeSagesseException("ARTICLE_NOT_FOUND"));
         if (isArticleSaved(userId, articleId))
             throw new VoixDeSagesseException("ALREADY_SAVED");
         userRepository.addSavedArticle(userId, articleId);
+        notificationService.articleSaved(article, userId);
     }
 
     @Override
@@ -432,6 +439,8 @@ public class UserServiceImpl implements UserService {
             throw new VoixDeSagesseException("NOT_SAVED");
         }
         userRepository.removeSavedArticle(userId, articleId);
+        articleRepository.findById(articleId).ifPresent(
+                article -> notificationService.withdraw(NotificationType.SAVE, article.getUserId(), userId, articleId));
     }
 
     @Override
@@ -591,6 +600,9 @@ public class UserServiceImpl implements UserService {
 
         // 9. Supprimer tous les signalements contre l'utilisateur
         signalRepository.deleteByReportedUserId(userId);
+
+        // Notifications received or caused by the user
+        notificationService.userDeleted(userId);
 
         // 10. Supprimer l'OTP si existe
         otpRepository.deleteById(user.getEmail());

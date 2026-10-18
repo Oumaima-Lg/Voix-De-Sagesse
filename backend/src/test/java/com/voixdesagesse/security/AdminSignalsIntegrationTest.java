@@ -110,7 +110,7 @@ class AdminSignalsIntegrationTest {
         ArgumentCaptor<MimeMessage> mail = ArgumentCaptor.forClass(MimeMessage.class);
         verify(mailSender).send(mail.capture());
         // A wisdom has no title: the email names it by the start of its text.
-        assertTrue(text(mail.getValue().getContent()).contains(CONTENT.substring(0, 60)));
+        assertTrue(text(mail.getValue().getContent()).contains(CONTENT.substring(0, 40)));
 
         process(second, "APPROVED").andExpect(status().isConflict())
             .andExpect(jsonPath("$.errorMessage").value("Ce signalement a déjà été traité."));
