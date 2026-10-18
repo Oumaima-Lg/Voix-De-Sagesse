@@ -2,10 +2,8 @@ import React from 'react'
 
 import Loader from '../../components/Loader'
 import fireHuman from '../../assets/fireHuman.webp'
-import Article from '../../assets/Article.png'
-import { PiArticleLight, PiStarLight } from "react-icons/pi";
+import { PiArticleLight, PiStarLight, PiArchiveLight } from "react-icons/pi";
 import { IoCreateOutline } from "react-icons/io5";
-import { PiArchiveLight } from "react-icons/pi";
 import ShinyText from '../../blocks/TextAnimations/ShinyText/ShinyText';
 import { Link as LinkRouter } from "react-router-dom";
 import { BsLayoutSidebarInset } from "react-icons/bs";
@@ -18,8 +16,24 @@ import SplineScene from '../../components/SplineScene';
 import { useSelector } from 'react-redux'
 
 
+// Links of the logged-in area, shown in the sidebar (desktop) and in the drawer (phones).
+const MENU = [
+    { to: '/espace/fil', label: 'Article', Icon: PiArticleLight },
+    { to: '/espace/publier', label: 'Nouvel article', Icon: IoCreateOutline },
+    { to: '/espace/mes-publications', label: 'Vos articles personnels', Icon: PiArchiveLight },
+    { to: '/espace/top-articles', label: 'Top articles', Icon: PiStarLight },
+]
 
-
+const MenuLinks = ({ iconClassName, textClassName }) => (
+    <>
+        {MENU.map(({ to, label, Icon }) => (
+            <LinkRouter key={to} to={to} className='flex flex-row items-center gap-3 hover:text-[#A09F87] hover:scale-105 transform-gpu'>
+                <Icon className={`${iconClassName} shrink-0`} />
+                <span className={`font-medium ${textClassName}`}>{label}</span>
+            </LinkRouter>
+        ))}
+    </>
+)
 
 const Home = () => {
     const [opened, { open, close }] = useDisclosure(false);
@@ -29,42 +43,8 @@ const Home = () => {
 
         <div className='flex sm:flex-row flex-col   mx-auto lg:pt-26 pt-22 min-h-screen lg:h-svh bg-gradient-to-bl from-[#171717] from-55% to-[#4E3F59] to-100%'>
             <div className=' w-xs pt-12 sm:block hidden'>
-                <div className=' border-x-3 border-b-3 px-4  border-[#202020]  md:h-3/4 h-2/3 md:w-3/4 w-2/3 bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100%  rounded-lg shadow-lg   text-white/85/85 flex flex-col justify-between  py-20 '>
-
-                    <div className='flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu' >
-                        <div>
-                            <PiArticleLight className='md:text-5xl text-2xl' />
-                        </div>
-                        <LinkRouter to='/espace/fil' className='font-medium md:text-xl text-sm'>
-                            Article
-                        </LinkRouter>
-                    </div>
-                    <div className='flex flex-row items-center gap-3 cursor-pointer  hover:text-[#A09F87] hover:scale-105 transform-gpu' >
-                        <div>
-                            <IoCreateOutline className='md:text-5xl text-2xl' />
-                        </div>
-                        <LinkRouter to="/espace/publier" className="font-medium md:text-xl text-sm">
-                            Nouveau <br /> Article
-                        </LinkRouter>
-                    </div>
-                    <div className='flex flex-row items-center gap-3 cursor-pointer  hover:text-[#A09F87] hover:scale-105 transform-gpu' >
-                        <div>
-                            <PiArchiveLight className='md:text-5xl text-2xl' />
-                        </div>
-                        <div className='font-medium md:text-xl text-sm'>
-                            <LinkRouter to="/espace/mes-publications" className="font-medium md:text-xl text-sm">
-                                Vos articles <br /> personnels
-                            </LinkRouter>
-                        </div>
-                    </div>
-                    <div className='flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu'>
-                        <div>
-                            <PiStarLight className='md:text-5xl text-2xl' />
-                        </div>
-                        <LinkRouter to="/espace/top-articles" className="font-medium md:text-xl text-sm">
-                           Top articles
-                        </LinkRouter>
-                    </div>
+                <div className=' border-x-3 border-b-3 px-4  border-[#202020]  md:h-3/4 h-2/3 md:w-3/4 w-2/3 bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100%  rounded-lg shadow-lg text-white/85 flex flex-col justify-center gap-6 lg:gap-8 py-8'>
+                    <MenuLinks iconClassName='md:text-3xl text-2xl' textClassName='md:text-base text-sm' />
                 </div>
             </div>
 
@@ -98,73 +78,10 @@ const Home = () => {
 
                 }}
             >
-                <div className="border-x-3 absolute bottom-0 left-0 border-b-3 py-30 px-4 size-full border-[#202020] bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% rounded-lg shadow-lg text-white/85 flex flex-col justify-between items-start ">
-                    <div className="flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu mb-6">
-                        <PiArticleLight className="text-5xl" />
-                        <LinkRouter to="/espace/fil" className="font-medium text-xl">
-                            Article
-                        </LinkRouter>
-                    </div>
-                    <div className="flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu mb-6">
-                        <IoCreateOutline className="text-5xl" />
-                        <LinkRouter to="/espace/publier" className="font-medium text-xl">
-                            Nouveau <br /> Article
-                        </LinkRouter>
-                    </div>
-                    <div className="flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu">
-                        <PiArchiveLight className="text-5xl" />
-                        <LinkRouter to="/espace/mes-publications" className="font-medium text-xl">
-                                Vos articles <br /> personnels
-                         </LinkRouter>
-                    </div>
-                    <div className='flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu'>
-                        <div>
-                            <PiStarLight className='text-5xl' />
-                        </div>
-                        <LinkRouter to="/espace/top-articles" className="font-medium text-xl">
-                           Top articles
-                        </LinkRouter>
-                    </div>
+                <div className="border-x-3 absolute bottom-0 left-0 border-b-3 px-6 size-full border-[#202020] bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% rounded-lg shadow-lg text-white/85 flex flex-col justify-center gap-10 items-start">
+                    <MenuLinks iconClassName='text-3xl' textClassName='text-lg' />
                 </div>
             </Drawer>
-
-            <div className='hidden fixed bottom-0 top-0 z-70 left-0 '>
-                <div className=' border-x-3 border-b-3 px-4 size-full  border-[#202020]  bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100%  rounded-lg shadow-lg   text-white/85 flex flex-col justify-between items-start  py-50 '>
-
-                    <div className='flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu' >
-                        <div className=''>
-                            <PiArticleLight className=' text-5xl ' />
-                        </div>
-                        <LinkRouter to='/espace/fil' className='font-medium text-xl'>
-                            Article
-                        </LinkRouter>
-                    </div>
-                    <div className='flex flex-row items-center gap-3 cursor-pointer  hover:text-[#A09F87] hover:scale-105 transform-gpu' >
-                        <div>
-                            <IoCreateOutline className='text-5xl' />
-                        </div>
-                        <LinkRouter to="/espace/publier" className="font-medium text-xl">
-                            Nouveau <br /> Article
-                        </LinkRouter>
-                    </div>
-                    <div className='flex flex-row items-center gap-3 cursor-pointer  hover:text-[#A09F87] hover:scale-105 transform-gpu' >
-                        <div>
-                            <PiArchiveLight className='text-5xl' />
-                        </div>
-                        <LinkRouter to="/espace/mes-publications" className="font-medium text-xl">
-                                Vos articles <br /> personnels
-                         </LinkRouter>
-                    </div>
-                    <div className='flex flex-row items-center gap-3 cursor-pointer hover:text-[#A09F87] hover:scale-105 transform-gpu'>
-                        <div>
-                            <PiStarLight className='text-5xl' />
-                        </div>
-                        <LinkRouter to="/espace/top-articles" className="font-medium text-xl">
-                           Top articles
-                        </LinkRouter>
-                    </div>
-                </div>
-            </div>
 
             <div className='w-full pt-10 sm:pt-0  sm:w-5/6 flex flex-col  gap-6 lg:gap-8 px-5'>
                 <div className='pt-5 text-center  text-gradient charm xl:text-6xl text-3xl leading-tight '>
