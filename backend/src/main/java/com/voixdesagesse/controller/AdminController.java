@@ -65,7 +65,7 @@ public class AdminController {
             @PathVariable Long signalId,
             @RequestParam SignalStatus status,
             @RequestParam(required = false) String adminComment,
-            @AuthenticationPrincipal CustomUserDetails currentUser) throws Exception {
+            @AuthenticationPrincipal CustomUserDetails currentUser) throws VoixDeSagesseException {
         log.info("Admin processing signal: {}", signalId);
         return ResponseEntity.ok(adminService.processSignal(signalId, status, adminComment, currentUser.getId()));
     }

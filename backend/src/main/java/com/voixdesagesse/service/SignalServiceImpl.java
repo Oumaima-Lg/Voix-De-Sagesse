@@ -2,17 +2,17 @@ package com.voixdesagesse.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import com.voixdesagesse.dto.SignalDTO;
 import com.voixdesagesse.dto.SignalStatus;
 import com.voixdesagesse.entity.Article;
 import com.voixdesagesse.mail.EmailTemplates;
+import com.voixdesagesse.mail.MailService;
 import com.voixdesagesse.entity.Signal;
 import com.voixdesagesse.entity.User;
 import com.voixdesagesse.exception.VoixDeSagesseException;
@@ -20,7 +20,6 @@ import com.voixdesagesse.repository.ArticleRepository;
 import com.voixdesagesse.repository.SignalRepository;
 import com.voixdesagesse.utility.Utilities;
 
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,10 +32,7 @@ public class SignalServiceImpl implements SignalService {
     private final UserService userService;
     private final ArticleService articleService;
     private final ArticleRepository articleRepository;
-    private final JavaMailSender mailSender;
-
-    @Value("${app.mail.from}")
-    private String mailFrom;
+    private final MailService mailService;
 
     @Override
     public SignalDTO reportArticle(Long reporterId, Long articleId, String reason, String description)
@@ -75,49 +71,60 @@ public class SignalServiceImpl implements SignalService {
         List<Signal> signals = signalRepository.findByStatusOrderByCreatedAtDesc(SignalStatus.PENDING);
         return signals.stream()
                 .map(this::convertToDTO)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public SignalDTO processSignal(Long signalId, SignalStatus status, String adminComment, Long adminId) throws VoixDeSagesseException, Exception {
+    public SignalDTO processSignal(Long signalId, SignalStatus status, String adminComment, Long adminId)
+            throws VoixDeSagesseException {
+        if (status != SignalStatus.APPROVED && status != SignalStatus.REJECTED)
+            throw new VoixDeSagesseException("SIGNAL_STATUS_INVALID");
         Signal signal = signalRepository.findById(signalId)
                 .orElseThrow(() -> new VoixDeSagesseException("SIGNAL_NOT_FOUND"));
+        if (signal.getStatus() != SignalStatus.PENDING)
+            throw new VoixDeSagesseException("SIGNAL_ALREADY_PROCESSED");
 
+        LocalDateTime now = LocalDateTime.now();
         signal.setStatus(status);
         signal.setAdminComment(adminComment);
         signal.setAdminId(adminId);
-        signal.setProcessedAt(LocalDateTime.now());
+        signal.setProcessedAt(now);
+        Signal savedSignal = signalRepository.save(signal);
 
         if (status == SignalStatus.APPROVED) {
-            String articleName = articleRepository.findById(signal.getArticleId())
-                    .map(Article::getTitle)
-                    .orElse("Inconnu");
-
-            articleService.deleteArticle(signal.getArticleId(), signal.getReportedUserId());
-            log.info("Article supprimé - ID: {}", signal.getArticleId());
-            
-            sendReport(signal.getReportedUserId(), articleName);
+            // Deleting the article settles the other reports on it with the same decision.
+            signalRepository.settlePendingByArticleId(signal.getArticleId(), SignalStatus.APPROVED, now, adminId);
+            Optional<Article> article = articleRepository.findById(signal.getArticleId());
+            // Reports made before this rule may point to an article its author already deleted.
+            if (article.isPresent()) {
+                articleService.deleteArticle(article.get().getId(), article.get().getUserId());
+                log.info("Article supprimé - ID: {}", signal.getArticleId());
+                notifyAuthor(article.get());
+            }
         }
 
-        Signal updatedSignal = signalRepository.save(signal);
-
         log.info("Signal traité - ID: {}, Statut: {}, Admin: {}", signalId, status, adminId);
-
-        return convertToDTO(updatedSignal);
+        return convertToDTO(savedSignal);
     }
 
-    public Boolean sendReport(Long id, String articleName) throws Exception {
-        User user = userService.getUserById(id);
-        String email = user.getEmail();
-        MimeMessage mm = mailSender.createMimeMessage();
-        MimeMessageHelper message = new MimeMessageHelper(mm, true);
-        message.setTo(email);
-        message.setSubject("[Avertissement] Votre article a été supprimé suite à des signalements");
+    // The decision is already saved: a failed email is logged, it does not undo the moderation.
+    private void notifyAuthor(Article article) {
+        try {
+            User author = userService.getUserById(article.getUserId());
+            mailService.sendHtml(author.getEmail(), "[Avertissement] Votre article a été supprimé suite à des signalements",
+                    EmailTemplates.articleDeleted(author.getNom(), author.getPrenom(), describe(article)));
+        } catch (VoixDeSagesseException e) {
+            log.warn("Author of deleted article {} not notified: {}", article.getId(), e.getMessage());
+        }
+    }
 
-        message.setText(EmailTemplates.articleDeleted(user.getNom(), user.getPrenom(), articleName), true);
-        message.setFrom(mailFrom);
-        mailSender.send(mm);
-        return true;
+    // How the article is named to its author: its title, or the start of its text (wisdoms have no title).
+    static String describe(Article article) {
+        if (article.getTitle() != null && !article.getTitle().isBlank())
+            return article.getTitle();
+        String content = article.getContent() == null ? "" : article.getContent().strip();
+        return content.length() <= 80 ? content : content.substring(0, 80).strip() + "…";
     }
 
     private SignalDTO convertToDTO(Signal signal) {
@@ -188,6 +195,7 @@ public class SignalServiceImpl implements SignalService {
         List<Signal> signals = signalRepository.findAllByOrderByCreatedAtDesc();
         return signals.stream()
                 .map(this::convertToDTO)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 

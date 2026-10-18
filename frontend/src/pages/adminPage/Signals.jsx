@@ -1,12 +1,18 @@
 import { useState, useEffect } from "react"
-import { useSelector } from "react-redux"
-import { AlertTriangle, Eye, Check, X, Clock, Search, ChevronLeft, ChevronRight, Tag, BookOpen, Quote } from "lucide-react"
+import { AlertTriangle, Eye, Check, X, Clock, Search, ChevronLeft, ChevronRight, Tag, BookOpen, Quote, Trash2 } from "lucide-react"
 import { getAllSignals, processSignal } from "../../api/adminService"
 import { errorNotification, successNotification } from "../../utils/notifications"
 import { getApiErrorMessage } from "../../api/apiError"
 
-const Signals = () => {
-    const user = useSelector((state) => state.user)
+// Wisdoms have no title: they are shown by the start of their text.
+const articleLabel = (signal) => {
+    if (signal.articleTitle) return signal.articleTitle
+    const content = signal.articleContent?.trim() || ""
+    return content.length > 60 ? `${content.slice(0, 60).trim()}…` : content || "Article sans titre"
+}
+
+// `onChange`: called after a decision, so the dashboard can refresh its counters.
+const Signals = ({ onChange }) => {
     const [signals, setSignals] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState("")
@@ -21,9 +27,10 @@ const Signals = () => {
         fetchSignals()
     }, [])
 
-    const fetchSignals = async () => {
+    // `silent`: reload without the full-page spinner (after a decision).
+    const fetchSignals = async (silent = false) => {
         try {
-            setIsLoading(true)
+            if (!silent) setIsLoading(true)
             const data = await getAllSignals()
             setSignals(data)
         } catch (error) {
@@ -39,9 +46,9 @@ const Signals = () => {
             case "PENDING":
                 return "bg-yellow-100 text-yellow-800 border-yellow-200"
             case "APPROVED":
-                return "bg-green-100 text-green-800 border-green-200"
-            case "REJECTED":
                 return "bg-red-100 text-red-800 border-red-200"
+            case "REJECTED":
+                return "bg-green-100 text-green-800 border-green-200"
             default:
                 return "bg-gray-100 text-gray-800 border-gray-200"
         }
@@ -67,9 +74,11 @@ const Signals = () => {
             case "PENDING":
                 return "En attente"
             case "APPROVED":
-                return "Approuvé"
+                return "Article supprimé"
             case "REJECTED":
-                return "Rejeté"
+                return "Article gardé"
+            case "CLOSED":
+                return "Supprimé par l'auteur"
             default:
                 return status
         }
@@ -95,7 +104,7 @@ const Signals = () => {
             signal.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             signal.reporterName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             signal.reportedUserName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            signal.articleTitle?.toLowerCase().includes(searchTerm.toLowerCase())
+            articleLabel(signal).toLowerCase().includes(searchTerm.toLowerCase())
         const matchesFilter = filterStatus === "tous" || signal.status === filterStatus
         return matchesSearch && matchesFilter
     })
@@ -105,29 +114,25 @@ const Signals = () => {
     const currentSignals = filteredSignals.slice(indexOfFirstSignal, indexOfLastSignal)
     const totalPages = Math.ceil(filteredSignals.length / signalsPerPage)
 
-    const handleProcessSignal = async (signalId, status) => {
+    // APPROVED deletes the article (and settles its other reports); REJECTED keeps it.
+    const handleProcessSignal = async (signal, status) => {
+        if (status === "APPROVED" && !window.confirm(
+            `Supprimer cet article ?\n\n« ${articleLabel(signal)} »\n\n` +
+            "Il sera retiré du site et son auteur sera prévenu par email. Les autres signalements de cet article seront aussi traités.")) {
+            return
+        }
         try {
             setProcessingSignal(true)
-            await processSignal(signalId, status)
-            
-            setSignals(signals.map(signal => 
-                signal.id === signalId 
-                    ? { 
-                        ...signal, 
-                        status: status, 
-                        processedAt: new Date().toISOString(), 
-                        adminId: user.id 
-                    }
-                    : signal
-            ))
-
-            successNotification("Succès", `Signalement ${status === 'APPROVED' ? 'approuvé' : 'rejeté'} avec succès`)
-            
-            if (showModal) {
-                setShowModal(false)
+            await processSignal(signal.id, status)
+            if (status === "APPROVED") {
+                successNotification("Article supprimé", "L'article a été retiré et son auteur prévenu.")
+            } else {
+                successNotification("Article gardé", "Le signalement est classé.")
             }
+            setShowModal(false)
+            await fetchSignals(true)
+            onChange?.()
         } catch (error) {
-            console.error("Erreur lors du traitement du signalement:", error)
             errorNotification("Erreur", getApiErrorMessage(error, "Impossible de traiter le signalement"))
         } finally {
             setProcessingSignal(false)
@@ -257,8 +262,9 @@ const Signals = () => {
                                 >
                                     <option value="tous">Tous les statuts</option>
                                     <option value="PENDING">En attente</option>
-                                    <option value="APPROVED">Approuvé</option>
-                                    <option value="REJECTED">Rejeté</option>
+                                    <option value="APPROVED">Article supprimé</option>
+                                    <option value="REJECTED">Article gardé</option>
+                                    <option value="CLOSED">Supprimé par l'auteur</option>
                                 </select>
                             </div>
                         </div>
@@ -300,8 +306,8 @@ const Signals = () => {
                                             <div className="text-xs text-[#A09F87]/60">{signal.reportedUserEmail}</div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="text-sm text-white">
-                                                {signal.articleTitle || "Article sans titre"}
+                                            <div className="text-sm text-white line-clamp-2" title={articleLabel(signal)}>
+                                                {articleLabel(signal)}
                                             </div>
                                             <div className="text-xs text-[#A09F87]/60">{formatArticleType(signal.articleType)}</div>
                                         </td>
@@ -317,6 +323,8 @@ const Signals = () => {
                                             <div className="flex items-center space-x-2">
                                                 <button
                                                     onClick={() => openModal(signal)}
+                                                    title="Voir le détail"
+                                                    aria-label="Voir le détail"
                                                     className="p-2 text-[#A09F87] hover:bg-[#A09F87]/20 rounded-lg transition-colors"
                                                 >
                                                     <Eye className="w-4 h-4" />
@@ -324,18 +332,22 @@ const Signals = () => {
                                                 {signal.status === 'PENDING' && (
                                                     <>
                                                         <button
-                                                            onClick={() => handleProcessSignal(signal.id, 'APPROVED')}
+                                                            onClick={() => handleProcessSignal(signal, 'REJECTED')}
                                                             disabled={processingSignal}
+                                                            title="Garder l'article"
+                                                            aria-label="Garder l'article"
                                                             className="p-2 text-green-400 hover:bg-green-900/30 rounded-lg transition-colors disabled:opacity-50"
                                                         >
                                                             <Check className="w-4 h-4" />
                                                         </button>
                                                         <button
-                                                            onClick={() => handleProcessSignal(signal.id, 'REJECTED')}
+                                                            onClick={() => handleProcessSignal(signal, 'APPROVED')}
                                                             disabled={processingSignal}
+                                                            title="Supprimer l'article"
+                                                            aria-label="Supprimer l'article"
                                                             className="p-2 text-red-400 hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50"
                                                         >
-                                                            <X className="w-4 h-4" />
+                                                            <Trash2 className="w-4 h-4" />
                                                         </button>
                                                     </>
                                                 )}
@@ -396,6 +408,7 @@ const Signals = () => {
                                 <h3 className="text-xl font-bold text-white">Détails du Signalement #{selectedSignal.id}</h3>
                                 <button
                                     onClick={() => setShowModal(false)}
+                                    aria-label="Fermer"
                                     className="p-2 hover:bg-[#202020]/50 rounded-lg transition-colors"
                                 >
                                     <X className="w-5 h-5 text-[#A09F87]" />
@@ -513,20 +526,20 @@ const Signals = () => {
                                 {selectedSignal.status === 'PENDING' && (
                                     <div className="flex gap-3 pt-4 border-t border-[#4C3163]/50">
                                         <button
-                                            onClick={() => handleProcessSignal(selectedSignal.id, 'APPROVED')}
+                                            onClick={() => handleProcessSignal(selectedSignal, 'REJECTED')}
                                             disabled={processingSignal}
                                             className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                                         >
                                             <Check className="w-4 h-4" />
-                                            {processingSignal ? "Traitement..." : "Approuver le signalement"}
+                                            {processingSignal ? "Traitement..." : "Garder l'article"}
                                         </button>
                                         <button
-                                            onClick={() => handleProcessSignal(selectedSignal.id, 'REJECTED')}
+                                            onClick={() => handleProcessSignal(selectedSignal, 'APPROVED')}
                                             disabled={processingSignal}
                                             className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                                         >
-                                            <X className="w-4 h-4" />
-                                            {processingSignal ? "Traitement..." : "Rejeter le signalement"}
+                                            <Trash2 className="w-4 h-4" />
+                                            {processingSignal ? "Traitement..." : "Supprimer l'article"}
                                         </button>
                                     </div>
                                 )}

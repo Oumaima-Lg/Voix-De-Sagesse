@@ -16,6 +16,6 @@ public interface AdminService {
 
     List<SignalDTO> getAllSignals() throws VoixDeSagesseException;
 
-    SignalDTO processSignal(Long signalId, SignalStatus status, String adminComment, Long adminId) throws VoixDeSagesseException, Exception;
+    SignalDTO processSignal(Long signalId, SignalStatus status, String adminComment, Long adminId) throws VoixDeSagesseException;
     
 }

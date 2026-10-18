@@ -1,9 +1,12 @@
 package com.voixdesagesse.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
+import org.springframework.data.mongodb.repository.Update;
 import org.springframework.stereotype.Repository;
 
 import com.voixdesagesse.dto.SignalStatus;
@@ -33,6 +36,11 @@ public interface SignalRepository extends MongoRepository<Signal, Long> {
     List<Signal> findAllByOrderByCreatedAtDesc();
 
     void deleteByArticleId(Long articleId);
+
+    // Settles at once every report still waiting on an article (when the article is deleted).
+    @Query("{ 'articleId': ?0, 'status': 'PENDING' }")
+    @Update("{ '$set': { 'status': ?1, 'processedAt': ?2, 'adminId': ?3 } }")
+    long settlePendingByArticleId(Long articleId, SignalStatus status, LocalDateTime processedAt, Long adminId);
 
     void deleteByReporterId(Long reporterId);
 

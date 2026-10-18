@@ -50,7 +50,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public SignalDTO processSignal(Long signalId, SignalStatus status, String adminComment, Long adminId)
-            throws VoixDeSagesseException, Exception {
+            throws VoixDeSagesseException {
         return signalService.processSignal(signalId, status, adminComment, adminId);
     }
 }
