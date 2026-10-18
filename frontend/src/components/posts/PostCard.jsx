@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import { Heart, MessageCircle, UserPlus, MoreHorizontal, Bookmark, Trash2 } from "lucide-react"
+import { Heart, MessageCircle, UserPlus, MoreHorizontal, Bookmark, Trash2, Send } from "lucide-react"
 import { FaQuoteLeft, FaHeart, FaBookmark } from "react-icons/fa"
 import { BiBook } from "react-icons/bi"
 import profileAvatar from "../../assets/profileAvatar.webp"
@@ -47,7 +47,7 @@ const PostCard = ({ poste, interactions, actions, linkToAuthor = true, showYou =
   return (
     <div className="bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% border-[#202020] border-2 rounded-lg shadow-lg">
       {/* Header */}
-      <div className="p-6 pb-4">
+      <div className="p-4 pb-4 sm:p-6 sm:pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full border-2 border-[#4C3163] overflow-hidden">
@@ -67,7 +67,7 @@ const PostCard = ({ poste, interactions, actions, linkToAuthor = true, showYou =
       </div>
 
       {/* Content */}
-      <div className="px-6 space-y-4">
+      <div className="px-4 sm:px-6 space-y-4">
         <div className="flex items-center gap-2 mb-3">
           {poste.article.type === "SAGESSE" ? (
             <FaQuoteLeft className="text-[#A09F87] text-lg" />
@@ -201,7 +201,7 @@ const PostCard = ({ poste, interactions, actions, linkToAuthor = true, showYou =
 
         {/* New comment */}
         <div className="flex gap-3 pt-4 pb-6">
-          <div className="w-8 h-8 rounded-full overflow-hidden border border-[#4C3163]">
+          <div className="w-8 h-8 shrink-0 rounded-full overflow-hidden border border-[#4C3163]">
             {user.profilePicture ? (
               <img
                 src={fileUrl(user.profilePicture)}
@@ -215,13 +215,13 @@ const PostCard = ({ poste, interactions, actions, linkToAuthor = true, showYou =
               <img src={profileAvatar} alt="Avatar par défaut" className="w-full h-full object-cover" />
             )}
           </div>
-          <div className="flex-1 flex gap-2">
+          <div className="flex-1 min-w-0 flex gap-2">
             <input
               value={commentInputs[articleId] || ""}
               onChange={(e) => handleCommentChange(articleId, e.target.value)}
               placeholder="Ajouter un commentaire..."
               maxLength={500}
-              className="flex-1 bg-[#202020] border border-[#4C3163] text-white placeholder:text-gray-400 focus:border-[#A09F87] px-3 py-2 rounded outline-none"
+              className="flex-1 min-w-0 bg-[#202020] border border-[#4C3163] text-white placeholder:text-gray-400 focus:border-[#A09F87] px-3 py-2 rounded outline-none"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault()
@@ -233,12 +233,21 @@ const PostCard = ({ poste, interactions, actions, linkToAuthor = true, showYou =
             <button
               onClick={() => handleCommentSubmit(articleId)}
               disabled={!commentInputs[articleId]?.trim() || commentLoading[articleId]}
-              className={`px-4 py-2 rounded font-medium transition-colors ${!commentInputs[articleId]?.trim() || commentLoading[articleId]
+              aria-label="Publier"
+              className={`px-3 sm:px-4 py-2 rounded font-medium transition-colors ${!commentInputs[articleId]?.trim() || commentLoading[articleId]
                 ? "bg-gray-500 text-gray-300 cursor-not-allowed"
                 : "bg-[#A09F87] hover:bg-[#A09F87]/80 text-[#171717]"
                 }`}
             >
-              {commentLoading[articleId] ? <Spinner /> : "Publier"}
+              {commentLoading[articleId] ? (
+                <Spinner />
+              ) : (
+                <>
+                  {/* Icon only on phones, text from sm up */}
+                  <Send className="w-4 h-4 sm:hidden" />
+                  <span className="hidden sm:inline">Publier</span>
+                </>
+              )}
             </button>
           </div>
         </div>
