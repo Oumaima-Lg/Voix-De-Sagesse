@@ -45,6 +45,7 @@ class AuthorizationIntegrationTest {
 
     private static final long ALICE_ID = 9_001L;
     private static final long BOB_ID = 9_002L;
+    private static final long CAROL_ID = 9_003L;
     private static final long ALICE_ARTICLE_ID = 9_101L;
 
     @Autowired
@@ -129,6 +130,27 @@ class AuthorizationIntegrationTest {
 
         assertEquals("N", userRepository.findById(ALICE_ID).orElseThrow().getNom());
         assertEquals("Pirate", userRepository.findById(BOB_ID).orElseThrow().getNom());
+    }
+
+    @Test
+    @DisplayName("Commentaires : supprimables par leur auteur ou par l'auteur de l'article, pas par un tiers")
+    void commentDeletionRules() throws Exception {
+        saveUser(CAROL_ID, "carol@test.local");
+        long byBob = addComment(BOB_ID), byBob2 = addComment(BOB_ID), byCarol = addComment(CAROL_ID);
+
+        mvc.perform(delete("/comments/" + byBob).with(as(CAROL_ID))).andExpect(status().isBadRequest());
+        mvc.perform(delete("/comments/" + byBob).with(as(BOB_ID))).andExpect(status().isOk());
+        mvc.perform(delete("/comments/" + byBob2).with(as(ALICE_ID))).andExpect(status().isOk());
+        mvc.perform(delete("/comments/" + byCarol).with(as(ALICE_ID))).andExpect(status().isOk());
+
+        assertEquals(0L, articleRepository.findById(ALICE_ARTICLE_ID).orElseThrow().getComments());
+    }
+
+    private long addComment(long authorId) throws Exception {
+        String json = mvc.perform(post("/comments/article/" + ALICE_ARTICLE_ID).with(as(authorId))
+                .contentType(MediaType.APPLICATION_JSON).content("{\"content\":\"Un commentaire\"}"))
+            .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        return new com.fasterxml.jackson.databind.ObjectMapper().readTree(json).get("comment").get("id").asLong();
     }
 
     @Test
