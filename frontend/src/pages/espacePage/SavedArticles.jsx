@@ -8,6 +8,7 @@ import { errorNotification } from "../../utils/notifications"
 import { getApiErrorMessage } from "../../api/apiError"
 import { usePostInteractions } from "../../hooks/usePostInteractions"
 import PostCard, { FollowButton, UnsaveButton } from "../../components/posts/PostCard"
+import NotificationBell from "../../components/notifications/NotificationBell"
 
 const SavedArticles = () => {
     const navigate = useNavigate()
@@ -57,6 +58,7 @@ const SavedArticles = () => {
                 <div className="flex items-center gap-2 text-[#A09F87]">
                     <FaBookmark className="w-5 h-5" />
                     <span className="text-sm">{posts.length} article{posts.length !== 1 ? 's' : ''}</span>
+                    <NotificationBell />
                 </div>
             </div>
 

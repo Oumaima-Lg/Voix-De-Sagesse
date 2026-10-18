@@ -8,6 +8,7 @@ import { getApiErrorMessage } from "../../api/apiError"
 import { errorNotification, successNotification } from "../../utils/notifications"
 import { usePostInteractions } from "../../hooks/usePostInteractions"
 import PostCard, { SaveButton, DeleteButton } from "../../components/posts/PostCard"
+import NotificationBell from "../../components/notifications/NotificationBell"
 
 const MyPosts = () => {
     const navigate = useNavigate()
@@ -76,6 +77,7 @@ const MyPosts = () => {
                 </h1>
                 <div className="flex items-center gap-4">
                     <span className="text-[#A09F87] text-sm">{posts.length} article{posts.length !== 1 ? 's' : ''}</span>
+                    <NotificationBell />
                     <button
                         onClick={() => navigate("/espace/publier")}
                         className="bg-[#A09F87] hover:bg-[#A09F87]/80 text-[#171717] p-2 rounded-lg transition-colors"
