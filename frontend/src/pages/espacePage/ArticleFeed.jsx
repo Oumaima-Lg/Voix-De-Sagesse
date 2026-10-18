@@ -40,7 +40,7 @@ const ArticleFeed = () => {
       })
       .catch((err) => {
         setLoading(false)
-        console.error(err)
+        errorNotification("Erreur", getApiErrorMessage(err, "Impossible de charger les articles"))
       })
   }
 
@@ -60,7 +60,7 @@ const ArticleFeed = () => {
       const searchResults = await searchArticles(filters)
       setPosts(searchResults)
     } catch (error) {
-      console.error("Erreur lors de la recherche:", error)
+      errorNotification("Erreur", getApiErrorMessage(error, "La recherche a échoué"))
       setPosts(allPosts)
       setIsSearchActive(false)
     } finally {

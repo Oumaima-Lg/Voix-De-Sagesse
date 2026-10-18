@@ -93,7 +93,7 @@ const Profile = () => {
             }
         } catch (error) {
             console.error('Erreur lors de la suppression:', error);
-            errorNotification('Erreur', 'Une erreur est survenue lors de la suppression du compte');
+            errorNotification('Erreur', getApiErrorMessage(error, 'Une erreur est survenue lors de la suppression du compte'));
             setIsDeleting(false);
         }
     };
@@ -203,7 +203,7 @@ const Profile = () => {
             successNotification('Succès', 'Photo de profil mise à jour avec succès!');
         } catch (error) {
             console.error('Erreur lors de l\'upload:', error);
-            errorNotification('Erreur', 'Échec du téléchargement de l\'image. Veuillez réessayer.');
+            errorNotification('Erreur', getApiErrorMessage(error, 'Échec du téléchargement de l\'image. Veuillez réessayer.'));
         } finally {
             setUploadingImage(false);
         }

@@ -13,16 +13,8 @@ const axiosInstance = axios.create({
   }
 });
 
-const isPublicRoute = (url) => {
-  const publicRoutes = [
-    '/auth/login',
-    '/auth/register',
-    '/auth/verifyOtp/',
-    '/auth/sendOtp/',
-    '/auth/changePass'
-  ];
-  return publicRoutes.some(route => url.includes(route));
-};
+// Login, sign-up and password reset: a 401 there means wrong credentials, not an expired session.
+const isPublicRoute = (url) => url.includes('/auth/');
 
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -54,66 +46,42 @@ axiosInstance.interceptors.request.use(
   }
 );
 
+// Only what concerns the whole app is handled here: an expired session and the admin area.
+// Every other error is shown once, by the page that made the request (see getApiErrorMessage).
 axiosInstance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
     const { response, config } = error;
 
-    if (response) {
-      switch (response.status) {
+    if (response?.status === 401) {
+      if (!isPublicRoute(config.url)) {
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
 
-        case 401:
-          if (!isPublicRoute(config.url)) {
-            const token = localStorage.getItem('token');
-            const userData = localStorage.getItem('user');
+        if (!token && !userData) {
+          return Promise.reject(error);
+        }
 
-            if (!token && !userData) {
-              return Promise.reject(error);
-            }
+        let message = 'Session expirée, veuillez vous reconnecter';
 
-     
-            let message = 'Session expirée, veuillez vous reconnecter';
+        if (!token && userData) {
+          message = 'Token manquant, reconnexion nécessaire';
+        } else if (token && !userData) {
+          message = 'Données utilisateur corrompues, reconnexion nécessaire';
+        }
 
-            if (!token && userData) {
-              message = 'Token manquant, reconnexion nécessaire';
-            } else if (token && !userData) {
-              message = 'Données utilisateur corrompues, reconnexion nécessaire';
-            }
+        errorNotification('Session expirée', message);
 
-            errorNotification('Session expirée', message);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        store.dispatch(removeUser());
+        store.dispatch(removeJwt());
 
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            store.dispatch(removeUser());
-            store.dispatch(removeJwt());
-
-            window.location.href = `/auth/login?message=${encodeURIComponent(message)}&redirect=${encodeURIComponent(window.location.pathname)}`;
-          }
-          break;
-        
-        case 403:
-          errorNotification('Accès refusé', 'Vous n\'avez pas les permissions nécessaires');
-
-          if (config.url.includes('/admin/')) {
-            window.location.href = '/espace';
-          }
-          break;
-
-        case 500:
-          errorNotification('Erreur serveur', 'Une erreur interne s\'est produite');
-          break;
-
-        default:
-          if (!isPublicRoute(config.url)) {
-            errorNotification('Erreur', response.data?.errorMessage || response.data?.error || 'Une erreur s\'est produite');
-          }
+        window.location.href = `/auth/login?message=${encodeURIComponent(message)}&redirect=${encodeURIComponent(window.location.pathname)}`;
       }
-    } else if (error.code === 'ECONNABORTED') {
-      errorNotification('Timeout', 'La requête a pris trop de temps');
-    } else {
-      errorNotification('Erreur réseau', 'Impossible de contacter le serveur');
+    } else if (response?.status === 403 && config.url.includes('/admin/')) {
+      errorNotification('Accès refusé', 'Cet espace est réservé aux administrateurs.');
+      window.location.href = '/espace';
     }
 
     return Promise.reject(error);

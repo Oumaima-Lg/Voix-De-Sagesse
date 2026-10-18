@@ -27,7 +27,7 @@ const MyPosts = () => {
             .catch((err) => {
                 setLoading(false);
                 console.error(err);
-                errorNotification('Erreur', 'Impossible de charger vos postes');
+                errorNotification('Erreur', getApiErrorMessage(err, 'Impossible de charger vos articles'));
             });
     }, [user.id]);
 

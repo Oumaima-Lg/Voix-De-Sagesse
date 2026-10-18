@@ -8,6 +8,8 @@ import { getUserProfile } from '../../api/userService';
 import { LoadingOverlay } from "@mantine/core"
 import { useParams } from "react-router-dom";
 import { fileUrl } from "../../config"
+import { getApiErrorMessage } from "../../api/apiError"
+import { errorNotification } from "../../utils/notifications"
 
 
 const ProfileAuthor = ({userId: propUserId}) => {
@@ -28,7 +30,7 @@ const ProfileAuthor = ({userId: propUserId}) => {
             })
             .catch((err) => {
                 setLoading(false);
-                console.error(err);
+                errorNotification('Erreur', getApiErrorMessage(err, 'Impossible de charger ce profil'));
             });
     }, [userId]);
 

@@ -3,6 +3,7 @@ import { useSelector } from "react-redux"
 import { AlertTriangle, Eye, Check, X, Clock, Search, ChevronLeft, ChevronRight, Tag, BookOpen, Quote } from "lucide-react"
 import { getAllSignals, processSignal } from "../../api/adminService"
 import { errorNotification, successNotification } from "../../utils/notifications"
+import { getApiErrorMessage } from "../../api/apiError"
 
 const Signals = () => {
     const user = useSelector((state) => state.user)
@@ -27,7 +28,7 @@ const Signals = () => {
             setSignals(data)
         } catch (error) {
             console.error("Erreur lors de la récupération des signalements:", error)
-            errorNotification("Erreur", "Impossible de charger les signalements")
+            errorNotification("Erreur", getApiErrorMessage(error, "Impossible de charger les signalements"))
         } finally {
             setIsLoading(false)
         }
@@ -127,7 +128,7 @@ const Signals = () => {
             }
         } catch (error) {
             console.error("Erreur lors du traitement du signalement:", error)
-            errorNotification("Erreur", "Impossible de traiter le signalement")
+            errorNotification("Erreur", getApiErrorMessage(error, "Impossible de traiter le signalement"))
         } finally {
             setProcessingSignal(false)
         }
