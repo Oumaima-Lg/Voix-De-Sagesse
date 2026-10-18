@@ -371,7 +371,7 @@ const AdminDashboard = () => {
 
             {/* Content based on active tab */}
             {activeTab === "signals" ? (
-                <Signals />
+                <Signals onChange={loadDashboardStats} />
             ) : (
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
