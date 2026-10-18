@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.voixdesagesse.dto.CommentDTO;
 import com.voixdesagesse.entity.User;
 import com.voixdesagesse.exception.VoixDeSagesseException;
@@ -21,6 +24,7 @@ import com.voixdesagesse.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "Commentaires")
 @RestController
 @RequestMapping("/comments")
 @RequiredArgsConstructor
@@ -31,6 +35,7 @@ public class CommentController {
      private final UserService userService;
 
     
+    @Operation(summary = "Commenter un article")
     @PostMapping("/article/{articleId}")
     public ResponseEntity<?> addComment(@PathVariable Long articleId, @RequestBody Map<String, String> request) {
         try {
@@ -65,6 +70,7 @@ public class CommentController {
         }
     }
     
+    @Operation(summary = "Commentaires d'un article")
     @GetMapping("/article/{articleId}")
     public ResponseEntity<?> getCommentsByArticle(@PathVariable Long articleId) {
         try {
@@ -90,6 +96,7 @@ public class CommentController {
     }
     
 
+    @Operation(summary = "Supprimer un commentaire (par son auteur ou l'auteur de l'article)")
     @DeleteMapping("/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long commentId) {
         try {

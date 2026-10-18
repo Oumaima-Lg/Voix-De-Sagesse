@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.voixdesagesse.exception.ErrorInfo;
 
+import io.swagger.v3.oas.annotations.Hidden;
+
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -17,6 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * Errors raised outside the controllers (for example a 403 from Spring Security) are forwarded here.
  * They get the same JSON shape as the errors handled by GlobalExceptionHandler.
  */
+@Hidden
 @RestController
 public class CustomErrorController implements ErrorController {
 

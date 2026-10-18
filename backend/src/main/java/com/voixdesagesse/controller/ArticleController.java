@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.voixdesagesse.dto.HistoireDTO;
 import com.voixdesagesse.dto.PosteDTO;
 import com.voixdesagesse.dto.SagesseDTO;
@@ -31,12 +34,14 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
+@Tag(name = "Articles")
 @RestController
 @RequestMapping("/articles")
 public class ArticleController {
 
     private final ArticleService articleService;
 
+    @Operation(summary = "Publier une sagesse (citation, proverbe…)")
     @PostMapping("/sagesse")
     public ResponseEntity<?> createSagesseArticle(@Valid @RequestBody SagesseDTO sagesseDTO, BindingResult result,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
@@ -57,6 +62,7 @@ public class ArticleController {
         }
     }
 
+    @Operation(summary = "Publier une histoire (expérience personnelle)")
     @PostMapping("/histoire")
     public ResponseEntity<?> createHistoireArticle(@Valid @RequestBody HistoireDTO histoireDTO, BindingResult result,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
@@ -77,11 +83,13 @@ public class ArticleController {
         }
     }
 
+    @Operation(summary = "Fil d'actualité : tous les articles avec leur auteur")
     @GetMapping("/posts")
     public ResponseEntity<List<PosteDTO>> DisplayPosts(@AuthenticationPrincipal CustomUserDetails currentUser) throws VoixDeSagesseException {
         return ResponseEntity.ok(articleService.displayPosts(currentUser.getId()));
     }
 
+    @Operation(summary = "Aimer un article")
     @PostMapping("/{id}/like")
     public ResponseEntity<String> likeArticle(
             @PathVariable Long id,
@@ -91,6 +99,7 @@ public class ArticleController {
         return ResponseEntity.ok("Article liked successfully");
     }
 
+    @Operation(summary = "Retirer son « j'aime »")
     @DeleteMapping("/{id}/like")
     public ResponseEntity<String> unlikeArticle(
             @PathVariable Long id,
@@ -100,6 +109,7 @@ public class ArticleController {
         return ResponseEntity.ok("Article unliked successfully");
     }
 
+    @Operation(summary = "Articles en favoris de l'utilisateur connecté")
     @GetMapping("/saved")
     public ResponseEntity<?> getSavedArticles(@AuthenticationPrincipal CustomUserDetails currentUser) throws VoixDeSagesseException {
         List<PosteDTO> savedPosts = articleService.getSavedArticles(currentUser.getId());
@@ -110,6 +120,7 @@ public class ArticleController {
                 "success", true));
     }
 
+    @Operation(summary = "Articles publiés par l'utilisateur connecté")
     @GetMapping("/my-posts")
     public ResponseEntity<?> getMyPosts(@AuthenticationPrincipal CustomUserDetails currentUser) throws VoixDeSagesseException {
 
@@ -122,6 +133,7 @@ public class ArticleController {
 
     }
 
+    @Operation(summary = "Supprimer un de ses articles")
     @DeleteMapping("/{articleId}")
     public ResponseEntity<?> deleteArticle(@PathVariable Long articleId, @AuthenticationPrincipal CustomUserDetails currentUser)
             throws VoixDeSagesseException {
@@ -133,6 +145,7 @@ public class ArticleController {
                 "deletedArticleId", articleId));
     }
 
+    @Operation(summary = "Rechercher des articles par texte et par type")
     @GetMapping("/search")
     public ResponseEntity<?> searchArticles(
             @AuthenticationPrincipal CustomUserDetails currentUser,

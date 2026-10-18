@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.voixdesagesse.dto.SignalDTO;
 import com.voixdesagesse.dto.SignalStatus;
 import com.voixdesagesse.dto.UserDTO;
@@ -22,6 +25,7 @@ import com.voixdesagesse.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@Tag(name = "Administration")
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -30,6 +34,7 @@ public class AdminController {
 
     private final AdminService adminService;
 
+    @Operation(summary = "Statistiques du tableau de bord")
     @GetMapping("/dashboard")
     public ResponseEntity<?> getDashboardStats() {
         log.info("Admin accessing dashboard");
@@ -39,6 +44,7 @@ public class AdminController {
         return ResponseEntity.ok(stats);
     }
 
+    @Operation(summary = "Liste des utilisateurs")
     @GetMapping("/users")
     public ResponseEntity<?> getAllUsers() throws VoixDeSagesseException {
         log.info("Admin fetching all users");
@@ -46,6 +52,7 @@ public class AdminController {
         return ResponseEntity.ok(users);
     }
 
+    @Operation(summary = "Liste des signalements")
     @GetMapping("/signals")
     public ResponseEntity<?> getAllSignals() {
         try {
@@ -58,6 +65,7 @@ public class AdminController {
         }
     }
 
+    @Operation(summary = "Traiter un signalement (statut et commentaire de l'admin)")
     @PutMapping("/signals/{signalId}/process")
     public ResponseEntity<?> processSignal(
             @PathVariable Long signalId,

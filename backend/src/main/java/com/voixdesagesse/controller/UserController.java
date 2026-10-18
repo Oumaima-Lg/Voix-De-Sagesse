@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.voixdesagesse.dto.UserProfileDTO;
 import com.voixdesagesse.entity.User;
 import com.voixdesagesse.exception.VoixDeSagesseException;
@@ -34,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@Tag(name = "Utilisateurs")
 @RestController
 @Validated
 @RequestMapping("/users")
@@ -46,6 +50,7 @@ public class UserController {
     private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
             "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp");
 
+    @Operation(summary = "Suivre un utilisateur")
     @PostMapping("/{targetUserId}/follow")
     public ResponseEntity<?> followUser(@PathVariable Long targetUserId) throws VoixDeSagesseException {
         User currentUser = userService.getCurrentUser();
@@ -57,6 +62,7 @@ public class UserController {
                 "isFollowing", true));
     }
 
+    @Operation(summary = "Ne plus suivre un utilisateur")
     @DeleteMapping("/{targetUserId}/follow")
     public ResponseEntity<?> unfollowUser(@PathVariable Long targetUserId) throws VoixDeSagesseException {
         User currentUser = userService.getCurrentUser();
@@ -69,6 +75,7 @@ public class UserController {
 
     }
 
+    @Operation(summary = "Savoir si l'on suit un utilisateur")
     @GetMapping("/{targetUserId}/follow")
     public ResponseEntity<?> isFollowingUser(@PathVariable Long targetUserId) throws VoixDeSagesseException {
         User currentUser = userService.getCurrentUser();
@@ -79,6 +86,7 @@ public class UserController {
                 "success", true));
     }
 
+    @Operation(summary = "Utilisateurs que l'on suit")
     @GetMapping("/me/following")
     public ResponseEntity<?> getFollowingUsers() throws VoixDeSagesseException {
         User currentUser = userService.getCurrentUser();
@@ -95,6 +103,7 @@ public class UserController {
                 "success", true));
     }
 
+    @Operation(summary = "Ses abonnés")
     @GetMapping("/me/followers")
     public ResponseEntity<?> getMyFollowers() throws VoixDeSagesseException {
 
@@ -112,6 +121,7 @@ public class UserController {
 
     }
 
+    @Operation(summary = "Modifier son profil")
     @PutMapping("/me")
     public ResponseEntity<UserProfileDTO> updateUserProfile(@Valid @RequestBody UserProfileDTO profileDTO,
             @AuthenticationPrincipal CustomUserDetails currentUser)
@@ -120,6 +130,7 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
+    @Operation(summary = "Profil public d'un utilisateur")
     @GetMapping("/{userId}")
     public ResponseEntity<UserProfileDTO> getUserProfile(@PathVariable long userId,
             @AuthenticationPrincipal CustomUserDetails currentUser) throws VoixDeSagesseException {
@@ -127,6 +138,7 @@ public class UserController {
         return ResponseEntity.ok(userId == currentUser.getId() ? user.toProfileDTO() : user.toPublicProfileDTO());
     }
 
+    @Operation(summary = "Changer sa photo de profil (image, 5 Mo max)")
     @PostMapping("/me/picture")
     public ResponseEntity<?> uploadProfilePicture(@RequestParam("profilePicture") MultipartFile file,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
@@ -170,6 +182,7 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Ajouter un article aux favoris")
     @PostMapping("/me/saved/{articleId}")
     public ResponseEntity<?> saveArticle(@PathVariable Long articleId) throws VoixDeSagesseException {
         User currentUser = userService.getCurrentUser();
@@ -181,6 +194,7 @@ public class UserController {
                 "isSaved", true));
     }
 
+    @Operation(summary = "Retirer un article des favoris")
     @DeleteMapping("/me/saved/{articleId}")
     public ResponseEntity<?> unsaveArticle(@PathVariable Long articleId) throws VoixDeSagesseException {
         User currentUser = userService.getCurrentUser();
@@ -192,6 +206,7 @@ public class UserController {
                 "isSaved", false));
     }
 
+    @Operation(summary = "Savoir si un article est en favori")
     @GetMapping("/me/saved/{articleId}")
     public ResponseEntity<?> isArticleSaved(@PathVariable Long articleId) throws VoixDeSagesseException {
         User currentUser = userService.getCurrentUser();
@@ -202,6 +217,7 @@ public class UserController {
                 "success", true));
     }
 
+    @Operation(summary = "Supprimer son compte")
     @DeleteMapping("/me")
     public ResponseEntity<?> deleteAccount(HttpServletRequest request) {
         try {
