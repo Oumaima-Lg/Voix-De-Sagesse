@@ -17,11 +17,12 @@ services:
       timeout: 5s
       retries: 20
 
-  # Catches every email the backend sends
+  # Catches every email the backend sends (web UI on 8025, SMTP on 1025 for a backend run outside Docker)
   mailpit:
     image: axllent/mailpit:v1.31.4
     ports:
       - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
 
   backend:
     build: ./backend
