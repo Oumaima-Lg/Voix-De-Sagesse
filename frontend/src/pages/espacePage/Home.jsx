@@ -95,7 +95,7 @@ const Home = () => {
                         <div className='flex flex-col justify-center items-center lg:gap-6 gap-0 '>
                             <div className='flex 2xl:space-x-[-50px] gap-2'>
                                 <div className='bg-[#4C3163] size-6 self-end origin-center rotate-24 '></div>
-                                <div className='text-center text-wrap xl:w-xl  text-[#A09F87] charm xl:text-4xl text-2xl font-medium leading-relaxed mx-auto pr-6'>
+                                <div className='text-center text-wrap xl:max-w-xl  text-[#A09F87] charm xl:text-4xl text-2xl font-medium leading-relaxed mx-auto pr-6'>
                                     Dans cette vie, chacun porte ses imperfections, et c'est ce qui fait de nous des êtres humains
                                 </div>
                                 <div className='bg-[#4C3163] size-6 self-start origin-center rotate-24 '></div>
