@@ -129,28 +129,41 @@ public class UserServiceImpl implements UserService {
         }
 
         pendingRegistrationRepository.delete(pending);
+        return saveNewUser(pending.getNom(), pending.getPrenom(), email, pending.getMotdepasse(), AccountType.USER)
+                .toRegisterDTO();
+    }
+
+    @Override
+    public User createAccount(String nom, String prenom, String email, String password, AccountType accountType)
+            throws VoixDeSagesseException {
+        return saveNewUser(nom, prenom, email, passwordEncoder.encode(password), accountType);
+    }
+
+    // The password is already hashed.
+    private User saveNewUser(String nom, String prenom, String email, String encodedPassword, AccountType accountType)
+            throws VoixDeSagesseException {
         // The address may have been registered by another sign-up in the meantime.
         if (userRepository.findByEmail(email).isPresent())
             throw new VoixDeSagesseException("USER_FOUND");
 
         User user = new User();
         user.setId(Utilities.getNextSequence("users"));
-        user.setNom(pending.getNom());
-        user.setPrenom(pending.getPrenom());
+        user.setNom(nom);
+        user.setPrenom(prenom);
         user.setEmail(email);
-        user.setMotdepasse(pending.getMotdepasse());
-        user.setAccountType(AccountType.USER);
-        user.setUsername(user.getPrenom());
+        user.setMotdepasse(encodedPassword);
+        user.setAccountType(accountType);
+        user.setUsername(prenom);
         user.setFollowersCount(0L);
         user.setContentCount(0L);
         user.setFollowingCount(0L);
+        user.setLikesReceived(0L);
         user.setLikedArticlesId(new HashSet<>());
         user.setFollowingId(new HashSet<>());
         user.setSavedArticlesId(new HashSet<>());
+        user.setReportedArticlesId(new HashSet<>());
         user.setDateInscription(LocalDateTime.now());
-        user = userRepository.save(user);
-
-        return user.toRegisterDTO();
+        return userRepository.save(user);
     }
 
     @Override
