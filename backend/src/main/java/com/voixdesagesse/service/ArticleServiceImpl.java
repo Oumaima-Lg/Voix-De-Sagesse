@@ -1,6 +1,7 @@
 package com.voixdesagesse.service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,6 +30,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class ArticleServiceImpl implements ArticleService {
+
+    // Newest first, like a news feed.
+    private static final Comparator<Article> NEWEST_FIRST =
+            Comparator.comparing(Article::getDatePublication, Comparator.nullsLast(Comparator.reverseOrder()));
 
     private final ArticleRepository articleRepository;
 
@@ -88,6 +93,7 @@ public class ArticleServiceImpl implements ArticleService {
 
         List<PosteDTO> posts = articles.stream()
                 .filter(article -> reportedArticles == null || !reportedArticles.contains(article.getId()))
+                .sorted(NEWEST_FIRST)
                 .map(article -> {
                     PosteDTO posteDTO = new PosteDTO();
                     posteDTO.setArticle(article);
@@ -129,6 +135,7 @@ public class ArticleServiceImpl implements ArticleService {
         List<Article> articles = articleRepository.findAllById(filteredSavedArticles);
 
         List<PosteDTO> posts = articles.stream()
+                .sorted(NEWEST_FIRST)
                 .map(article -> {
                     PosteDTO posteDTO = new PosteDTO();
                     posteDTO.setArticle(article);
@@ -262,6 +269,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         List<PosteDTO> posts = articles.stream()
+                .sorted(NEWEST_FIRST)
                 .map(article -> {
                     PosteDTO posteDTO = new PosteDTO();
                     posteDTO.setArticle(article);
