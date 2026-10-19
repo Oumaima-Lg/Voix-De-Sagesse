@@ -1,0 +1,4 @@
+node_modules/
+dist/
+# The API URL is passed as a build argument
+.env*
