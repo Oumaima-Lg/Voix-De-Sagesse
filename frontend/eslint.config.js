@@ -31,4 +31,9 @@ export default [
       ],
     },
   },
+  // End-to-end tests and their config run in Node, not in the browser.
+  {
+    files: ['e2e/**/*.js', 'playwright.config.js'],
+    languageOptions: { globals: globals.node },
+  },
 ]

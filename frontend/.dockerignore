@@ -1,0 +1,9 @@
+node_modules/
+dist/
+# The API URL is passed as a build argument
+.env*
+# End-to-end tests are not part of the app
+e2e/
+playwright.config.js
+test-results/
+playwright-report/

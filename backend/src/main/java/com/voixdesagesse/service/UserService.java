@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.voixdesagesse.dto.AccountType;
 import com.voixdesagesse.dto.ResetPasswordRequest;
 import com.voixdesagesse.dto.ResponseDTO;
 import com.voixdesagesse.dto.UserDTO;
@@ -24,6 +25,10 @@ public interface UserService {
     public ResponseDTO startRegistration(UserRegistrationDTO userDTO) throws VoixDeSagesseException;
 
     public UserRegistrationDTO confirmRegistration(String email, String otp) throws VoixDeSagesseException;
+
+    // Creates an account directly, without the email code (demo data).
+    public User createAccount(String nom, String prenom, String email, String password, AccountType accountType)
+            throws VoixDeSagesseException;
 
     public UserDTO getUserByEmail(String email) throws VoixDeSagesseException;
 
