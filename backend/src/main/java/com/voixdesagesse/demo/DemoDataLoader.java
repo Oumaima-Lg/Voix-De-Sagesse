@@ -113,16 +113,17 @@ public class DemoDataLoader implements ApplicationRunner {
     private Article wisdom(User author, int daysAgo, String content, String source, CategoryType category, String... tags)
             throws VoixDeSagesseException {
         SagesseDTO dto = new SagesseDTO(content, source, category, Set.of(tags), author.getId());
-        return backdate(articleService.createSagesseArticle(dto), daysAgo);
+        return markAsDemo(articleService.createSagesseArticle(dto), daysAgo);
     }
 
     private Article story(User author, int daysAgo, String title, String content, String lesson, CategoryType category,
             String... tags) throws VoixDeSagesseException {
         HistoireDTO dto = new HistoireDTO(title, content, category, Set.of(tags), lesson, author.getId());
-        return backdate(articleService.createHistoireArticle(dto), daysAgo);
+        return markAsDemo(articleService.createHistoireArticle(dto), daysAgo);
     }
 
-    private Article backdate(Article article, int daysAgo) {
+    private Article markAsDemo(Article article, int daysAgo) {
+        article.setDemo(true);
         article.setDatePublication(LocalDateTime.now().minusDays(daysAgo).minusHours(daysAgo * 3L % 11));
         return articleRepository.save(article);
     }

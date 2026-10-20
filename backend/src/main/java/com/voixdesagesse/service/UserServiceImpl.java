@@ -243,6 +243,7 @@ public class UserServiceImpl implements UserService {
     public UserProfileDTO updateUserProfile(Long userId, UserProfileDTO profileDTO) throws VoixDeSagesseException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new VoixDeSagesseException("USER_NOT_FOUND"));
+        rejectSharedDemoAccount(user.getEmail());
         user.setNom(profileDTO.getNom());
         user.setPrenom(profileDTO.getPrenom());
         user.setBio(profileDTO.getBio());
@@ -379,15 +380,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String saveProfilePicture(MultipartFile file, Long userId) throws IOException {
+    public String saveProfilePicture(MultipartFile file, Long userId) throws IOException, VoixDeSagesseException {
+        User user = getUserById(userId);
+        rejectSharedDemoAccount(user.getEmail());
         String profilePictureUrl = pictureStorage.store(file, userId);
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            pictureStorage.delete(user.getProfilePicture());
-            user.setProfilePicture(profilePictureUrl);
-            userRepository.save(user);
-        }
+        pictureStorage.delete(user.getProfilePicture());
+        user.setProfilePicture(profilePictureUrl);
+        userRepository.save(user);
         return profilePictureUrl;
     }
 

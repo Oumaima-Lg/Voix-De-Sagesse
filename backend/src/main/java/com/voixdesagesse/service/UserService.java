@@ -49,7 +49,7 @@ public interface UserService {
     public void decrementLikesReceived(Long userId);
 
     
-    public String saveProfilePicture(MultipartFile file, Long userId) throws IOException;
+    public String saveProfilePicture(MultipartFile file, Long userId) throws IOException, VoixDeSagesseException;
 
     public void incrementContentCount(Long userId);
     

@@ -433,7 +433,7 @@ public class UserServiceImplTest {
 
     @Test
     @DisplayName("Upload photo - la nouvelle photo remplace l'ancienne")
-    void testSaveProfilePictureReplacesOldPicture() throws IOException {
+    void testSaveProfilePictureReplacesOldPicture() throws Exception {
         user.setProfilePicture("/uploads/profile-pictures/old.png");
         MockMultipartFile file = new MockMultipartFile("profilePicture", "photo.png", "image/png", new byte[] { 1, 2, 3 });
         when(pictureStorage.store(file, 1L)).thenReturn("/uploads/profile-pictures/new.png");
@@ -445,6 +445,34 @@ public class UserServiceImplTest {
         assertEquals("/uploads/profile-pictures/new.png", user.getProfilePicture());
         verify(pictureStorage).delete("/uploads/profile-pictures/old.png");
         verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("Comptes démo partagés - le profil ne peut pas être modifié")
+    void testUpdateProfileRefusedForDemoAccount() {
+        user.setEmail("karim@voixdesagesse.local");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        UserProfileDTO profileDTO = new UserProfileDTO();
+        profileDTO.setNom("Autre");
+
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
+            () -> userService.updateUserProfile(1L, profileDTO));
+        assertEquals("DEMO_ACCOUNT_PROTECTED", exception.getMessage());
+        assertEquals("Test", user.getNom());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("Comptes démo partagés - la photo ne peut pas être changée")
+    void testSaveProfilePictureRefusedForDemoAccount() throws Exception {
+        user.setEmail("demo@voixdesagesse.local");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        MockMultipartFile file = new MockMultipartFile("profilePicture", "photo.png", "image/png", new byte[] { 1, 2, 3 });
+
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
+            () -> userService.saveProfilePicture(file, 1L));
+        assertEquals("DEMO_ACCOUNT_PROTECTED", exception.getMessage());
+        verify(pictureStorage, never()).store(any(), anyLong());
     }
 
     @Test

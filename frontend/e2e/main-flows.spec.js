@@ -141,7 +141,7 @@ test.describe.serial('Parcours principaux', () => {
     token = await login(EMAIL, NEW_PASSWORD)
   })
 
-  test('comptes démo : ni suppression ni nouveau mot de passe', async ({ browser }) => {
+  test('comptes démo : ni suppression, ni nouveau mot de passe, ni changement de profil', async ({ browser }) => {
     const demoPage = await browser.newPage({ baseURL: BASE_URL, viewport: VIEWPORT })
     await signIn(demoPage, DEMO)
     await demoPage.goto('/espace/profil')
@@ -152,7 +152,8 @@ test.describe.serial('Parcours principaux', () => {
     await expect(demoPage.locator('.mantine-Notification-root')).toContainText('comptes de démonstration')
     await demoPage.close()
     await expect(api('POST', '/auth/password/otp', null, { email: DEMO })).rejects.toThrow('-> 403')
-    await login(DEMO)
+    const demo = await login(DEMO)
+    await expect(api('PUT', '/users/me', demo, { nom: 'Autre', prenom: 'Nom' })).rejects.toThrow('-> 403')
   })
 
   test('documentation Swagger', async () => {

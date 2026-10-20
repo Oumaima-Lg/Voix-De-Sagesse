@@ -33,7 +33,7 @@ Every setting that changes between environments comes from an environment variab
 | `CLOUDINARY_URL` | empty | `cloudinary://<api_key>:<api_secret>@<cloud_name>`, required by the `cloudinary` storage |
 | `PORT` | `8080` | HTTP port |
 | `DEMO_DATA` | `false` | Create demo accounts and articles when the database is empty |
-| `DEMO_USER_PASSWORD` | `Demo1234!` | Password of the shared demo accounts, which cannot change it or be deleted |
+| `DEMO_USER_PASSWORD` | `Demo1234!` | Password of the shared demo accounts, which cannot change their password or profile, be deleted, or delete the demo articles |
 | `DEMO_ADMIN_PASSWORD` | empty | Password of `admin@voixdesagesse.local`; no admin is created when empty |
 
 ## Tests

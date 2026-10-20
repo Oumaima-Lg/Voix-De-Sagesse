@@ -1,10 +1,13 @@
 package com.voixdesagesse.demo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -19,8 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import com.voixdesagesse.dto.AccountType;
 import com.voixdesagesse.entity.Article;
@@ -32,6 +38,8 @@ import com.voixdesagesse.repository.SignalRepository;
 import com.voixdesagesse.repository.UserRepository;
 import com.voixdesagesse.security.CustomUserDetails;
 import com.voixdesagesse.service.ArticleService;
+
+import tools.jackson.databind.json.JsonMapper;
 
 @SpringBootTest(properties = { "app.demo-data.enabled=true", "app.demo-data.user-password=Demo1234!",
         "app.demo-data.admin-password=Admin1234!" })
@@ -100,21 +108,60 @@ class DemoDataLoaderIntegrationTest {
     }
 
     @Test
-    @DisplayName("Démo : les comptes partagés ne peuvent ni changer de mot de passe ni être supprimés")
+    @DisplayName("Démo : les comptes partagés gardent leur mot de passe, leur profil, leur compte et leurs articles")
     void sharedAccountsAreProtected() throws Exception {
         loader.run(null);
         User demo = userRepository.findByEmail(DemoAccounts.DEMO_EMAIL).orElseThrow();
+        long demoArticle = articleRepository.findByUserId(demo.getId()).get(0).getId();
+        MockMultipartFile picture = new MockMultipartFile("profilePicture", "photo.png", "image/png", new byte[] { 1, 2, 3 });
 
-        mvc.perform(post("/auth/password/otp").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"" + DemoAccounts.DEMO_EMAIL + "\"}"))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.errorMessage").value(PROTECTED));
-        mvc.perform(delete("/users/me").with(user(new CustomUserDetails(demo.getId(), demo.getNom(), demo.getPrenom(),
-                null, demo.getEmail(), demo.getMotdepasse(), demo.getAccountType()))))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.errorMessage").value(PROTECTED));
+        expectProtected(post("/auth/password/otp").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"" + DemoAccounts.DEMO_EMAIL + "\"}"));
+        expectProtected(delete("/users/me").with(as(demo)));
+        expectProtected(put("/users/me").with(as(demo)).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"nom\":\"Autre\",\"prenom\":\"Nom\"}"));
+        expectProtected(multipart("/users/me/picture").file(picture).with(as(demo)));
+        expectProtected(delete("/articles/" + demoArticle).with(as(demo)));
 
-        assertTrue(userRepository.findByEmail(DemoAccounts.DEMO_EMAIL).isPresent());
+        User after = userRepository.findByEmail(DemoAccounts.DEMO_EMAIL).orElseThrow();
+        assertEquals("Démo", after.getNom());
+        assertNull(after.getProfilePicture());
         assertEquals(2, articleRepository.findByUserId(demo.getId()).size());
+    }
+
+    @Test
+    @DisplayName("Démo : un visiteur peut supprimer ce qu'il publie, et l'admin peut retirer un article démo signalé")
+    void visitorPostsAndModerationStillWork() throws Exception {
+        loader.run(null);
+        User demo = userRepository.findByEmail(DemoAccounts.DEMO_EMAIL).orElseThrow();
+        User karim = userRepository.findByEmail(DemoAccounts.KARIM_EMAIL).orElseThrow();
+        User admin = userRepository.findByEmail(DemoAccounts.ADMIN_EMAIL).orElseThrow();
+
+        String created = mvc.perform(post("/articles/sagesse").with(as(demo)).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"content\":\"Une pensée publiée par un visiteur pour essayer.\",\"category\":\"philosophie\",\"tags\":[\"test\"]}"))
+                .andExpect(status().is2xxSuccessful()).andReturn().getResponse().getContentAsString();
+        long visitorArticle = new JsonMapper().readTree(created).get("id").asLong();
+        mvc.perform(delete("/articles/" + visitorArticle).with(as(demo))).andExpect(status().isOk());
+
+        long demoArticle = articleRepository.findByUserId(demo.getId()).get(0).getId();
+        String signal = mvc.perform(post("/signals").with(as(karim)).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"articleId\":" + demoArticle + ",\"reason\":\"Spam\",\"description\":\"\"}"))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        mvc.perform(put("/admin/signals/" + new JsonMapper().readTree(signal).get("id").asLong() + "/process")
+                .param("status", "APPROVED").with(as(admin)))
+                .andExpect(status().isOk());
+
+        assertTrue(articleRepository.findById(demoArticle).isEmpty());
+    }
+
+    private void expectProtected(RequestBuilder request) throws Exception {
+        mvc.perform(request)
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorMessage").value(PROTECTED));
+    }
+
+    private static RequestPostProcessor as(User user) {
+        return user(new CustomUserDetails(user.getId(), user.getNom(), user.getPrenom(), null, user.getEmail(),
+                user.getMotdepasse(), user.getAccountType()));
     }
 }
