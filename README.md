@@ -6,7 +6,8 @@ Built with **Spring Boot 4** (Java 17), **React 19** and **MongoDB**, tested at 
 
 [![CI](https://github.com/Oumaima-Lg/Voix-De-Sagesse/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Oumaima-Lg/Voix-De-Sagesse/actions/workflows/ci.yml) ![Java 17](https://img.shields.io/badge/Java-17-orange) ![Spring Boot 4.1](https://img.shields.io/badge/Spring%20Boot-4.1-6DB33F) ![React 19](https://img.shields.io/badge/React-19-61DAFB) ![MongoDB 8](https://img.shields.io/badge/MongoDB-8-47A248) ![License: MIT](https://img.shields.io/badge/License-MIT-blue)
 
-> **Live demo:** coming soon.
+> **Live demo:** [voix-de-sagesse.onrender.com](https://voix-de-sagesse.onrender.com), sign in with `demo@voixdesagesse.local` / `Demo1234!`, or create your own account with an email code.
+> The free server sleeps when nobody uses it: the first page can take up to two minutes to load.
 
 ![Landing page](.github/screenshots/landing.jpg)
 
