@@ -313,6 +313,39 @@ public class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Comptes démo partagés - pas de code pour changer le mot de passe")
+    void testSendOtpRefusedForDemoAccount() throws Exception {
+        user.setEmail("demo@voixdesagesse.local");
+        when(userRepository.findByEmail("demo@voixdesagesse.local")).thenReturn(Optional.of(user));
+
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
+            () -> userService.sendOtp("demo@voixdesagesse.local"));
+        assertEquals("DEMO_ACCOUNT_PROTECTED", exception.getMessage());
+        verify(otpRepository, never()).save(any(OTP.class));
+        verify(mailService, never()).sendHtml(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("Comptes démo partagés - le mot de passe ne peut pas être changé")
+    void testChangePasswordRefusedForDemoAccount() {
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class, () -> userService.changePassword(
+            new ResetPasswordRequest("karim@voixdesagesse.local", "reset-token", "Password123!")));
+        assertEquals("DEMO_ACCOUNT_PROTECTED", exception.getMessage());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("Comptes démo partagés - le compte ne peut pas être supprimé")
+    void testDeleteRefusedForDemoAccount() {
+        user.setEmail("demo@voixdesagesse.local");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class, () -> userService.deleteUserAccount(1L));
+        assertEquals("DEMO_ACCOUNT_PROTECTED", exception.getMessage());
+        verify(userRepository, never()).deleteById(anyLong());
+    }
+
+    @Test
     @DisplayName("Changement de mot de passe - refusé sans code vérifié")
     void testChangePasswordWithoutVerifiedOtp() {
         when(otpRepository.findById(anyString())).thenReturn(Optional.empty());

@@ -31,9 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DemoDataLoader implements ApplicationRunner {
 
-    public static final String DEMO_EMAIL = "demo@voixdesagesse.local";
-    public static final String ADMIN_EMAIL = "admin@voixdesagesse.local";
-
     @Value("${app.demo-data.user-password}")
     private String userPassword;
 
@@ -53,12 +50,12 @@ public class DemoDataLoader implements ApplicationRunner {
             return;
         }
 
-        User demo = account("Démo", "Visiteur", DEMO_EMAIL);
-        User karim = account("Benali", "Karim", "karim@voixdesagesse.local");
-        User amina = account("El Idrissi", "Amina", "amina@voixdesagesse.local");
-        User youssef = account("Alaoui", "Youssef", "youssef@voixdesagesse.local");
+        User demo = account("Démo", "Visiteur", DemoAccounts.DEMO_EMAIL);
+        User karim = account("Benali", "Karim", DemoAccounts.KARIM_EMAIL);
+        User amina = account("El Idrissi", "Amina", DemoAccounts.AMINA_EMAIL);
+        User youssef = account("Alaoui", "Youssef", DemoAccounts.YOUSSEF_EMAIL);
         if (!adminPassword.isBlank())
-            userService.createAccount("Admin", "Voix", ADMIN_EMAIL, adminPassword, AccountType.ADMIN);
+            userService.createAccount("Admin", "Voix", DemoAccounts.ADMIN_EMAIL, adminPassword, AccountType.ADMIN);
 
         Article patience = wisdom(karim, 13, "La patience est un arbre dont la racine est amère, mais dont les fruits sont doux.",
                 "Proverbe persan", CategoryType.sagesse_populaire, "patience");
@@ -105,7 +102,8 @@ public class DemoDataLoader implements ApplicationRunner {
         save(youssef, coeur);
         save(demo, ensemble, ecoute);
 
-        log.info("Demo data loaded: sign in with {} (admin account: {})", DEMO_EMAIL, adminPassword.isBlank() ? "none" : ADMIN_EMAIL);
+        log.info("Demo data loaded: sign in with {} (admin account: {})", DemoAccounts.DEMO_EMAIL,
+                adminPassword.isBlank() ? "none" : DemoAccounts.ADMIN_EMAIL);
     }
 
     private User account(String nom, String prenom, String email) throws VoixDeSagesseException {

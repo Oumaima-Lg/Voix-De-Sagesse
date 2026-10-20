@@ -30,7 +30,7 @@ Before the first end-to-end run, install the browser with `npx playwright instal
 ## Tests
 
 - **Unit tests** (`src/**/*.test.js(x)`, Vitest and Testing Library): form validation, route guards, login, sign-up with the email code, post actions, notification bell, admin report review, API error handling, waking the API.
-- **End-to-end tests** (`e2e/`, Playwright): a real browser goes through the main flows (sign-up, publishing, reactions, search, favorites, profile picture, password reset, admin), the moderation of reported articles, and notifications. They use the demo accounts and clean up after themselves.
+- **End-to-end tests** (`e2e/`, Playwright): a real browser goes through the main flows (sign-up, publishing, reactions, search, favorites, profile picture, password reset, protected demo accounts, admin), the moderation of reported articles, and notifications. They use the demo accounts and clean up after themselves.
 
 ## Code organization
 

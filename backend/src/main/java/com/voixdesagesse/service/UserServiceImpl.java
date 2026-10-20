@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.voixdesagesse.demo.DemoAccounts;
 import com.voixdesagesse.dto.AccountType;
 import com.voixdesagesse.dto.NotificationType;
 import com.voixdesagesse.dto.ResetPasswordRequest;
@@ -156,6 +157,7 @@ public class UserServiceImpl implements UserService {
             return true;
         }
         User user = found.get();
+        rejectSharedDemoAccount(user.getEmail());
         Optional<OTP> previous = otpRepository.findById(email);
         if (previous.isPresent()
                 && previous.get().getCreationTime().isAfter(LocalDateTime.now().minusSeconds(OTP_RESEND_DELAY_SECONDS)))
@@ -199,6 +201,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseDTO changePassword(ResetPasswordRequest request) throws VoixDeSagesseException {
+        rejectSharedDemoAccount(request.email());
         OTP otpEntity = otpRepository.findById(request.email())
                 .filter(otp -> otp.getResetToken() != null && !isExpired(otp.getCreationTime()))
                 .filter(otp -> MessageDigest.isEqual(
@@ -212,6 +215,11 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         otpRepository.delete(otpEntity);
         return new ResponseDTO("Mot de passe modifié avec succès.");
+    }
+
+    private void rejectSharedDemoAccount(String email) throws VoixDeSagesseException {
+        if (DemoAccounts.isShared(email))
+            throw new VoixDeSagesseException("DEMO_ACCOUNT_PROTECTED");
     }
 
     private boolean isExpired(LocalDateTime creationTime) {
@@ -471,6 +479,7 @@ public class UserServiceImpl implements UserService {
         log.info("Début de la suppression du compte utilisateur: {}", userId);
 
         User user = getUserById(userId);
+        rejectSharedDemoAccount(user.getEmail());
 
         if (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) {
             try {

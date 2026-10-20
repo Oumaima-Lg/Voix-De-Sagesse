@@ -37,7 +37,7 @@ services:
       - key: DEMO_DATA
         value: "true"
       - key: DEMO_ADMIN_PASSWORD
-        sync: false
+        generateValue: true
 
   - type: web
     name: voix-de-sagesse
