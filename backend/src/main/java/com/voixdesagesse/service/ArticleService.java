@@ -27,6 +27,8 @@ public interface ArticleService {
 
     public void deleteArticle(Long articleId, Long currentUserId) throws VoixDeSagesseException;
 
+    public void deleteOwnArticle(Long articleId, Long currentUserId) throws VoixDeSagesseException;
+
     public List<PosteDTO> searchArticles(Long currentUserId, String searchText, String type) throws VoixDeSagesseException;
 
     public long getTotalArticles();

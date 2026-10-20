@@ -108,7 +108,7 @@ public class ArticleController {
     @DeleteMapping("/{articleId}")
     public ResponseEntity<?> deleteArticle(@PathVariable Long articleId, @AuthenticationPrincipal CustomUserDetails currentUser)
             throws VoixDeSagesseException {
-        articleService.deleteArticle(articleId, currentUser.getId());
+        articleService.deleteOwnArticle(articleId, currentUser.getId());
 
         return ResponseEntity.ok(Map.of(
                 "message", "Article supprimé avec succès",

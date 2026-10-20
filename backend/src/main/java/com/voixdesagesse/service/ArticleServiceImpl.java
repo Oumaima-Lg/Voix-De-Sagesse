@@ -219,6 +219,15 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    public void deleteOwnArticle(Long articleId, Long currentUserId) throws VoixDeSagesseException {
+        Article article = articleRepository.findByIdAndUserId(articleId, currentUserId)
+                .orElseThrow(() -> new VoixDeSagesseException("ARTICLE_NOT_FOUND"));
+        if (article.isDemo())
+            throw new VoixDeSagesseException("DEMO_ACCOUNT_PROTECTED");
+        deleteArticle(articleId, currentUserId);
+    }
+
+    @Override
     public void deleteArticle(Long articleId, Long currentUserId) throws VoixDeSagesseException {
         Article article = articleRepository.findByIdAndUserId(articleId, currentUserId)
                 .orElseThrow(() -> new VoixDeSagesseException("ARTICLE_NOT_FOUND"));

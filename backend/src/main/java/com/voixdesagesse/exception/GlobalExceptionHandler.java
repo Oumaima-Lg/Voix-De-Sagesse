@@ -38,6 +38,7 @@ public class GlobalExceptionHandler {
             Map.entry("ARTICLE_NOT_FOUND", HttpStatus.NOT_FOUND),
             Map.entry("COMMENT_NOT_FOUND", HttpStatus.NOT_FOUND),
             Map.entry("SIGNAL_NOT_FOUND", HttpStatus.NOT_FOUND),
+            Map.entry("DEMO_ACCOUNT_PROTECTED", HttpStatus.FORBIDDEN),
             Map.entry("USER_FOUND", HttpStatus.CONFLICT),
             Map.entry("ALREADY_LIKED", HttpStatus.CONFLICT),
             Map.entry("NOT_LIKED", HttpStatus.CONFLICT),

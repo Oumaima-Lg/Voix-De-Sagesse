@@ -40,6 +40,7 @@ public class Article {
     private ArticleType type;  
      
     private long userId;
+    private boolean demo;
 
     public String label() {
         return title != null && !title.isBlank() ? title : Utilities.excerpt(content, 60);

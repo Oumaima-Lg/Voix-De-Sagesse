@@ -8,23 +8,21 @@ import com.voixdesagesse.mail.MailService;
 import com.voixdesagesse.repository.OTPRepository;
 import com.voixdesagesse.repository.PendingRegistrationRepository;
 import com.voixdesagesse.repository.UserRepository;
+import com.voixdesagesse.storage.PictureStorage;
 import com.voixdesagesse.utility.Utilities;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -54,6 +52,9 @@ public class UserServiceImplTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private PictureStorage pictureStorage;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -312,6 +313,39 @@ public class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Comptes démo partagés - pas de code pour changer le mot de passe")
+    void testSendOtpRefusedForDemoAccount() throws Exception {
+        user.setEmail("demo@voixdesagesse.local");
+        when(userRepository.findByEmail("demo@voixdesagesse.local")).thenReturn(Optional.of(user));
+
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
+            () -> userService.sendOtp("demo@voixdesagesse.local"));
+        assertEquals("DEMO_ACCOUNT_PROTECTED", exception.getMessage());
+        verify(otpRepository, never()).save(any(OTP.class));
+        verify(mailService, never()).sendHtml(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("Comptes démo partagés - le mot de passe ne peut pas être changé")
+    void testChangePasswordRefusedForDemoAccount() {
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class, () -> userService.changePassword(
+            new ResetPasswordRequest("karim@voixdesagesse.local", "reset-token", "Password123!")));
+        assertEquals("DEMO_ACCOUNT_PROTECTED", exception.getMessage());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("Comptes démo partagés - le compte ne peut pas être supprimé")
+    void testDeleteRefusedForDemoAccount() {
+        user.setEmail("demo@voixdesagesse.local");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class, () -> userService.deleteUserAccount(1L));
+        assertEquals("DEMO_ACCOUNT_PROTECTED", exception.getMessage());
+        verify(userRepository, never()).deleteById(anyLong());
+    }
+
+    @Test
     @DisplayName("Changement de mot de passe - refusé sans code vérifié")
     void testChangePasswordWithoutVerifiedOtp() {
         when(otpRepository.findById(anyString())).thenReturn(Optional.empty());
@@ -398,23 +432,47 @@ public class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Upload photo - l'extension vient du type d'image, pas du nom de fichier")
-    void testSaveProfilePictureUsesImageExtension(@TempDir Path uploadDir) throws IOException {
-        ReflectionTestUtils.setField(userService, "uploadDir", uploadDir.toString());
-        MockMultipartFile file = new MockMultipartFile("profilePicture", "evil.html", "image/png", new byte[] { 1, 2, 3 });
+    @DisplayName("Upload photo - la nouvelle photo remplace l'ancienne")
+    void testSaveProfilePictureReplacesOldPicture() throws Exception {
+        user.setProfilePicture("/uploads/profile-pictures/old.png");
+        MockMultipartFile file = new MockMultipartFile("profilePicture", "photo.png", "image/png", new byte[] { 1, 2, 3 });
+        when(pictureStorage.store(file, 1L)).thenReturn("/uploads/profile-pictures/new.png");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         String url = userService.saveProfilePicture(file, 1L);
 
-        assertTrue(url.endsWith(".png"), url);
+        assertEquals("/uploads/profile-pictures/new.png", url);
+        assertEquals("/uploads/profile-pictures/new.png", user.getProfilePicture());
+        verify(pictureStorage).delete("/uploads/profile-pictures/old.png");
+        verify(userRepository).save(user);
     }
 
     @Test
-    @DisplayName("Upload photo - un type qui n'est pas une image est refusé")
-    void testSaveProfilePictureRejectsNonImage(@TempDir Path uploadDir) {
-        ReflectionTestUtils.setField(userService, "uploadDir", uploadDir.toString());
-        MockMultipartFile file = new MockMultipartFile("profilePicture", "evil.html", "text/html", new byte[] { 1 });
+    @DisplayName("Comptes démo partagés - le profil ne peut pas être modifié")
+    void testUpdateProfileRefusedForDemoAccount() {
+        user.setEmail("karim@voixdesagesse.local");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        UserProfileDTO profileDTO = new UserProfileDTO();
+        profileDTO.setNom("Autre");
 
-        assertThrows(IOException.class, () -> userService.saveProfilePicture(file, 1L));
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
+            () -> userService.updateUserProfile(1L, profileDTO));
+        assertEquals("DEMO_ACCOUNT_PROTECTED", exception.getMessage());
+        assertEquals("Test", user.getNom());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("Comptes démo partagés - la photo ne peut pas être changée")
+    void testSaveProfilePictureRefusedForDemoAccount() throws Exception {
+        user.setEmail("demo@voixdesagesse.local");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        MockMultipartFile file = new MockMultipartFile("profilePicture", "photo.png", "image/png", new byte[] { 1, 2, 3 });
+
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
+            () -> userService.saveProfilePicture(file, 1L));
+        assertEquals("DEMO_ACCOUNT_PROTECTED", exception.getMessage());
+        verify(pictureStorage, never()).store(any(), anyLong());
     }
 
     @Test

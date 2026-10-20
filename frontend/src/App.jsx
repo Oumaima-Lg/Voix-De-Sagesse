@@ -9,8 +9,10 @@ import Store from './store'
 import { Provider } from 'react-redux'
 import AppRoutes from './routes/AppRoutes';
 import { BrowserRouter } from 'react-router-dom';
+import { useServerWakeUp } from './hooks/useServerWakeUp';
 
 const App = () => {
+  useServerWakeUp();
 
   return (
     <Provider store={Store}>

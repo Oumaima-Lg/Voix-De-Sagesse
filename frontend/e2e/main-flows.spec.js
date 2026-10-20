@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import {
-  ADMIN, ADMIN_PASSWORD, API, BASE_URL, KARIM, VIEWPORT,
+  ADMIN, ADMIN_PASSWORD, API, BASE_URL, DEMO, KARIM, VIEWPORT,
   api, card, expectCall, likeButton, login, signIn, waitForCode,
 } from './helpers.js'
 
@@ -139,6 +139,21 @@ test.describe.serial('Parcours principaux', () => {
     const { resetToken } = await api('POST', '/auth/password/otp/verify', null, { email: EMAIL, otp: code })
     await api('POST', '/auth/password/reset', null, { email: EMAIL, resetToken, newPassword: NEW_PASSWORD })
     token = await login(EMAIL, NEW_PASSWORD)
+  })
+
+  test('comptes démo : ni suppression, ni nouveau mot de passe, ni changement de profil', async ({ browser }) => {
+    const demoPage = await browser.newPage({ baseURL: BASE_URL, viewport: VIEWPORT })
+    await signIn(demoPage, DEMO)
+    await demoPage.goto('/espace/profil')
+    await demoPage.getByRole('button', { name: 'Supprimer mon compte' }).click()
+    await demoPage.getByPlaceholder('Tapez SUPPRIMER').fill('SUPPRIMER')
+    await expectCall(demoPage, 'DELETE', '/users/me',
+      () => demoPage.getByRole('button', { name: 'Supprimer définitivement' }).click(), 403)
+    await expect(demoPage.locator('.mantine-Notification-root')).toContainText('comptes de démonstration')
+    await demoPage.close()
+    await expect(api('POST', '/auth/password/otp', null, { email: DEMO })).rejects.toThrow('-> 403')
+    const demo = await login(DEMO)
+    await expect(api('PUT', '/users/me', demo, { nom: 'Autre', prenom: 'Nom' })).rejects.toThrow('-> 403')
   })
 
   test('documentation Swagger', async () => {

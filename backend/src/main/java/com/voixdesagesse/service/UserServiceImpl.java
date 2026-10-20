@@ -2,21 +2,15 @@ package com.voixdesagesse.service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.voixdesagesse.demo.DemoAccounts;
 import com.voixdesagesse.dto.AccountType;
 import com.voixdesagesse.dto.NotificationType;
 import com.voixdesagesse.dto.ResetPasswordRequest;
@@ -43,6 +38,7 @@ import com.voixdesagesse.repository.OTPRepository;
 import com.voixdesagesse.repository.PendingRegistrationRepository;
 import com.voixdesagesse.repository.SignalRepository;
 import com.voixdesagesse.repository.UserRepository;
+import com.voixdesagesse.storage.PictureStorage;
 import com.voixdesagesse.utility.Utilities;
 
 import lombok.RequiredArgsConstructor;
@@ -53,19 +49,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private static final Map<String, String> IMAGE_EXTENSIONS = Map.of(
-            "image/jpeg", ".jpg",
-            "image/jpg", ".jpg",
-            "image/png", ".png",
-            "image/gif", ".gif",
-            "image/webp", ".webp");
-
     private static final long OTP_VALIDITY_MINUTES = 10;
     private static final int OTP_MAX_ATTEMPTS = 5;
     private static final long OTP_RESEND_DELAY_SECONDS = 60;
-
-    @Value("${file.upload-dir:uploads/profile-pictures}")
-    private String uploadDir;
 
     private final UserRepository userRepository;
     private final OTPRepository otpRepository;
@@ -73,6 +59,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
     private final NotificationService notificationService;
+    private final PictureStorage pictureStorage;
     private final CommonService commonService;
     private final SignalRepository signalRepository;
     private final ArticleRepository articleRepository;
@@ -170,6 +157,7 @@ public class UserServiceImpl implements UserService {
             return true;
         }
         User user = found.get();
+        rejectSharedDemoAccount(user.getEmail());
         Optional<OTP> previous = otpRepository.findById(email);
         if (previous.isPresent()
                 && previous.get().getCreationTime().isAfter(LocalDateTime.now().minusSeconds(OTP_RESEND_DELAY_SECONDS)))
@@ -213,6 +201,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseDTO changePassword(ResetPasswordRequest request) throws VoixDeSagesseException {
+        rejectSharedDemoAccount(request.email());
         OTP otpEntity = otpRepository.findById(request.email())
                 .filter(otp -> otp.getResetToken() != null && !isExpired(otp.getCreationTime()))
                 .filter(otp -> MessageDigest.isEqual(
@@ -226,6 +215,11 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         otpRepository.delete(otpEntity);
         return new ResponseDTO("Mot de passe modifié avec succès.");
+    }
+
+    private void rejectSharedDemoAccount(String email) throws VoixDeSagesseException {
+        if (DemoAccounts.isShared(email))
+            throw new VoixDeSagesseException("DEMO_ACCOUNT_PROTECTED");
     }
 
     private boolean isExpired(LocalDateTime creationTime) {
@@ -249,6 +243,7 @@ public class UserServiceImpl implements UserService {
     public UserProfileDTO updateUserProfile(Long userId, UserProfileDTO profileDTO) throws VoixDeSagesseException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new VoixDeSagesseException("USER_NOT_FOUND"));
+        rejectSharedDemoAccount(user.getEmail());
         user.setNom(profileDTO.getNom());
         user.setPrenom(profileDTO.getPrenom());
         user.setBio(profileDTO.getBio());
@@ -385,45 +380,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String saveProfilePicture(MultipartFile file, Long userId) throws IOException {
-        Path uploadPath = Paths.get(uploadDir);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
-
-        String fileExtension = IMAGE_EXTENSIONS.get(String.valueOf(file.getContentType()).toLowerCase());
-        if (fileExtension == null)
-            throw new IOException("Unsupported image type");
-        String uniqueFileName = "profile_" + userId + "_" + System.currentTimeMillis() + fileExtension;
-        Path filePath = uploadPath.resolve(uniqueFileName);
-        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        String profilePictureUrl = "/uploads/profile-pictures/" + uniqueFileName;
-
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-
-            if (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) {
-                deleteOldProfilePicture(user.getProfilePicture());
-            }
-
-            user.setProfilePicture(profilePictureUrl);
-            userRepository.save(user);
-        }
-
+    public String saveProfilePicture(MultipartFile file, Long userId) throws IOException, VoixDeSagesseException {
+        User user = getUserById(userId);
+        rejectSharedDemoAccount(user.getEmail());
+        String profilePictureUrl = pictureStorage.store(file, userId);
+        pictureStorage.delete(user.getProfilePicture());
+        user.setProfilePicture(profilePictureUrl);
+        userRepository.save(user);
         return profilePictureUrl;
-    }
-
-    private void deleteOldProfilePicture(String oldPictureUrl) {
-        try {
-            String fileName = oldPictureUrl.substring(oldPictureUrl.lastIndexOf("/") + 1);
-            Path oldFilePath = Paths.get(uploadDir).resolve(fileName);
-            if (Files.exists(oldFilePath)) {
-                Files.delete(oldFilePath);
-            }
-        } catch (IOException e) {
-            log.error("Erreur lors de la suppression de l'ancienne image: " + e.getMessage());
-        }
     }
 
     @Override
@@ -514,10 +478,11 @@ public class UserServiceImpl implements UserService {
         log.info("Début de la suppression du compte utilisateur: {}", userId);
 
         User user = getUserById(userId);
+        rejectSharedDemoAccount(user.getEmail());
 
         if (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) {
             try {
-                deleteOldProfilePicture(user.getProfilePicture());
+                pictureStorage.delete(user.getProfilePicture());
                 log.info("Photo de profil supprimée pour l'utilisateur: {}", userId);
             } catch (Exception e) {
                 log.error("Erreur lors de la suppression de la photo de profil: {}", e.getMessage());
