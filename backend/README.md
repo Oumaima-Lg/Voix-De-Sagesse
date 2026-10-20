@@ -28,7 +28,9 @@ Every setting that changes between environments comes from an environment variab
 | `MAIL_USERNAME`, `MAIL_PASSWORD` | empty | SMTP credentials |
 | `MAIL_SMTP_AUTH`, `MAIL_SMTP_STARTTLS` | `false`, `false` | SMTP options |
 | `MAIL_FROM` | `no-reply@voixdesagesse.local` | Sender address |
-| `UPLOAD_DIR` | `uploads/profile-pictures` | Where profile pictures are stored |
+| `PICTURE_STORAGE` | `local` | Where profile pictures go: `local` (a folder) or `cloudinary` |
+| `UPLOAD_DIR` | `uploads/profile-pictures` | Folder used by the `local` storage |
+| `CLOUDINARY_URL` | empty | `cloudinary://<api_key>:<api_secret>@<cloud_name>`, required by the `cloudinary` storage |
 | `PORT` | `8080` | HTTP port |
 | `DEMO_DATA` | `false` | Create demo accounts and articles when the database is empty |
 | `DEMO_USER_PASSWORD` | `Demo1234!` | Password of the demo accounts |
@@ -40,7 +42,7 @@ Every setting that changes between environments comes from an environment variab
 ./mvnw test
 ```
 
-Unit tests use Mockito. Integration tests call the API through MockMvc or a real HTTP server, against a MongoDB database named `voixdesagesse_test` on `localhost:27017` (`MONGODB_TEST_URI` to use another one). They cover authorization (acting as another user, admin routes), sign-up and password codes, error responses, moderation, notifications and the demo data.
+Unit tests use Mockito. Integration tests call the API through MockMvc or a real HTTP server, against a MongoDB database named `voixdesagesse_test` on `localhost:27017` (`MONGODB_TEST_URI` to use another one). They cover authorization (acting as another user, admin routes), sign-up and password codes, error responses, moderation, notifications, profile pictures and the demo data.
 
 ## Code organization
 
@@ -53,9 +55,10 @@ Unit tests use Mockito. Integration tests call the API through MockMvc or a real
 | `repository` | Spring Data MongoDB repositories, including atomic updates |
 | `entity`, `dto` | Stored documents and API payloads |
 | `security` | JWT filter and helper, user details, login attempt limiter |
-| `config` | Security rules, CORS, static files, OpenAPI |
+| `config` | Security rules, CORS, OpenAPI |
 | `exception` | Business errors and the global handler that formats every error the same way |
 | `mail` | Email templates and sending |
+| `storage` | Profile pictures behind one interface: a local folder served by the API, or Cloudinary in production |
 | `demo` | Demo data loaded on an empty database |
 
 Error messages shown to users are in `src/main/resources/messages.properties`.

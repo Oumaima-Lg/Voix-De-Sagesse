@@ -2,21 +2,15 @@ package com.voixdesagesse.service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,6 +37,7 @@ import com.voixdesagesse.repository.OTPRepository;
 import com.voixdesagesse.repository.PendingRegistrationRepository;
 import com.voixdesagesse.repository.SignalRepository;
 import com.voixdesagesse.repository.UserRepository;
+import com.voixdesagesse.storage.PictureStorage;
 import com.voixdesagesse.utility.Utilities;
 
 import lombok.RequiredArgsConstructor;
@@ -53,19 +48,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private static final Map<String, String> IMAGE_EXTENSIONS = Map.of(
-            "image/jpeg", ".jpg",
-            "image/jpg", ".jpg",
-            "image/png", ".png",
-            "image/gif", ".gif",
-            "image/webp", ".webp");
-
     private static final long OTP_VALIDITY_MINUTES = 10;
     private static final int OTP_MAX_ATTEMPTS = 5;
     private static final long OTP_RESEND_DELAY_SECONDS = 60;
-
-    @Value("${file.upload-dir:uploads/profile-pictures}")
-    private String uploadDir;
 
     private final UserRepository userRepository;
     private final OTPRepository otpRepository;
@@ -73,6 +58,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
     private final NotificationService notificationService;
+    private final PictureStorage pictureStorage;
     private final CommonService commonService;
     private final SignalRepository signalRepository;
     private final ArticleRepository articleRepository;
@@ -386,44 +372,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String saveProfilePicture(MultipartFile file, Long userId) throws IOException {
-        Path uploadPath = Paths.get(uploadDir);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
-
-        String fileExtension = IMAGE_EXTENSIONS.get(String.valueOf(file.getContentType()).toLowerCase());
-        if (fileExtension == null)
-            throw new IOException("Unsupported image type");
-        String uniqueFileName = "profile_" + userId + "_" + System.currentTimeMillis() + fileExtension;
-        Path filePath = uploadPath.resolve(uniqueFileName);
-        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        String profilePictureUrl = "/uploads/profile-pictures/" + uniqueFileName;
-
+        String profilePictureUrl = pictureStorage.store(file, userId);
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-
-            if (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) {
-                deleteOldProfilePicture(user.getProfilePicture());
-            }
-
+            pictureStorage.delete(user.getProfilePicture());
             user.setProfilePicture(profilePictureUrl);
             userRepository.save(user);
         }
-
         return profilePictureUrl;
-    }
-
-    private void deleteOldProfilePicture(String oldPictureUrl) {
-        try {
-            String fileName = oldPictureUrl.substring(oldPictureUrl.lastIndexOf("/") + 1);
-            Path oldFilePath = Paths.get(uploadDir).resolve(fileName);
-            if (Files.exists(oldFilePath)) {
-                Files.delete(oldFilePath);
-            }
-        } catch (IOException e) {
-            log.error("Erreur lors de la suppression de l'ancienne image: " + e.getMessage());
-        }
     }
 
     @Override
@@ -517,7 +474,7 @@ public class UserServiceImpl implements UserService {
 
         if (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) {
             try {
-                deleteOldProfilePicture(user.getProfilePicture());
+                pictureStorage.delete(user.getProfilePicture());
                 log.info("Photo de profil supprimée pour l'utilisateur: {}", userId);
             } catch (Exception e) {
                 log.error("Erreur lors de la suppression de la photo de profil: {}", e.getMessage());

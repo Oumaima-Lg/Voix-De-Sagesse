@@ -56,7 +56,7 @@ flowchart LR
     api["Spring Boot 4 API<br/>Java 17, Spring Security"]
     db[("MongoDB 8")]
     mail["SMTP server<br/>(Mailpit locally)"]
-    files[("Profile pictures")]
+    files[("Profile pictures<br/>(folder locally, Cloudinary online)")]
 
     browser -- "pages and scripts" --> web
     browser -- "REST + JWT" --> api
@@ -67,7 +67,7 @@ flowchart LR
 
 | Part | Technologies |
 |---|---|
-| **Backend** | Java 17, Spring Boot 4.1 (Web MVC, Security, Data MongoDB, Validation, Mail, Actuator), JJWT, springdoc-openapi, Lombok |
+| **Backend** | Java 17, Spring Boot 4.1 (Web MVC, Security, Data MongoDB, Validation, Mail, Actuator), JJWT, springdoc-openapi, Cloudinary SDK, Lombok |
 | **Frontend** | React 19, Vite 6, React Router 7, Redux Toolkit, Mantine 8, Tailwind CSS 4, Framer Motion, Axios |
 | **Database** | MongoDB 8 |
 | **Tests** | JUnit 5, Mockito, MockMvc · Vitest, Testing Library · Playwright |
@@ -80,7 +80,7 @@ flowchart LR
 - **Consistent data.** Likes use atomic MongoDB updates, so a double click cannot count twice. Notifications are not duplicated, disappear when the action is undone, and expire after 90 days through a TTL index.
 - **Moderation workflow.** Deleting a reported article settles all its reports; reports are closed if the author deletes the article first. A failed email never undoes a decision.
 - **Demo data.** On an empty database, the backend creates demo accounts and content through its own services, so counters and notifications match real use.
-- **Tests at three levels.** 70 backend tests (unit, and integration against a real MongoDB), 37 frontend unit tests, and 26 end-to-end tests that drive a real browser through the whole app. Backend and frontend checks run on every pull request with GitHub Actions.
+- **Tests at three levels.** 81 backend tests (unit, and integration against a real MongoDB), 37 frontend unit tests, and 26 end-to-end tests that drive a real browser through the whole app. Backend and frontend checks run on every pull request with GitHub Actions.
 
 ## Getting started
 
@@ -112,7 +112,7 @@ The passwords can be changed in `.env`. To work on one part without Docker, see 
 
 | Level | Tools | Command |
 |---|---|---|
-| Backend: unit and integration (70) | JUnit 5, Mockito, MockMvc | `cd backend && ./mvnw test`, with MongoDB running (`docker compose up -d mongo`) |
+| Backend: unit and integration (81) | JUnit 5, Mockito, MockMvc | `cd backend && ./mvnw test`, with MongoDB running (`docker compose up -d mongo`) |
 | Frontend: unit (37) | Vitest, Testing Library | `cd frontend && npm test` |
 | End-to-end (26) | Playwright | `cd frontend && npm run test:e2e`, with the app running (`docker compose up`) |
 
@@ -132,6 +132,7 @@ Without Node, `frontend/e2e/run-in-docker.sh` runs the end-to-end tests in Playw
 │       ├── config/          security, CORS, API documentation
 │       ├── exception/       error handling
 │       ├── mail/            email templates and sending
+│       ├── storage/         profile pictures: local folder or Cloudinary
 │       └── demo/            demo data loader
 ├── frontend/                React application
 │   ├── src/
@@ -157,7 +158,6 @@ Without Node, `frontend/e2e/run-in-docker.sh` runs the end-to-end tests in Playw
 
 - Real-time notifications (WebSocket or Server-Sent Events) instead of polling every 30 seconds
 - Pagination or infinite scroll in the feed
-- Profile pictures in an object storage service
 - Readable category labels in the feed ("Émouvante" instead of "emouvante")
 - End-to-end tests in the CI pipeline
 

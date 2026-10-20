@@ -8,23 +8,21 @@ import com.voixdesagesse.mail.MailService;
 import com.voixdesagesse.repository.OTPRepository;
 import com.voixdesagesse.repository.PendingRegistrationRepository;
 import com.voixdesagesse.repository.UserRepository;
+import com.voixdesagesse.storage.PictureStorage;
 import com.voixdesagesse.utility.Utilities;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -54,6 +52,9 @@ public class UserServiceImplTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private PictureStorage pictureStorage;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -398,23 +399,19 @@ public class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Upload photo - l'extension vient du type d'image, pas du nom de fichier")
-    void testSaveProfilePictureUsesImageExtension(@TempDir Path uploadDir) throws IOException {
-        ReflectionTestUtils.setField(userService, "uploadDir", uploadDir.toString());
-        MockMultipartFile file = new MockMultipartFile("profilePicture", "evil.html", "image/png", new byte[] { 1, 2, 3 });
+    @DisplayName("Upload photo - la nouvelle photo remplace l'ancienne")
+    void testSaveProfilePictureReplacesOldPicture() throws IOException {
+        user.setProfilePicture("/uploads/profile-pictures/old.png");
+        MockMultipartFile file = new MockMultipartFile("profilePicture", "photo.png", "image/png", new byte[] { 1, 2, 3 });
+        when(pictureStorage.store(file, 1L)).thenReturn("/uploads/profile-pictures/new.png");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         String url = userService.saveProfilePicture(file, 1L);
 
-        assertTrue(url.endsWith(".png"), url);
-    }
-
-    @Test
-    @DisplayName("Upload photo - un type qui n'est pas une image est refusé")
-    void testSaveProfilePictureRejectsNonImage(@TempDir Path uploadDir) {
-        ReflectionTestUtils.setField(userService, "uploadDir", uploadDir.toString());
-        MockMultipartFile file = new MockMultipartFile("profilePicture", "evil.html", "text/html", new byte[] { 1 });
-
-        assertThrows(IOException.class, () -> userService.saveProfilePicture(file, 1L));
+        assertEquals("/uploads/profile-pictures/new.png", url);
+        assertEquals("/uploads/profile-pictures/new.png", user.getProfilePicture());
+        verify(pictureStorage).delete("/uploads/profile-pictures/old.png");
+        verify(userRepository).save(user);
     }
 
     @Test
