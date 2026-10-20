@@ -65,4 +65,6 @@ Error messages shown to users are in `src/main/resources/messages.properties`.
 
 ## Docker image
 
-The `Dockerfile` builds the jar with Maven, then runs it on a Java 17 runtime image as a non-root user. `/actuator/health` is public, for health checks.
+The `Dockerfile` builds the jar with Maven, then runs it on a Java 17 runtime image as a non-root user. To start faster on a small server, the image includes a class data sharing archive, created by a training run during the build, and uses the C1 compiler and the serial garbage collector. `/actuator/health` is public, for health checks.
+
+With the `local` storage, pictures are written to `/app/uploads`, owned by the app user; Docker Compose keeps them in a volume. On Render the disk is not kept between restarts, so production uses `PICTURE_STORAGE=cloudinary`.

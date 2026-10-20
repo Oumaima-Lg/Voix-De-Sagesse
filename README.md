@@ -55,7 +55,7 @@ flowchart LR
     web["nginx<br/>React 19 build"]
     api["Spring Boot 4 API<br/>Java 17, Spring Security"]
     db[("MongoDB 8")]
-    mail["SMTP server<br/>(Mailpit locally)"]
+    mail["SMTP server<br/>(Mailpit locally, Brevo online)"]
     files[("Profile pictures<br/>(folder locally, Cloudinary online)")]
 
     browser -- "pages and scripts" --> web
@@ -80,7 +80,7 @@ flowchart LR
 - **Consistent data.** Likes use atomic MongoDB updates, so a double click cannot count twice. Notifications are not duplicated, disappear when the action is undone, and expire after 90 days through a TTL index.
 - **Moderation workflow.** Deleting a reported article settles all its reports; reports are closed if the author deletes the article first. A failed email never undoes a decision.
 - **Demo data.** On an empty database, the backend creates demo accounts and content through its own services, so counters and notifications match real use.
-- **Tests at three levels.** 81 backend tests (unit, and integration against a real MongoDB), 37 frontend unit tests, and 26 end-to-end tests that drive a real browser through the whole app. Backend and frontend checks run on every pull request with GitHub Actions.
+- **Tests at three levels.** 81 backend tests (unit, and integration against a real MongoDB), 41 frontend unit tests, and 26 end-to-end tests that drive a real browser through the whole app. Backend and frontend checks run on every pull request with GitHub Actions.
 
 ## Getting started
 
@@ -113,10 +113,16 @@ The passwords can be changed in `.env`. To work on one part without Docker, see 
 | Level | Tools | Command |
 |---|---|---|
 | Backend: unit and integration (81) | JUnit 5, Mockito, MockMvc | `cd backend && ./mvnw test`, with MongoDB running (`docker compose up -d mongo`) |
-| Frontend: unit (37) | Vitest, Testing Library | `cd frontend && npm test` |
+| Frontend: unit (41) | Vitest, Testing Library | `cd frontend && npm test` |
 | End-to-end (26) | Playwright | `cd frontend && npm run test:e2e`, with the app running (`docker compose up`) |
 
 Without Node, `frontend/e2e/run-in-docker.sh` runs the end-to-end tests in Playwright's Docker image.
+
+## Deployment
+
+The app runs on free plans: [Render](https://render.com) hosts the API (Docker) and the frontend (static site), [MongoDB Atlas](https://www.mongodb.com/atlas) stores the data, [Cloudinary](https://cloudinary.com) the profile pictures, and [Brevo](https://www.brevo.com) sends the emails. [`render.yaml`](render.yaml) describes both services, so Render creates them from the repository.
+
+On the free plan the API sleeps after 15 minutes without traffic. To shorten the restart, the Docker image ships a class data sharing archive and JVM options suited to a small CPU, and the frontend wakes the API as soon as a page opens and tells the visitor while it starts.
 
 ## Project structure
 
@@ -143,6 +149,7 @@ Without Node, `frontend/e2e/run-in-docker.sh` runs the end-to-end tests in Playw
 │   │   └── routes/          routing and access guards
 │   └── e2e/                 end-to-end tests
 ├── docker-compose.yml       the whole app on your machine
+├── render.yaml              free deployment on Render
 └── .github/                 CI workflow and screenshots
 ```
 
@@ -153,6 +160,7 @@ Without Node, `frontend/e2e/run-in-docker.sh` runs the end-to-end tests in Playw
 - **Each level of tests catches different bugs.** Unit tests check the logic; end-to-end tests caught problems that only appear when everything runs together, such as an error message shown twice.
 - **A feature is more than its happy path.** Consistent error messages, loading and empty states, small screens, and data that stays consistent when an action is undone or an article is deleted.
 - **Making a project easy to run.** With Docker Compose and demo data, anyone can try the whole app with one command.
+- **Measuring before tuning.** Run locally with the free plan's limits (512 MB, 0.1 CPU), the API took 7 minutes to start. A class data sharing archive and lighter JVM options brought it to about 2 minutes, using 140 MB of memory.
 
 ## Possible improvements
 
