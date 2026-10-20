@@ -31,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
-    // HTTP status of the known business error keys; any other VoixDeSagesseException is a bad request.
     private static final Map<String, HttpStatus> STATUS_BY_KEY = Map.ofEntries(
             Map.entry("INVALID_CREDENTIALS", HttpStatus.UNAUTHORIZED),
             Map.entry("COMMENT_DELETE_FORBIDDEN", HttpStatus.FORBIDDEN),
@@ -39,7 +38,6 @@ public class GlobalExceptionHandler {
             Map.entry("ARTICLE_NOT_FOUND", HttpStatus.NOT_FOUND),
             Map.entry("COMMENT_NOT_FOUND", HttpStatus.NOT_FOUND),
             Map.entry("SIGNAL_NOT_FOUND", HttpStatus.NOT_FOUND),
-            // Conflicts with the current state: already done, or nothing to undo.
             Map.entry("USER_FOUND", HttpStatus.CONFLICT),
             Map.entry("ALREADY_LIKED", HttpStatus.CONFLICT),
             Map.entry("NOT_LIKED", HttpStatus.CONFLICT),
@@ -57,7 +55,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(VoixDeSagesseException.class)
     public ResponseEntity<ErrorInfo> handleArticlaException(VoixDeSagesseException exception) {
-        // Known keys (USER_NOT_FOUND...) are translated from messages.properties; other messages are already readable.
         String key = exception.getMessage();
         String msg = messageSource.getMessage(key, null, key, Locale.FRENCH);
         return error(STATUS_BY_KEY.getOrDefault(key, HttpStatus.BAD_REQUEST), msg);
@@ -99,12 +96,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorInfo> handleUnexpected(Exception exception) {
-        // Standard Spring MVC errors (unknown route, wrong method, missing parameter...) keep their status.
         if (exception instanceof ErrorResponse errorResponse && errorResponse.getStatusCode().is4xxClientError()) {
             HttpStatusCode status = errorResponse.getStatusCode();
             return error(status, status.value() == 404 ? "Ressource introuvable." : "Requête invalide.");
         }
-        // Internal details are logged, never returned to the client.
         log.error("Unexpected error", exception);
         return error(HttpStatus.INTERNAL_SERVER_ERROR, "Une erreur interne est survenue.");
     }

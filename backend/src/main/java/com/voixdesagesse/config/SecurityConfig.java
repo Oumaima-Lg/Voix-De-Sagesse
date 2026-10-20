@@ -1,4 +1,3 @@
-
 package com.voixdesagesse.config;
 
 import java.util.List;
@@ -36,8 +35,6 @@ public class SecurityConfig {
         return builder.getAuthenticationManager();
     }
 
-    // Only the frontend origin(s) may call the API from a browser. The JWT travels in the
-    // Authorization header (no cookies), so credentials are not needed.
     @Value("${app.cors.allowed-origins}")
     private List<String> allowedOrigins;
 
@@ -60,7 +57,6 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        // Error dispatches (e.g. a 403) run without the JWT filter: keep their status instead of a 401.
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()

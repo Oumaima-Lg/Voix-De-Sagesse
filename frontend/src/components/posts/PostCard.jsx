@@ -9,8 +9,6 @@ const Spinner = ({ className = "w-4 h-4 border-2" }) => (
   <div className={`${className} border-current border-t-transparent rounded-full animate-spin`}></div>
 )
 
-// One post of a list, with its comments. `actions` are the page-specific buttons shown top right;
-// `interactions` comes from usePostInteractions.
 const PostCard = ({ poste, interactions, actions, linkToAuthor = true, showYou = true }) => {
   const {
     user, commentInputs, postComments, showComments, commentLoading, deleteCommentLoading, likeLoading,
@@ -46,7 +44,6 @@ const PostCard = ({ poste, interactions, actions, linkToAuthor = true, showYou =
 
   return (
     <div className="bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% border-[#202020] border-2 rounded-lg shadow-lg">
-      {/* Header */}
       <div className="p-4 pb-4 sm:p-6 sm:pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -66,7 +63,6 @@ const PostCard = ({ poste, interactions, actions, linkToAuthor = true, showYou =
         </div>
       </div>
 
-      {/* Content */}
       <div className="px-4 sm:px-6 space-y-4">
         <div className="flex items-center gap-2 mb-3">
           {poste.article.type === "SAGESSE" ? (
@@ -105,7 +101,6 @@ const PostCard = ({ poste, interactions, actions, linkToAuthor = true, showYou =
           ))}
         </div>
 
-        {/* Like and comment counters */}
         <div className="flex items-center justify-between pt-4 border-t border-[#4C3163]">
           <div className="flex items-center gap-6">
             <button
@@ -137,7 +132,6 @@ const PostCard = ({ poste, interactions, actions, linkToAuthor = true, showYou =
           </div>
         </div>
 
-        {/* Comments */}
         {showComments[articleId] && (
           <div className="mt-4 border-t border-[#4C3163] pt-4">
             <div className={`space-y-3 ${comments?.length > 2 ? "max-h-64 overflow-y-auto pr-2" : ""}`}>
@@ -165,7 +159,6 @@ const PostCard = ({ poste, interactions, actions, linkToAuthor = true, showYou =
                       <span className="text-[#A09F87] text-xs">@{comment.user.username}</span>
                       <span className="text-gray-400 text-xs">• {comment.createdAt}</span>
 
-                      {/* The comment's author and the article's author can delete it */}
                       {(comment.user.id === user.id || poste.user.id === user.id) && (
                         <button
                           onClick={() => handleDeleteComment(comment.id, articleId)}
@@ -199,7 +192,6 @@ const PostCard = ({ poste, interactions, actions, linkToAuthor = true, showYou =
           </div>
         )}
 
-        {/* New comment */}
         <div className="flex gap-3 pt-4 pb-6">
           <div className="w-8 h-8 shrink-0 rounded-full overflow-hidden border border-[#4C3163]">
             {user.profilePicture ? (
@@ -243,7 +235,6 @@ const PostCard = ({ poste, interactions, actions, linkToAuthor = true, showYou =
                 <Spinner />
               ) : (
                 <>
-                  {/* Icon only on phones, text from sm up */}
                   <Send className="w-4 h-4 sm:hidden" />
                   <span className="hidden sm:inline">Publier</span>
                 </>
@@ -255,8 +246,6 @@ const PostCard = ({ poste, interactions, actions, linkToAuthor = true, showYou =
     </div>
   )
 }
-
-// --- Buttons for the top-right `actions` of a PostCard
 
 export const FollowButton = ({ poste, interactions }) => {
   const { followLoading, handleFollow } = interactions
@@ -284,7 +273,6 @@ export const FollowButton = ({ poste, interactions }) => {
   )
 }
 
-// Toggles the saved state (feed, my posts).
 export const SaveButton = ({ poste, interactions }) => {
   const { saveLoading, handleSave } = interactions
   const loading = saveLoading[poste.article.id]
@@ -311,7 +299,6 @@ export const SaveButton = ({ poste, interactions }) => {
   )
 }
 
-// Removes a post from the saved articles (saved articles page).
 export const UnsaveButton = ({ poste, interactions }) => {
   const { saveLoading, handleSave } = interactions
   return (

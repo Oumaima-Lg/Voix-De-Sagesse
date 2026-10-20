@@ -8,7 +8,6 @@ import com.voixdesagesse.entity.User;
 public record NotificationDTO(Long id, NotificationType type, boolean read, LocalDateTime createdAt, Actor actor,
         Long articleId, String articleExcerpt, String commentExcerpt) {
 
-    // Who did the action (null for moderation decisions).
     public record Actor(Long id, String nom, String prenom, String profilePicture) {
     }
 

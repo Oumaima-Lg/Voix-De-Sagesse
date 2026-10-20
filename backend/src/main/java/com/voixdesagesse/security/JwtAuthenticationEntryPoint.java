@@ -36,7 +36,6 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         
         log.debug("Unauthenticated request to {}", request.getRequestURI());
 
-        // Same shape as the other API errors (see GlobalExceptionHandler).
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

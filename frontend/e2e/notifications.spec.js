@@ -1,8 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { ADMIN, ADMIN_PASSWORD, BASE_URL, DEMO, KARIM, VIEWPORT, api, login, signIn, userId } from './helpers.js'
 
-// Notifications of the demo account after Karim reacts to its article and the admin removes another one.
-// Karim's reactions are put back as they were at the end.
 test.describe.serial('Notifications', () => {
   let page
   let demo, karim, karimId, demoId, articleId, before, comment
@@ -15,7 +13,6 @@ test.describe.serial('Notifications', () => {
     articleId = post.article.id
     before = { ...post.interaction }
 
-    // Start from Karim having no reaction on the article and every notification read.
     if (before.liked) await api('DELETE', `/articles/${articleId}/like`, karim)
     if (before.saved) await api('DELETE', `/users/me/saved/${articleId}`, karim)
     if (before.following) await api('DELETE', `/users/${demoId}/follow`, karim)
@@ -35,8 +32,7 @@ test.describe.serial('Notifications', () => {
 
   test.afterAll(async () => {
     await page?.close()
-    if (!before) return // the setup stopped before changing anything
-    // Undone whatever the setup managed to do (an undo of something not done is refused: ignored).
+    if (!before) return
     const quietly = (call) => call.catch(() => {})
     if (comment) await quietly(api('DELETE', `/comments/${comment.id}`, karim))
     await quietly(api('DELETE', `/articles/${articleId}/like`, karim))

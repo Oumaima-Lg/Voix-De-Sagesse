@@ -37,7 +37,6 @@ public class HistoireDTO {
     @Size(max = 500, message = "La leçon ne peut pas dépasser 500 caractères")
     private String lesson;
     
-    // Set by the server from the JWT, never taken from the request body.
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long userId;
 

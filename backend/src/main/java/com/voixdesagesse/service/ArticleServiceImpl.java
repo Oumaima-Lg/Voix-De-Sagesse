@@ -31,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ArticleServiceImpl implements ArticleService {
 
-    // Newest first, like a news feed.
     private static final Comparator<Article> NEWEST_FIRST =
             Comparator.comparing(Article::getDatePublication, Comparator.nullsLast(Comparator.reverseOrder()));
 
@@ -201,7 +200,6 @@ public class ArticleServiceImpl implements ArticleService {
     public void likeArticle(Long articleId, Long currentUserId) throws VoixDeSagesseException {
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new VoixDeSagesseException("ARTICLE_NOT_FOUND"));
-        // Recorded atomically: a double click cannot count the like twice.
         if (!userService.addLikedArticle(currentUserId, articleId))
             throw new VoixDeSagesseException("ALREADY_LIKED");
         articleRepository.incrementLikes(articleId);
@@ -223,7 +221,6 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public void deleteArticle(Long articleId, Long currentUserId) throws VoixDeSagesseException {
         Article article = articleRepository.findByIdAndUserId(articleId, currentUserId)
-                // Same answer whether the article does not exist or belongs to someone else.
                 .orElseThrow(() -> new VoixDeSagesseException("ARTICLE_NOT_FOUND"));
 
         Long likesCount = article.getLikes();
@@ -240,7 +237,6 @@ public class ArticleServiceImpl implements ArticleService {
         commonService.deleteAllCommentsByArticle(articleId);
         articleRepository.deleteById(articleId);
         notificationService.articleDeleted(articleId);
-        // Reports still waiting on it have nothing left to review (when the admin deletes it, they are already settled).
         signalRepository.settlePendingByArticleId(articleId, SignalStatus.CLOSED, LocalDateTime.now(), null);
 
         log.info("Article supprimé - ID: %d, Likes: %d, Commentaires: %d, Partages: %d%n",

@@ -1,4 +1,3 @@
-// EspacePage.jsx - Solution 2: Utiliser un wrapper avec z-index
 import React from 'react'
 import Espace from './Espace'
 

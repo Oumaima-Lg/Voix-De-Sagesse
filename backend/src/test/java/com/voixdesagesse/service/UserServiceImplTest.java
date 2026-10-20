@@ -197,17 +197,14 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Test envoi OTP - succès")
     void testSendOtpSuccess() throws Exception {
-        // Given
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(otpRepository.save(any(OTP.class))).thenReturn(new OTP());
 
         try (MockedStatic<Utilities> utilities = mockStatic(Utilities.class)) {
             utilities.when(Utilities::generateOTP).thenReturn("123456");
 
-            // When
             Boolean result = userService.sendOtp("test@example.com");
 
-            // Then
             assertTrue(result);
             verify(otpRepository).save(any(OTP.class));
             verify(mailService).sendHtml(eq("test@example.com"), anyString(), anyString());
@@ -239,14 +236,11 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Test vérification OTP - succès")
     void testVerifyOtpSuccess() throws VoixDeSagesseException {
-        // Given
         OTP otp = new OTP("test@example.com", "123456", LocalDateTime.now());
         when(otpRepository.findById(anyString())).thenReturn(Optional.of(otp));
 
-        // When
         String resetToken = userService.verifyOtp("test@example.com", "123456");
 
-        // Then: a reset token is issued and the code cannot be reused
         assertNotNull(resetToken);
         assertEquals(resetToken, otp.getResetToken());
         assertNull(otp.getOtpCode());
@@ -279,10 +273,8 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Test vérification OTP - OTP non trouvé")
     void testVerifyOtpNotFound() {
-        // Given
         when(otpRepository.findById(anyString())).thenReturn(Optional.empty());
 
-        // When & Then
         VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
             () -> userService.verifyOtp("test@example.com", "123456"));
         assertEquals("OTP_NOT_FOUND", exception.getMessage());
@@ -291,11 +283,9 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Test vérification OTP - OTP incorrect")
     void testVerifyOtpIncorrect() {
-        // Given
         OTP otp = new OTP("test@example.com", "654321", LocalDateTime.now());
         when(otpRepository.findById(anyString())).thenReturn(Optional.of(otp));
 
-        // When & Then
         VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
             () -> userService.verifyOtp("test@example.com", "123456"));
         assertEquals("OTP_INCORRECT", exception.getMessage());
@@ -306,18 +296,15 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Test changement de mot de passe - succès")
     void testChangePasswordSuccess() throws VoixDeSagesseException {
-        // Given: the OTP was verified and a reset token issued
         OTP otp = new OTP("test@example.com", null, LocalDateTime.now(), 0, "reset-token");
         when(otpRepository.findById(anyString())).thenReturn(Optional.of(otp));
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(passwordEncoder.encode(anyString())).thenReturn("newEncodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        // When
         ResponseDTO result = userService.changePassword(
             new ResetPasswordRequest("test@example.com", "reset-token", "Password123!"));
 
-        // Then
         assertNotNull(result);
         verify(userRepository).save(any(User.class));
         verify(passwordEncoder).encode("Password123!");
@@ -350,7 +337,6 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Test suppression OTP expirés")
     void testRemoveExpiredOTPs() {
-        // Given
         LocalDateTime oldTime = LocalDateTime.now().minusMinutes(10);
         OTP expiredOTP1 = new OTP("test1@example.com", "111111", oldTime);
         OTP expiredOTP2 = new OTP("test2@example.com", "222222", oldTime);
@@ -358,10 +344,8 @@ public class UserServiceImplTest {
 
         when(otpRepository.findByCreationTimeBefore(any(LocalDateTime.class))).thenReturn(expiredOTPs);
 
-        // When
         userService.removeExpiredOTPs();
 
-        // Then
         verify(otpRepository).deleteAll(expiredOTPs);
     }
 
@@ -379,7 +363,6 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Test mise à jour profil utilisateur - succès")
     void testUpdateUserProfileSuccess() throws VoixDeSagesseException {
-        // Given
         UserProfileDTO profileDTO = new UserProfileDTO();
         profileDTO.setId(1L);
         profileDTO.setNom("UpdatedNom");
@@ -390,10 +373,8 @@ public class UserServiceImplTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        // When
         UserProfileDTO result = userService.updateUserProfile(1L, profileDTO);
 
-        // Then
         assertNotNull(result);
         assertEquals(profileDTO.getNom(), result.getNom());
         assertEquals(profileDTO.getPrenom(), result.getPrenom());
@@ -439,13 +420,11 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Test mise à jour profil - utilisateur non trouvé")
     void testUpdateUserProfileNotFound() {
-        // Given
         UserProfileDTO profileDTO = new UserProfileDTO();
         profileDTO.setId(999L);
 
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // When & Then
         VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
             () -> userService.updateUserProfile(999L, profileDTO));
         assertEquals("USER_NOT_FOUND", exception.getMessage());

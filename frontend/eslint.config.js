@@ -23,7 +23,6 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      // Capitalized names are JSX components; `motion` is used as <motion.div>, which this rule does not see.
       'no-unused-vars': ['error', { varsIgnorePattern: '^([A-Z_]|motion$)', argsIgnorePattern: '^[A-Z_]' }],
       'react-refresh/only-export-components': [
         'warn',
@@ -31,7 +30,6 @@ export default [
       ],
     },
   },
-  // End-to-end tests and their config run in Node, not in the browser.
   {
     files: ['e2e/**/*.js', 'playwright.config.js'],
     languageOptions: { globals: globals.node },

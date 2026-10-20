@@ -21,12 +21,10 @@ public interface UserService {
 
     public User getCurrentUser() throws VoixDeSagesseException;
 
-    // Sign-up in two steps: a code is emailed first, the account is created once the code is confirmed.
     public ResponseDTO startRegistration(UserRegistrationDTO userDTO) throws VoixDeSagesseException;
 
     public UserRegistrationDTO confirmRegistration(String email, String otp) throws VoixDeSagesseException;
 
-    // Creates an account directly, without the email code (demo data).
     public User createAccount(String nom, String prenom, String email, String password, AccountType accountType)
             throws VoixDeSagesseException;
 
@@ -42,7 +40,6 @@ public interface UserService {
 
     public User getUserById(long userId) throws VoixDeSagesseException;
 
-    // Return false when nothing changed (already liked / not liked).
     public boolean addLikedArticle(Long currentUserId, Long articleId);
 
     public boolean removeLikedArticle(Long currentUserId, Long articleId);

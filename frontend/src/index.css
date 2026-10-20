@@ -7,12 +7,10 @@
   --breakpoint-smm: 439px;
   --color-start: #A09F87;
   --color-end: #4C3163; 
-  /* --breakpoint-sm: 490px; */
 }
 
 .carousel-control {
   color: #4C3163 !important;
-  /* font-size: 100px !important; */
   background: #A09F87 !important;
   border-color: #4C3163 !important;
 }
@@ -21,12 +19,10 @@
 
 .charm {
   font-family: 'Charm', cursive;
-  /* background: #16191f; */
 }
 
 .border-image-1 {
   border-image: linear-gradient(to right, #f43f5e, #fbbf24) 1;
-  /* border: 3px solid; */
 }
 
 .border-image-gradient {
@@ -78,7 +74,6 @@
 
 
 
-/* Animation for shine effect */
 @keyframes shine {
   0% {
     background-position: 100%;
@@ -102,12 +97,6 @@
 
 
 
-/* Styles personnalisés pour l'application React */
-/* .App {
-  text-align: left;
-} */
-
-/* Adding modern floating background animations */
 @keyframes float-slow {
   0%,
   100% {
@@ -225,7 +214,6 @@
   }
 }
 
-/* Adding animation utility classes */
 .animate-float-slow {
   animation: float-slow 8s ease-in-out infinite;
 }
@@ -266,7 +254,6 @@
   animation: slide-in-right 0.4s ease-out forwards;
 }
 
-/* Adding new particle and shape animations for moving background elements */
 @keyframes bounce-slow {
   0%,
   100% {
@@ -437,7 +424,6 @@
   }
 }
 
-/* Adding utility classes for new animations */
 .animate-bounce-slow {
   animation: bounce-slow 3s ease-in-out infinite;
 }
@@ -490,7 +476,6 @@
   animation: orbit-fast 10s linear infinite;
 }
 
-/* Animations personnalisées existantes */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -506,7 +491,6 @@
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Styles pour les gradients */
 .gradient-bg {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
@@ -520,24 +504,20 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-/* Styles pour les statistiques */
 .stats-card {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Styles pour la table */
 .table-row:hover {
   background-color: rgba(59, 130, 246, 0.05);
 }
 
-/* Adding modern blur utilities */
 .blur-3xl {
   filter: blur(64px);
 }
 
-/* Adding glassmorphism effects */
 .backdrop-blur-xl {
   backdrop-filter: blur(24px);
 }
@@ -546,7 +526,6 @@
   backdrop-filter: blur(4px);
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
   .stats-grid {
     grid-template-columns: 1fr;
@@ -556,7 +535,6 @@
     overflow-x: auto;
   }
 
-  /* Reducing animation intensity on mobile */
   .animate-float-slow,
   .animate-float-delayed,
   .animate-float-reverse {

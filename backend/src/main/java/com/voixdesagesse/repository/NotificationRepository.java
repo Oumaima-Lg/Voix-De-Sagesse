@@ -13,7 +13,6 @@ import com.voixdesagesse.entity.Notification;
 @Repository
 public interface NotificationRepository extends MongoRepository<Notification, Long> {
 
-    // Ids grow with time: they order notifications created in the same millisecond.
     List<Notification> findTop50ByRecipientIdOrderByCreatedAtDescIdDesc(Long recipientId);
 
     long countByRecipientIdAndReadFalse(Long recipientId);

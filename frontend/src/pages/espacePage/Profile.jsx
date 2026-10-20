@@ -230,7 +230,6 @@ const Profile = () => {
                 overlayProps={{ radius: 'sm', blur: 2 }}
                 loaderProps={{ color: '#A09F87', type: 'bars' }}
             />
-            {/* Titre principal */}
             <div className="text-center mb-8  text-gradient charm xl:text-5xl text-3xl leading-tight">
                 <ShinyText
                     text="VOTRE PROFIL"
@@ -239,13 +238,10 @@ const Profile = () => {
                 />
             </div>
 
-            {/* profile */}
             <div className="max-w-6xl mx-auto">
                 <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Section Avatar et Informations principales */}
                     <div className="lg:col-span-1">
                         <div className="border-3 border-[#202020] bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% rounded-lg shadow-lg p-6 text-white">
-                            {/* Avatar */}
                             <div className="flex flex-col items-center mb-6">
                                 <div className="relative group">
                                     <img
@@ -279,7 +275,6 @@ const Profile = () => {
                                 <p className="text-gray-300">@{userProfile.username || 'nom_utilisateur'}</p>
                             </div>
 
-                            {/* Statistiques */}
                             <div className="grid grid-cols-2 gap-4 mb-6">
                                 <div className="text-center p-3 bg-[#202020] rounded-lg">
                                     <div className="text-2xl font-bold text-[#A09F87]">{userProfile.contentCount || 0}</div>
@@ -299,7 +294,6 @@ const Profile = () => {
                                 </div>
                             </div>
 
-                            {/* Bouton d'édition */}
                             <button
                                 onClick={handleEditToggle}
                                 className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#A09F87] to-[#4C3163] text-white py-3 px-4 rounded-lg hover:scale-105 transform-gpu transition-all duration-300 font-medium"
@@ -319,7 +313,6 @@ const Profile = () => {
                         </div>
                     </div>
 
-                    {/* Section Informations détaillées */}
                     <div className="lg:col-span-2">
                         <div className="border-3 border-[#202020] bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% rounded-lg shadow-lg p-6 text-white">
                             <div className="flex items-center justify-between mb-6">
@@ -336,7 +329,6 @@ const Profile = () => {
                             </div>
 
                             <div className="grid md:grid-cols-2 gap-6">
-                                {/* Nom */}
                                 <div className="space-y-2">
                                     <label className="flex items-center gap-2 text-[#A09F87] font-medium">
                                         <IoPersonOutline className="text-xl" />
@@ -356,7 +348,6 @@ const Profile = () => {
                                     )}
                                 </div>
 
-                                {/* Prénom */}
                                 <div className="space-y-2">
                                     <label className="flex items-center gap-2 text-[#A09F87] font-medium">
                                         <IoPersonOutline className="text-xl" />
@@ -376,19 +367,16 @@ const Profile = () => {
                                     )}
                                 </div>
 
-                                {/* Email */}
                                 <div className="space-y-2">
                                     <label className="flex items-center gap-2 text-[#A09F87] font-medium">
                                         <IoMailOutline className="text-xl" />
                                         Email
                                     </label>
-                                    {/* The email identifies the account and cannot be changed from the profile. */}
                                     <div className="bg-[#202020] rounded-lg px-4 py-3 border-2 border-transparent">
                                         {userProfile.email || "Non renseigné"}
                                     </div>
                                 </div>
 
-                                {/* Nom d'utilisateur */}
                                 <div className="space-y-2">
                                     <label className="flex items-center gap-2 text-[#A09F87] font-medium">
                                         <PiUserCircle className="text-xl" />
@@ -408,7 +396,6 @@ const Profile = () => {
                                     )}
                                 </div>
 
-                                {/* Téléphone */}
                                 <div className="space-y-2">
                                     <label className="flex items-center gap-2 text-[#A09F87] font-medium">
                                         <IoCallOutline className="text-xl" />
@@ -428,7 +415,6 @@ const Profile = () => {
                                     )}
                                 </div>
 
-                                {/* Localisation */}
                                 <div className="space-y-2">
                                     <label className="flex items-center gap-2 text-[#A09F87] font-medium">
                                         <IoLocationOutline className="text-xl" />
@@ -449,7 +435,6 @@ const Profile = () => {
                                 </div>
                             </div>
 
-                            {/* Biographie */}
                             <div className="mt-6 space-y-2">
                                 <label className="flex items-center gap-2 text-[#A09F87] font-medium">
                                     <PiUser className="text-xl" />
@@ -470,7 +455,6 @@ const Profile = () => {
                                 )}
                             </div>
 
-                            {/* Site web */}
                             <div className="mt-6 space-y-2">
                                 <label className="flex items-center gap-2 text-[#A09F87] font-medium">
                                     <MdOutlineLanguage className="text-xl" />
@@ -503,12 +487,10 @@ const Profile = () => {
                             </div>
                         </div>
 
-                        {/* Section Préférences */}
                         <div className="border-3 border-[#202020] bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% rounded-lg shadow-lg p-6 text-white mt-8">
                             <h3 className="text-2xl font-bold text-[#A09F87] charm mb-6">Préférences</h3>
 
                             <div className="grid md:grid-cols-2 gap-6">
-                                {/* Langue préférée */}
                                 <div className="space-y-2">
                                     <label className="flex items-center gap-2 text-[#A09F87] font-medium">
                                         <MdOutlineLanguage className="text-xl" />
@@ -537,7 +519,6 @@ const Profile = () => {
                                     )}
                                 </div>
 
-                                {/* Visibilité du profil */}
                                 <div className="space-y-2">
                                     <label className="flex items-center gap-2 text-[#A09F87] font-medium">
                                         <MdOutlineVisibility className="text-xl" />
@@ -567,7 +548,6 @@ const Profile = () => {
                                 </div>
                             </div>
 
-                            {/* Notifications */}
                             <div className="mt-6 space-y-4">
                                 <h4 className="text-lg font-semibold text-[#A09F87]">Notifications</h4>
 
@@ -652,7 +632,6 @@ const Profile = () => {
                             </div>
                         </div>
 
-                        {/* Modal de confirmation de suppression */}
                         <Modal
                             opened={showDeleteModal}
                             onClose={() => {

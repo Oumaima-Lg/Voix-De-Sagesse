@@ -4,7 +4,6 @@ import { Routes, Route,  } from 'react-router-dom';
 import { AuthChecker, PublicRoute, ProtectedRoute } from './AuthGuard'
 import { AdminRoute } from './AdminGuard'
 
-// Pages other than the landing page are downloaded when they are first visited.
 const LoginPage = lazy(() => import('../pages/loginPage/LoginPage'))
 const RegisterPage = lazy(() => import('../pages/registerPage/RegisterPage'))
 const EspacePage = lazy(() => import('../pages/espacePage/EspacePage'))
@@ -84,12 +83,8 @@ const AppRoutes = () => {
                             <AdminDashboard />
                         </AdminRoute>
                     } />
-                    {/* ✅ Route catch-all pour 404 - DOIT ÊTRE EN DERNIER */}
                     <Route path="*" element={<NotFoundPage />} />
 
-                    {/* ✅ Redirection par défaut */}
-
-                    {/* ✅ Route 404 */}
                 </Routes>
             </Suspense>
         </AuthChecker>

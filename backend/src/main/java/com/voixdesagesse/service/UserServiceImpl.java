@@ -96,7 +96,6 @@ public class UserServiceImpl implements UserService {
                 && previous.get().getCreationTime().isAfter(LocalDateTime.now().minusSeconds(OTP_RESEND_DELAY_SECONDS)))
             throw new VoixDeSagesseException("OTP_TOO_SOON");
 
-        // Signing up again replaces the previous pending sign-up (new code, new details).
         String code = Utilities.generateOTP();
         PendingRegistration pending = new PendingRegistration(email, userDTO.getNom(), userDTO.getPrenom(),
                 passwordEncoder.encode(userDTO.getMotdepasse()), code, LocalDateTime.now(), 0);
@@ -105,7 +104,6 @@ public class UserServiceImpl implements UserService {
             mailService.sendHtml(email, "Confirmez votre inscription - Voix De Sagesse",
                     EmailTemplates.registrationCode(code, pending.getNom(), pending.getPrenom()));
         } catch (VoixDeSagesseException e) {
-            // Without the email the code is useless: let the user try again right away.
             pendingRegistrationRepository.delete(pending);
             throw e;
         }
@@ -139,10 +137,8 @@ public class UserServiceImpl implements UserService {
         return saveNewUser(nom, prenom, email, passwordEncoder.encode(password), accountType);
     }
 
-    // The password is already hashed.
     private User saveNewUser(String nom, String prenom, String email, String encodedPassword, AccountType accountType)
             throws VoixDeSagesseException {
-        // The address may have been registered by another sign-up in the meantime.
         if (userRepository.findByEmail(email).isPresent())
             throw new VoixDeSagesseException("USER_FOUND");
 
@@ -170,7 +166,6 @@ public class UserServiceImpl implements UserService {
     public Boolean sendOtp(String email) throws VoixDeSagesseException {
         Optional<User> found = userRepository.findByEmail(email);
         if (found.isEmpty()) {
-            // Same answer as for a known address, so this endpoint cannot be used to find accounts.
             log.info("OTP requested for an unknown email");
             return true;
         }
@@ -254,7 +249,6 @@ public class UserServiceImpl implements UserService {
     public UserProfileDTO updateUserProfile(Long userId, UserProfileDTO profileDTO) throws VoixDeSagesseException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new VoixDeSagesseException("USER_NOT_FOUND"));
-        // Email, picture and counters are not editable here: the picture only changes through the upload endpoint.
         user.setNom(profileDTO.getNom());
         user.setPrenom(profileDTO.getPrenom());
         user.setBio(profileDTO.getBio());
@@ -397,8 +391,6 @@ public class UserServiceImpl implements UserService {
             Files.createDirectories(uploadPath);
         }
 
-        // The extension comes from the validated image type, never from the client file name, so an
-        // uploaded file can only ever be served back as an image.
         String fileExtension = IMAGE_EXTENSIONS.get(String.valueOf(file.getContentType()).toLowerCase());
         if (fileExtension == null)
             throw new IOException("Unsupported image type");
@@ -523,7 +515,6 @@ public class UserServiceImpl implements UserService {
 
         User user = getUserById(userId);
 
-        // 1. Supprimer la photo de profil du système de fichiers
         if (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) {
             try {
                 deleteOldProfilePicture(user.getProfilePicture());
@@ -533,34 +524,24 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        // 2. Supprimer tous les commentaires de l'utilisateur
         commonService.deleteAllCommentsByUser(userId);
         log.info("Commentaires supprimés pour l'utilisateur: {}", userId);
 
-        // 3. Récupérer tous les articles de l'utilisateur
         List<Article> userArticles = articleRepository.findByUserId(userId);
 
-        // 4. Pour chaque article de l'utilisateur
         for (Article article : userArticles) {
-            // Supprimer l'article de toutes les listes de likes des autres utilisateurs
             userRepository.removeArticleFromAllUsersLikes(article.getId());
 
-            // Supprimer l'article de toutes les listes sauvegardées des autres utilisateurs
             userRepository.removeArticleFromAllUsersSaved(article.getId());
 
-            // Supprimer tous les commentaires sur cet article
             commonService.deleteAllCommentsByArticle(article.getId());
 
-            // Supprimer tous les signalements liés à cet article
             signalRepository.deleteByArticleId(article.getId());
         }
 
-        // 5. Supprimer tous les articles de l'utilisateur
         articleRepository.deleteByUserId(userId);
         log.info("Articles supprimés pour l'utilisateur: {}", userId);
 
-        // 6. Gérer les relations de suivi
-        // Retirer l'utilisateur de la liste following de tous ceux qui le suivent
         List<User> followers = userRepository.findByFollowingIdContaining(userId);
         for (User follower : followers) {
             follower.getFollowingId().remove(userId);
@@ -568,8 +549,6 @@ public class UserServiceImpl implements UserService {
             userRepository.save(follower);
         }
 
-        // Pour chaque utilisateur que l'utilisateur supprimé suivait, décrémenter leur
-        // compteur de followers
         if (user.getFollowingId() != null && !user.getFollowingId().isEmpty()) {
             for (Long followedUserId : user.getFollowingId()) {
                 try {
@@ -582,17 +561,14 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        // 7. Gérer les likes donnés par l'utilisateur
         if (user.getLikedArticlesId() != null && !user.getLikedArticlesId().isEmpty()) {
             for (Long articleId : user.getLikedArticlesId()) {
                 try {
                     Article article = articleRepository.findById(articleId).orElse(null);
                     if (article != null) {
-                        // Décrémenter le compteur de likes de l'article
                         article.setLikes(Math.max(0, article.getLikes() - 1));
                         articleRepository.save(article);
 
-                        // Décrémenter les likes reçus par l'auteur de l'article
                         try {
                             User articleAuthor = getUserById(article.getUserId());
                             articleAuthor.setLikesReceived(Math.max(0, articleAuthor.getLikesReceived() - 1));
@@ -608,19 +584,14 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        // 8. Supprimer tous les signalements faits par l'utilisateur
         signalRepository.deleteByReporterId(userId);
 
-        // 9. Supprimer tous les signalements contre l'utilisateur
         signalRepository.deleteByReportedUserId(userId);
 
-        // Notifications received or caused by the user
         notificationService.userDeleted(userId);
 
-        // 10. Supprimer l'OTP si existe
         otpRepository.deleteById(user.getEmail());
 
-        // 11. Finalement, supprimer l'utilisateur
         userRepository.deleteById(userId);
         log.info("Compte utilisateur supprimé avec succès: {}", userId);
     }

@@ -19,7 +19,6 @@ import com.voixdesagesse.service.SignalService;
 
 import lombok.RequiredArgsConstructor;
 
-// Reporting is open to users; reviewing and processing reports is done under /admin.
 @Tag(name = "Signalements")
 @RestController
 @RequestMapping("/signals")

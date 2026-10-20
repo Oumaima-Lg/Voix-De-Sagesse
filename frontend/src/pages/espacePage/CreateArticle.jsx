@@ -147,7 +147,6 @@ const CreateArticleForm = () => {
   return (
     <div className="min-h-screen p-6 flex items-center justify-center bg-gradient-to-bl from-[#171717] from-55% to-[#4E3F59] to-100%">
       <div className="w-full max-w-4xl bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% border-[#202020] border-3 rounded-lg shadow-lg">
-        {/* Header */}
         <div className="text-center pb-8 p-6">
           <div className="flex items-center justify-between mb-4">
             <button
@@ -170,10 +169,8 @@ const CreateArticleForm = () => {
           </h1>
         </div>
 
-        {/* Form */}
         <div className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Title/Quote Field */}
             <div className="space-y-2">
               <label className="text-[#A09F87] font-semibold flex items-center gap-2">
                 {isWisdom ? <Quote className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
@@ -197,7 +194,6 @@ const CreateArticleForm = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Category Selection */}
               <div className="space-y-2">
                 <label className="text-[#A09F87] font-semibold">Catégorie *</label>
                 <select
@@ -227,7 +223,6 @@ const CreateArticleForm = () => {
                 {errors.category && <p className="text-red-400 text-sm">{errors.category}</p>}
               </div>
 
-              {/* Tags */}
               <div className="space-y-2">
                 <label className="text-[#A09F87] font-semibold flex items-center gap-2">
                   <Tag className="w-4 h-4" />
@@ -244,7 +239,6 @@ const CreateArticleForm = () => {
               </div>
             </div>
 
-            {/* Content/Story Field */}
             {!isWisdom && (
               <div className="space-y-2">
                 <label className="text-[#A09F87] font-semibold">Racontez votre histoire *</label>
@@ -260,7 +254,6 @@ const CreateArticleForm = () => {
               </div>
             )}
 
-            {/* Source for wisdom */}
             {isWisdom && (
               <div className="space-y-2">
                 <label className="text-[#A09F87] font-semibold">Source/Origine culturelle (optionnel)</label>
@@ -275,7 +268,6 @@ const CreateArticleForm = () => {
               </div>
             )}
 
-            {/* Lesson for stories */}
             {!isWisdom && (
               <div className="space-y-2">
                 <label className="text-[#A09F87] font-semibold">Leçon tirée (optionnel)</label>

@@ -62,7 +62,6 @@ const SearchBar = ({ onSearch, currentFilters }) => {
             className="bg-[#A09F87] hover:bg-[#A09F87]/80 text-[#171717] px-3 sm:px-6 py-3 font-medium transition-colors"
             aria-label="Rechercher"
           >
-            {/* Icon only on phones, text from sm up */}
             <Search className="w-5 h-5 sm:hidden" />
             <span className="hidden sm:inline">Rechercher</span>
           </button>

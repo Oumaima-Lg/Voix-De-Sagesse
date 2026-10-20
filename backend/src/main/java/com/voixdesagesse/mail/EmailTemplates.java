@@ -4,7 +4,6 @@ import java.time.Year;
 
 import org.springframework.web.util.HtmlUtils;
 
-/** HTML bodies of the emails sent by the application. User-provided values are always escaped. */
 public final class EmailTemplates {
 
     private EmailTemplates() {

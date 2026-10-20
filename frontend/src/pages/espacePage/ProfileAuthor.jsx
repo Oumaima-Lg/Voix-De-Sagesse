@@ -56,7 +56,6 @@ const ProfileAuthor = ({userId: propUserId}) => {
                 overlayProps={{ radius: 'sm', blur: 2 }}
                 loaderProps={{ color: '#A09F87', type: 'bars' }}
             />
-            {/* Titre principal */}
             <div className="text-center mb-8  text-gradient charm xl:text-5xl text-3xl leading-tight">
                 <ShinyText
                     text="PROFIL"
@@ -65,13 +64,10 @@ const ProfileAuthor = ({userId: propUserId}) => {
                 />
             </div>
 
-            {/* profile */}
             <div className="max-w-6xl mx-auto">
                 <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Section Avatar et Informations principales */}
                     <div className="lg:col-span-1">
                         <div className="border-3 border-[#202020] bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% rounded-lg shadow-lg p-6 text-white">
-                            {/* Avatar */}
                             <div className="flex flex-col items-center mb-6">
                                 <div className="relative group">
                                     <img
@@ -92,7 +88,6 @@ const ProfileAuthor = ({userId: propUserId}) => {
                                 <p className="text-gray-300">@{userProfile.username || 'nom_utilisateur'}</p>
                             </div>
 
-                            {/* Statistiques */}
                             <div className="grid grid-cols-2 gap-4 mb-6">
                                 <div className="text-center p-3 bg-[#202020] rounded-lg">
                                     <div className="text-2xl font-bold text-[#A09F87]">{userProfile.contentCount || 0}</div>
@@ -115,7 +110,6 @@ const ProfileAuthor = ({userId: propUserId}) => {
                         </div>
                     </div>
 
-                    {/* Section Informations détaillées */}
                     <div className="lg:col-span-2">
                         <div className="border-3 border-[#202020] bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% rounded-lg shadow-lg p-6 text-white">
                             <div className="flex items-center justify-between mb-6">
@@ -123,7 +117,6 @@ const ProfileAuthor = ({userId: propUserId}) => {
                             </div>
 
                             <div className="grid md:grid-cols-2 gap-6">
-                                {/* Nom */}
                                 <div className="space-y-2">
                                     <label className="flex items-center gap-2 text-[#A09F87] font-medium">
                                         <IoPersonOutline className="text-xl" />
@@ -135,7 +128,6 @@ const ProfileAuthor = ({userId: propUserId}) => {
                                     
                                 </div>
 
-                                {/* Prénom */}
                                 <div className="space-y-2">
                                     <label className="flex items-center gap-2 text-[#A09F87] font-medium">
                                         <IoPersonOutline className="text-xl" />
@@ -146,7 +138,6 @@ const ProfileAuthor = ({userId: propUserId}) => {
                                         </div>
                                 </div>
 
-                                {/* Nom d'utilisateur */}
                                 <div className="space-y-2">
                                     <label className="flex items-center gap-2 text-[#A09F87] font-medium">
                                         <PiUserCircle className="text-xl" />
@@ -157,7 +148,6 @@ const ProfileAuthor = ({userId: propUserId}) => {
                                         </div>
                                 </div>
 
-                                {/* Localisation */}
                                 <div className="space-y-2">
                                     <label className="flex items-center gap-2 text-[#A09F87] font-medium">
                                         <IoLocationOutline className="text-xl" />
@@ -169,7 +159,6 @@ const ProfileAuthor = ({userId: propUserId}) => {
                                 </div>
                             </div>
 
-                            {/* Biographie */}
                             <div className="mt-6 space-y-2">
                                 <label className="flex items-center gap-2 text-[#A09F87] font-medium">
                                     <PiUser className="text-xl" />
@@ -180,7 +169,6 @@ const ProfileAuthor = ({userId: propUserId}) => {
                                     </div>
                             </div>
 
-                            {/* Site web */}
                             <div className="mt-6 space-y-2">
                                 <label className="flex items-center gap-2 text-[#A09F87] font-medium">
                                     <MdOutlineLanguage className="text-xl" />

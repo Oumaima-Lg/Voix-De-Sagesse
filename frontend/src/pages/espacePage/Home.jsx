@@ -16,7 +16,6 @@ import SplineScene from '../../components/SplineScene';
 import { useSelector } from 'react-redux'
 
 
-// Links of the logged-in area, shown in the sidebar (desktop) and in the drawer (phones).
 const MENU = [
     { to: '/espace/fil', label: 'Article', Icon: PiArticleLight },
     { to: '/espace/publier', label: 'Nouvel article', Icon: IoCreateOutline },

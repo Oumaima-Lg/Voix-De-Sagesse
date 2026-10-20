@@ -103,7 +103,6 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.markAllRead(userId);
     }
 
-    // Liking, saving or following twice (after undoing it) does not pile up notifications.
     private void notifyOnce(NotificationType type, Long recipientId, Long actorId, Article article) {
         Long articleId = article == null ? null : article.getId();
         if (notificationRepository.existsByRecipientIdAndActorIdAndTypeAndArticleId(recipientId, actorId, type, articleId))
@@ -111,7 +110,6 @@ public class NotificationServiceImpl implements NotificationService {
         save(build(type, recipientId, actorId, article));
     }
 
-    // Returns null when there is nobody to notify (an action on one's own article or profile).
     private Notification build(NotificationType type, Long recipientId, Long actorId, Article article) {
         if (recipientId == null || recipientId.equals(actorId))
             return null;
@@ -127,7 +125,6 @@ public class NotificationServiceImpl implements NotificationService {
         return notification;
     }
 
-    // A notification must never make the action that triggered it fail.
     private void save(Notification notification) {
         if (notification == null)
             return;

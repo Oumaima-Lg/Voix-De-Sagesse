@@ -50,7 +50,6 @@ public class Utilities {
 
     }
 
-    // The start of a text, cut between two words, with an ellipsis when it had to be shortened.
     public static String excerpt(String text, int maxLength) {
         String value = text == null ? "" : text.strip();
         if (value.length() <= maxLength)

@@ -24,7 +24,6 @@ public class UserProfileDTO {
     private String phoneNumber;
     @Size(max = 100, message = "{user.location.too.long}")
     private String location;
-    // Rendered as a link: only http(s) URLs are accepted.
     @Size(max = 200, message = "{user.website.invalid}")
     @Pattern(regexp = "^$|^https?://\\S+$", message = "{user.website.invalid}")
     private String website;

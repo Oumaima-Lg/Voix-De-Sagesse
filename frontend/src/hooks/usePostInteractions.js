@@ -6,9 +6,6 @@ import { addComment, getCommentsByArticle, deleteComment } from "../api/commentS
 import { getApiErrorMessage } from "../api/apiError"
 import { errorNotification, successNotification } from "../utils/notifications"
 
-// State and actions shared by the pages that list posts (feed, saved articles, my posts).
-// Errors are always reported; a success message is only shown when a post leaves the list.
-// `removeWhenUnsaved`: on the saved-articles page, unsaving a post removes it from the list.
 export const usePostInteractions = (posts, setPosts, { removeWhenUnsaved = false } = {}) => {
   const user = useSelector((state) => state.user)
   const [commentInputs, setCommentInputs] = useState({})

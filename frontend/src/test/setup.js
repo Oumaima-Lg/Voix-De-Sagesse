@@ -7,7 +7,6 @@ afterEach(() => {
   localStorage.clear()
 })
 
-// Browser APIs used by Mantine that jsdom does not provide.
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation((query) => ({

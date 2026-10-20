@@ -16,7 +16,6 @@ public interface UserRepository extends MongoRepository<User, Long> {
 
     public Optional<User> findByEmail(String email);
 
-    // Atomic: matches only if the article is not liked yet; returns the number of updated users (0 or 1).
     @Query("{ '_id': ?0, 'likedArticlesId': { $ne: ?1 } }")
     @Update("{ '$addToSet': { 'likedArticlesId': ?1 } }")
     long addLikedArticle(Long userId, Long articleId);

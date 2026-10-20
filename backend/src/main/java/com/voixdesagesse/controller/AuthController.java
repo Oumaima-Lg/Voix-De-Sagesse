@@ -37,7 +37,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Tag(name = "Authentification")
-// Public routes: no JWT needed.
 @SecurityRequirements
 @RestController
 @Validated
@@ -83,7 +82,6 @@ public class AuthController {
         }
     }
 
-    // Step 1: emails a code. Nothing is created in `users` yet.
     @Operation(summary = "Inscription, étape 1 : envoie un code par email")
     @PostMapping("/register")
     public ResponseEntity<ResponseDTO> registerUser(@RequestBody @Valid UserRegistrationDTO registerDTO)
@@ -91,7 +89,6 @@ public class AuthController {
         return new ResponseEntity<>(userService.startRegistration(registerDTO), HttpStatus.ACCEPTED);
     }
 
-    // Step 2: the code proves the address belongs to the user; the account is created.
     @Operation(summary = "Inscription, étape 2 : vérifie le code et crée le compte")
     @PostMapping("/register/verify")
     public ResponseEntity<UserRegistrationDTO> confirmRegistration(@RequestBody @Valid VerifyOtpRequest request)
@@ -113,7 +110,6 @@ public class AuthController {
         return ResponseEntity.ok(new ResponseDTO("Si un compte existe avec cet email, un code vient d'être envoyé."));
     }
 
-    // POST so the code never ends up in URLs or access logs.
     @Operation(summary = "Mot de passe oublié, étape 2 : vérifie le code")
     @PostMapping("/password/otp/verify")
     public ResponseEntity<OtpVerificationResponse> verifyOtp(@RequestBody @Valid VerifyOtpRequest request)

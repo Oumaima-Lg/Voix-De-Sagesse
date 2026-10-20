@@ -9,10 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-/**
- * Blocks a login key (email + client IP) for 15 minutes after 5 failed attempts.
- * Kept in memory: enough for a single instance, and reset on restart.
- */
 @Service
 public class LoginAttemptService {
 

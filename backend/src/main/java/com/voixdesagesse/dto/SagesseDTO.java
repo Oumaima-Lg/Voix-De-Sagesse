@@ -33,7 +33,6 @@ public class SagesseDTO {
     @Size(min = 1, message = "Au moins un tag est requis")
     private Set<String> tags;
     
-    // Set by the server from the JWT, never taken from the request body.
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long userId;
 
