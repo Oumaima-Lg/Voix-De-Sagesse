@@ -29,7 +29,7 @@ Before the first end-to-end run, install the browser with `npx playwright instal
 
 ## Tests
 
-- **Unit tests** (`src/**/*.test.js(x)`, Vitest and Testing Library): form validation, route guards, login, sign-up with the email code, post actions, notification bell, admin report review, API error handling.
+- **Unit tests** (`src/**/*.test.js(x)`, Vitest and Testing Library): form validation, route guards, login, sign-up with the email code, post actions, notification bell, admin report review, API error handling, waking the API.
 - **End-to-end tests** (`e2e/`, Playwright): a real browser goes through the main flows (sign-up, publishing, reactions, search, favorites, profile picture, password reset, admin), the moderation of reported articles, and notifications. They use the demo accounts and clean up after themselves.
 
 ## Code organization
@@ -41,7 +41,7 @@ Before the first end-to-end run, install the browser with `npx playwright instal
 | `pages` | Pages: landing (`homePage`), login and sign-up, user area (`espacePage`), admin |
 | `components` | Shared components: post card, notification bell, and UI pieces |
 | `api` | Calls to the API (Axios), with session and error handling |
-| `hooks` | Shared logic, such as the actions on posts |
+| `hooks` | Shared logic, such as the actions on posts and waking the API |
 | `store` | Redux state: current user and token |
 | `routes` | Routes, loaded on demand, and access guards |
 | `utils` | Form validation, notifications, dates, local storage |
