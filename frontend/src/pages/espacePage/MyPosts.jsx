@@ -64,7 +64,6 @@ const MyPosts = () => {
                 loaderProps={{ color: '#A09F87', type: 'bars' }}
             />
 
-            {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <button
                     onClick={handleBack}
@@ -88,7 +87,6 @@ const MyPosts = () => {
                 </div>
             </div>
 
-            {/* Mes postes */}
             <div className="max-w-2xl mx-auto space-y-6">
                 {posts.length === 0 ? (
                     <div className="text-center py-12">

@@ -12,7 +12,6 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.tags.Tag;
 
-/** Swagger UI at /swagger-ui.html. Routes need the JWT unless their controller says otherwise. */
 @Configuration
 public class OpenApiConfig {
 
@@ -29,7 +28,6 @@ public class OpenApiConfig {
                 .components(new Components().addSecuritySchemes(BEARER_JWT,
                         new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")))
                 .addSecurityItem(new SecurityRequirement().addList(BEARER_JWT))
-                // Sections in reading order; each controller joins its section with @Tag(name = ...).
                 .tags(List.of(
                         new Tag().name("Authentification").description("Connexion, inscription et mot de passe oublié. Routes publiques."),
                         new Tag().name("Articles").description("Publier, lire, aimer et rechercher des articles."),

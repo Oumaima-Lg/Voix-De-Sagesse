@@ -20,7 +20,6 @@ const NotFoundPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-bl from-[#171717] from-55% to-[#4E3F59] to-100% flex items-center justify-center p-4">
       <div className="max-w-2xl mx-auto text-center">
-        {/* Icône et titre principal */}
         <div className="mb-8">
           <div className="relative mb-6">
             <div className="w-32 h-32 mx-auto bg-gradient-to-br from-[#A09F87] to-[#4C3163] rounded-full flex items-center justify-center animate-pulse">
@@ -52,7 +51,6 @@ const NotFoundPage = () => {
           </div>
         </div>
 
-        {/* Suggestions et actions */}
         <div className="space-y-4 mb-8">
           <h3 className="text-xl font-semibold text-white mb-4">
             Que souhaitez-vous faire ?
@@ -85,7 +83,6 @@ const NotFoundPage = () => {
           </div>
         </div>
 
-        {/* Pages populaires */}
         <div className="bg-[#202020] border border-[#4C3163] rounded-lg p-6">
           <h4 className="text-lg font-semibold text-white mb-4">
             Pages populaires
@@ -112,7 +109,6 @@ const NotFoundPage = () => {
           </div>
         </div>
 
-        {/* Message d'aide */}
         <div className="mt-8 text-center">
           <p className="text-gray-400 text-sm">
             Si vous pensez qu'il s'agit d'une erreur, veuillez{' '}

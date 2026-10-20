@@ -1,7 +1,3 @@
-# The whole app on your machine. See .env.example, then: docker compose up --build
-#   App      http://localhost:5173
-#   API      http://localhost:8080 (documentation: /swagger-ui.html)
-#   Emails   http://localhost:8025 (sign-up and password reset codes)
 name: voix-de-sagesse
 
 services:
@@ -17,7 +13,6 @@ services:
       timeout: 5s
       retries: 20
 
-  # Catches every email the backend sends (web UI on 8025, SMTP on 1025 for a backend run outside Docker)
   mailpit:
     image: axllent/mailpit:v1.31.4
     ports:

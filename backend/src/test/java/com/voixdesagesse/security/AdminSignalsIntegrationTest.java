@@ -49,7 +49,6 @@ import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 import tools.jackson.databind.json.JsonMapper;
 
-/** Moderation: deleting a reported article settles all its reports; the author is told by email. */
 @SpringBootTest
 @AutoConfigureMockMvc
 class AdminSignalsIntegrationTest {
@@ -109,7 +108,6 @@ class AdminSignalsIntegrationTest {
         assertEquals(SignalStatus.APPROVED, signalRepository.findById(second).orElseThrow().getStatus());
         ArgumentCaptor<MimeMessage> mail = ArgumentCaptor.forClass(MimeMessage.class);
         verify(mailSender).send(mail.capture());
-        // A wisdom has no title: the email names it by the start of its text.
         assertTrue(text(mail.getValue().getContent()).contains(CONTENT.substring(0, 40)));
 
         process(second, "APPROVED").andExpect(status().isConflict())
@@ -183,7 +181,6 @@ class AdminSignalsIntegrationTest {
             .with(as(ADMIN_ID, AccountType.ADMIN)));
     }
 
-    // Text of an email, whatever its multipart structure.
     private static String text(Object content) throws Exception {
         if (content instanceof Multipart multipart) {
             StringBuilder text = new StringBuilder();

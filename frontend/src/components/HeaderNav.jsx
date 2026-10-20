@@ -9,7 +9,6 @@ const SECTIONS = [
   { id: 'Contact', label: 'Contact' },
 ];
 
-// Height of the fixed header, so a section title is not hidden behind it.
 const HEADER_OFFSET = 90;
 
 const sectionTop = (id) => {
@@ -24,9 +23,6 @@ const scrollToSection = (id) => {
   }
 };
 
-// The active section is the last one whose top has reached the upper third of
-// the screen. At the very bottom of the page the last section is active, even
-// if it is too short to reach that point.
 const useActiveSection = () => {
   const [active, setActive] = useState(SECTIONS[0].id);
 

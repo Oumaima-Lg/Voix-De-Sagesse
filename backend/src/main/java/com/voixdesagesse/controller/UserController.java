@@ -139,14 +139,12 @@ public class UserController {
     @PostMapping("/me/picture")
     public ResponseEntity<?> uploadProfilePicture(@RequestParam("profilePicture") MultipartFile file,
             @AuthenticationPrincipal CustomUserDetails currentUser) throws VoixDeSagesseException, IOException {
-        // Files over 5 MB are rejected before reaching this method (spring.servlet.multipart.max-file-size).
         if (file.isEmpty())
             throw new VoixDeSagesseException("FILE_EMPTY");
         String contentType = file.getContentType();
         if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType.toLowerCase()))
             throw new VoixDeSagesseException("FILE_TYPE_NOT_ALLOWED");
 
-        // Relative path, like the stored value: the frontend prefixes it with the API URL.
         String profilePictureUrl = userService.saveProfilePicture(file, currentUser.getId());
         return ResponseEntity.ok(Map.of(
                 "profilePictureUrl", profilePictureUrl,

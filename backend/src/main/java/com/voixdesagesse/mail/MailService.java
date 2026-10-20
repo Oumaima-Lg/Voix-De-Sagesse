@@ -23,7 +23,6 @@ public class MailService {
     @Value("${app.mail.from}")
     private String mailFrom;
 
-    // Any sending failure is reported as MAIL_FAILED; the details stay in the logs.
     public void sendHtml(String to, String subject, String html) throws VoixDeSagesseException {
         try {
             MimeMessage mm = mailSender.createMimeMessage();

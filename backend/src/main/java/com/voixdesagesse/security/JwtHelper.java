@@ -21,7 +21,7 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JwtHelper {
 
-    private static final int MIN_SECRET_BYTES = 32; // HS256 needs a 256-bit key
+    private static final int MIN_SECRET_BYTES = 32;
 
     @Value("${jwt.secret}")
     private String secret;
@@ -29,7 +29,6 @@ public class JwtHelper {
     @Value("${jwt.expiration:86400000}")
     private Long jwtExpiration;
 
-    // Fail at startup rather than signing tokens with a missing or guessable key.
     @PostConstruct
     void checkSecret() {
         if (secret == null || secret.getBytes(StandardCharsets.UTF_8).length < MIN_SECRET_BYTES)

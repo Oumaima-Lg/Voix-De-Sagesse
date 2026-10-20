@@ -4,7 +4,6 @@ import {
   api, card, expectCall, likeButton, login, signIn, waitForCode,
 } from './helpers.js'
 
-// Main flows, with a temporary account created through the normal sign-up and deleted at the end.
 const STAMP = Date.now().toString()
 const EMAIL = `smoke-${STAMP}@voixdesagesse.local`
 const PASSWORD = 'Smoke123!'
@@ -71,7 +70,7 @@ test.describe.serial('Parcours principaux', () => {
     await page.goto('/espace/fil')
     const like = likeButton(card(page, WISDOM))
     await expectCall(page, 'POST', '/like', () => like.click())
-    await page.waitForTimeout(500) // the button is locked for 300 ms after a click
+    await page.waitForTimeout(500)
     await expectCall(page, 'DELETE', '/like', () => like.click())
   })
 
@@ -95,7 +94,6 @@ test.describe.serial('Parcours principaux', () => {
   test('recherche', async () => {
     await page.getByPlaceholder('Rechercher dans les articles...').fill(STAMP)
     await expectCall(page, 'GET', '/articles/search', () => page.getByRole('button', { name: 'Rechercher' }).click())
-    // The wisdom and the story both contain the stamp.
     await expect(page.getByText('2 résultats trouvés')).toBeVisible()
     await expect(card(page, WISDOM)).toBeVisible()
   })

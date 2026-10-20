@@ -41,7 +41,6 @@ public class Article {
      
     private long userId;
 
-    // How the article is named in emails and notifications: its title, or the start of its text (wisdoms have no title).
     public String label() {
         return title != null && !title.isBlank() ? title : Utilities.excerpt(content, 60);
     }

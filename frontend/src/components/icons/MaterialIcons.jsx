@@ -1,5 +1,3 @@
-// The three Material icons the app used from @mui/icons-material, with the same paths and the same
-// SvgIcon styles (fontSize="inherit"), so they render identically without the MUI dependency.
 const svgStyle = {
   userSelect: 'none',
   width: '1em',

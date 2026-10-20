@@ -94,10 +94,8 @@ public class SignalServiceImpl implements SignalService {
         Signal savedSignal = signalRepository.save(signal);
 
         if (status == SignalStatus.APPROVED) {
-            // Deleting the article settles the other reports on it with the same decision.
             signalRepository.settlePendingByArticleId(signal.getArticleId(), SignalStatus.APPROVED, now, adminId);
             Optional<Article> article = articleRepository.findById(signal.getArticleId());
-            // Reports made before this rule may point to an article its author already deleted.
             if (article.isPresent()) {
                 articleService.deleteArticle(article.get().getId(), article.get().getUserId());
                 log.info("Article supprimé - ID: {}", signal.getArticleId());
@@ -110,7 +108,6 @@ public class SignalServiceImpl implements SignalService {
         return convertToDTO(savedSignal);
     }
 
-    // The decision is already saved: a failed email is logged, it does not undo the moderation.
     private void notifyAuthor(Article article) {
         try {
             User author = userService.getUserById(article.getUserId());

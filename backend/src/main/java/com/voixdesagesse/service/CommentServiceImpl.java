@@ -87,7 +87,6 @@ public class CommentServiceImpl implements CommentService {
         Article article = articleRepository.findById(comment.getArticleId())
                 .orElseThrow(() -> new VoixDeSagesseException("ARTICLE_NOT_FOUND"));
 
-        // A comment can be deleted by its author or by the author of the article it was posted on.
         if (!comment.getUserId().equals(userId) && article.getUserId() != userId)
             throw new VoixDeSagesseException("COMMENT_DELETE_FORBIDDEN");
 

@@ -20,7 +20,6 @@ const post = (id, authorId, interaction = {}) => ({
   interaction: { liked: false, saved: false, following: false, ...interaction },
 })
 
-// Keeps the list in state, like the pages do.
 const setup = (initialPosts, options) =>
   renderHook(
     () => {

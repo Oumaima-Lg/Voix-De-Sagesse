@@ -25,11 +25,6 @@ import com.voixdesagesse.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Fills an empty database with demo accounts, articles and reactions, so the app can be tried right away
- * (docker compose, online demo). Enabled with DEMO_DATA=true; does nothing once the database has users.
- * Everything goes through the services, so counters and notifications are the same as for real use.
- */
 @Component
 @ConditionalOnBooleanProperty("app.demo-data.enabled")
 @RequiredArgsConstructor
@@ -42,7 +37,6 @@ public class DemoDataLoader implements ApplicationRunner {
     @Value("${app.demo-data.user-password}")
     private String userPassword;
 
-    // Empty: no admin account is created.
     @Value("${app.demo-data.admin-password:}")
     private String adminPassword;
 
@@ -95,7 +89,6 @@ public class DemoDataLoader implements ApplicationRunner {
         wisdom(youssef, 1, "Le meilleur moment pour planter un arbre, c'était il y a vingt ans. Le deuxième meilleur moment, c'est maintenant.",
                 "Proverbe chinois", CategoryType.inspiration, "action");
 
-        // Reactions between the authors; the demo account receives some, so its notifications are not empty.
         follow(demo, amina);
         follow(karim, demo);
         follow(amina, demo);
@@ -119,7 +112,6 @@ public class DemoDataLoader implements ApplicationRunner {
         return userService.createAccount(nom, prenom, email, userPassword, AccountType.USER);
     }
 
-    // `daysAgo` spreads the publication dates, so the feed does not show everything "à l'instant".
     private Article wisdom(User author, int daysAgo, String content, String source, CategoryType category, String... tags)
             throws VoixDeSagesseException {
         SagesseDTO dto = new SagesseDTO(content, source, category, Set.of(tags), author.getId());

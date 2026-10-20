@@ -60,7 +60,6 @@ public class User {
         this.followingCount, this.likesReceived, this.likedArticlesId, this.followingId, this.savedArticlesId, this.reportedArticlesId, this.dateInscription);
     }
 
-    // Profile as seen by other users: contact details (email, phone) stay private.
     public UserProfileDTO toPublicProfileDTO() {
         UserProfileDTO profile = toProfileDTO();
         profile.setEmail(null);

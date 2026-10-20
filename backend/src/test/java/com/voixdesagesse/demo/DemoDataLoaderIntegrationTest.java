@@ -65,14 +65,12 @@ class DemoDataLoaderIntegrationTest {
         assertTrue(passwordEncoder.matches("Demo1234!", demo.getMotdepasse()));
         assertEquals(AccountType.ADMIN, userRepository.findByEmail(DemoDataLoader.ADMIN_EMAIL).orElseThrow().getAccountType());
 
-        // Counters kept by the services: the demo account wrote 2 articles and is followed by 2 authors.
         assertEquals(2L, demo.getContentCount());
         assertEquals(2L, demo.getFollowersCount());
         long likesOnDemoArticles = articleRepository.findByUserId(demo.getId()).stream().mapToLong(Article::getLikes).sum();
         assertEquals(likesOnDemoArticles, demo.getLikesReceived());
         assertTrue(notificationRepository.countByRecipientIdAndReadFalse(demo.getId()) >= 5);
 
-        // The feed shows the newest articles first (the demo articles have different dates).
         List<LocalDateTime> dates = articleService.displayPosts(demo.getId()).stream()
             .map(post -> post.getArticle().getDatePublication()).toList();
         assertEquals(dates.stream().sorted(Comparator.reverseOrder()).toList(), dates);

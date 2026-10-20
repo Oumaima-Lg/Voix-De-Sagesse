@@ -5,7 +5,6 @@ import { errorNotification } from '../utils/notifications'
 
 vi.mock('../utils/notifications')
 
-// Answers every request with the given status, without any network.
 const failWith = (status) => ({
   adapter: async (config) => {
     throw new AxiosError('failed', 'ERR_BAD_RESPONSE', config, null,

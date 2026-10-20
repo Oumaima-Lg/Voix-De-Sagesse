@@ -4,7 +4,6 @@ import {
   api, createAccount, emailHtml, emailsTo, login, signIn,
 } from './helpers.js'
 
-// Reported articles, as the admin handles them. A temporary second reporter is created and deleted.
 const STAMP = Date.now().toString()
 const CONTENT = `Contenu douteux à modérer ${STAMP}, signalé par deux lecteurs du site.`
 const REPORTER = `rapporteur-${STAMP}@voixdesagesse.local`
@@ -18,7 +17,6 @@ test.describe.serial('Modération des signalements', () => {
   const reportsFor = async (articleId) =>
     (await api('GET', '/admin/signals', admin)).filter((s) => s.articleId === articleId).map((s) => s.status)
 
-  // The tab shows the number of pending reports; no number when there are none.
   const pendingBadge = async () => {
     const last = (await page.getByRole('button', { name: /Signalements/ }).first().innerText()).trim().split(/\s+/).pop()
     return /^\d+$/.test(last) ? Number(last) : 0
@@ -96,7 +94,6 @@ test.describe.serial('Modération des signalements', () => {
     ])
     expect(response.status()).toBe(200)
     expect(dialogs).toHaveLength(dialogsBefore)
-    // Checked in the author's feed: an article is hidden from the people who reported it.
     expect((await api('GET', '/articles/posts', karim)).some((post) => post.article.id === kept.id)).toBe(true)
     expect(await reportsFor(kept.id)).toEqual(['REJECTED'])
   })

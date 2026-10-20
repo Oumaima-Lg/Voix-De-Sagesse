@@ -25,7 +25,6 @@ const ArticleTypeSelection = () => {
       </div>
 
       <div className="flex flex-col md:flex-row gap-8 mb-12">
-        {/* Sagesse Partagée Card */}
         <div
           className="w-full md:w-96 bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% border-[#202020] border-3 hover:scale-105 transform-gpu transition-all duration-300 cursor-pointer group rounded-lg shadow-lg"
           onClick={() => handleTypeSelect("wisdom")}
@@ -49,7 +48,6 @@ const ArticleTypeSelection = () => {
           </div>
         </div>
 
-        {/* Histoires Personnelles Card */}
         <div
           className="w-full md:w-96 bg-gradient-to-br from-[#171717] from-54% to-[#4E3F59] to-100% border-[#202020] border-3 hover:scale-105 transform-gpu transition-all duration-300 cursor-pointer group rounded-lg shadow-lg"
           onClick={() => handleTypeSelect("story")}

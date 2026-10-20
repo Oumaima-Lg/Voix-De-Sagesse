@@ -33,7 +33,6 @@ public class UserRegistrationDTO {
     )
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String motdepasse;
-    // Set by the server on registration, never taken from the request body.
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private AccountType accountType;
 

@@ -13,7 +13,6 @@ const axiosInstance = axios.create({
   }
 });
 
-// Login, sign-up and password reset: a 401 there means wrong credentials, not an expired session.
 const isPublicRoute = (url) => url.includes('/auth/');
 
 axiosInstance.interceptors.request.use(
@@ -46,8 +45,6 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Only what concerns the whole app is handled here: an expired session and the admin area.
-// Every other error is shown once, by the page that made the request (see getApiErrorMessage).
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {

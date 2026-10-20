@@ -4,14 +4,12 @@ import { getAllSignals, processSignal } from "../../api/adminService"
 import { errorNotification, successNotification } from "../../utils/notifications"
 import { getApiErrorMessage } from "../../api/apiError"
 
-// Wisdoms have no title: they are shown by the start of their text.
 const articleLabel = (signal) => {
     if (signal.articleTitle) return signal.articleTitle
     const content = signal.articleContent?.trim() || ""
     return content.length > 60 ? `${content.slice(0, 60).trim()}…` : content || "Article sans titre"
 }
 
-// `onChange`: called after a decision, so the dashboard can refresh its counters.
 const Signals = ({ onChange }) => {
     const [signals, setSignals] = useState([])
     const [isLoading, setIsLoading] = useState(true)
@@ -27,7 +25,6 @@ const Signals = ({ onChange }) => {
         fetchSignals()
     }, [])
 
-    // `silent`: reload without the full-page spinner (after a decision).
     const fetchSignals = async (silent = false) => {
         try {
             if (!silent) setIsLoading(true)
@@ -114,7 +111,6 @@ const Signals = ({ onChange }) => {
     const currentSignals = filteredSignals.slice(indexOfFirstSignal, indexOfLastSignal)
     const totalPages = Math.ceil(filteredSignals.length / signalsPerPage)
 
-    // APPROVED deletes the article (and settles its other reports); REJECTED keeps it.
     const handleProcessSignal = async (signal, status) => {
         if (status === "APPROVED" && !window.confirm(
             `Supprimer cet article ?\n\n« ${articleLabel(signal)} »\n\n` +
@@ -198,7 +194,6 @@ const Signals = ({ onChange }) => {
             </header>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-                {/* Statistics Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div className="backdrop-blur-xl bg-gradient-to-br from-[#171717] to-[#4E3F59] rounded-2xl shadow-xl border border-[#202020] p-6">
                         <div className="flex items-center justify-between">
@@ -237,7 +232,6 @@ const Signals = ({ onChange }) => {
                     </div>
                 </div>
 
-                {/* Signals Management Table */}
                 <div className="backdrop-blur-xl bg-gradient-to-br from-[#171717] to-[#4E3F59] rounded-2xl shadow-2xl border border-[#202020] overflow-hidden">
                     <div className="px-6 py-5 border-b border-[#4C3163]/50">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -359,7 +353,6 @@ const Signals = ({ onChange }) => {
                         </table>
                     </div>
 
-                    {/* Pagination */}
                     {totalPages > 1 && (
                         <div className="px-6 py-4 border-t border-[#4C3163]/50 bg-gradient-to-r from-[#202020]/50 to-[#4C3163]/50">
                             <div className="flex items-center justify-between">
@@ -400,7 +393,6 @@ const Signals = ({ onChange }) => {
                     )}
                 </div>
 
-                {/* Modal for Signal Details */}
                 {showModal && selectedSignal && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-70 p-4">
                         <div className="bg-gradient-to-br from-[#171717] to-[#4E3F59] rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-[#202020]">
@@ -416,7 +408,6 @@ const Signals = ({ onChange }) => {
                             </div>
 
                             <div className="space-y-6">
-                                {/* Informations du signalement */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label className="text-sm font-semibold text-[#A09F87] block mb-2">Raison du signalement</label>
@@ -440,7 +431,6 @@ const Signals = ({ onChange }) => {
                                     </div>
                                 )}
 
-                                {/* Informations sur les utilisateurs */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="text-sm font-semibold text-[#A09F87] block mb-2">Signalé par</label>
@@ -463,7 +453,6 @@ const Signals = ({ onChange }) => {
                                     </div>
                                 </div>
 
-                                {/* Informations détaillées de l'article */}
                                 <div className="border-t border-[#4C3163]/50 pt-6">
                                     <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                                         {selectedSignal.articleType === 'SAGESSE' ? <Quote className="w-5 h-5" /> : <BookOpen className="w-5 h-5" />}
@@ -522,7 +511,6 @@ const Signals = ({ onChange }) => {
                                     )}
                                 </div>
 
-                                {/* Actions pour les signalements en attente */}
                                 {selectedSignal.status === 'PENDING' && (
                                     <div className="flex gap-3 pt-4 border-t border-[#4C3163]/50">
                                         <button
@@ -544,7 +532,6 @@ const Signals = ({ onChange }) => {
                                     </div>
                                 )}
 
-                                {/* Informations de traitement */}
                                 {selectedSignal.processedAt && (
                                     <div className="pt-4 border-t border-[#4C3163]/50">
                                         <div className="text-sm text-[#A09F87]/80">

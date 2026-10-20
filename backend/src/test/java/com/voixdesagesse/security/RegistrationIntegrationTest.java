@@ -31,7 +31,6 @@ import com.voixdesagesse.repository.UserRepository;
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 
-/** An account only exists once the code sent by email has been confirmed. */
 @SpringBootTest
 @AutoConfigureMockMvc
 class RegistrationIntegrationTest {
@@ -75,7 +74,6 @@ class RegistrationIntegrationTest {
         assertEquals(AccountType.USER, userRepository.findByEmail(EMAIL).orElseThrow().getAccountType());
         login().andExpect(status().isOk()).andExpect(jsonPath("$.jwt").exists());
 
-        // The code is single-use.
         confirm(code).andExpect(status().isBadRequest());
     }
 

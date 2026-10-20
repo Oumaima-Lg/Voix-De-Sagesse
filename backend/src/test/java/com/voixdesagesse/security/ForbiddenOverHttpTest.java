@@ -21,10 +21,6 @@ import com.voixdesagesse.dto.AccountType;
 import com.voixdesagesse.entity.User;
 import com.voixdesagesse.repository.UserRepository;
 
-/**
- * Over a real HTTP server, a forbidden request goes through the /error dispatch, which MockMvc does not
- * simulate: a logged-in user calling an admin endpoint must get 403, not 401.
- */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ForbiddenOverHttpTest {
 

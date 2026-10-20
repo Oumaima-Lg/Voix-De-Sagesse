@@ -40,7 +40,6 @@ import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 import tools.jackson.databind.json.JsonMapper;
 
-/** What other users do with an article or a profile reaches its owner as a notification. */
 @SpringBootTest
 @AutoConfigureMockMvc
 class NotificationIntegrationTest {
@@ -110,7 +109,6 @@ class NotificationIntegrationTest {
             .andExpect(jsonPath("$[3].actor.email").doesNotExist())
             .andExpect(jsonPath("$[3].articleExcerpt").value(EXCERPT))
             .andExpect(jsonPath("$[3].read").value(false));
-        // The reader received nothing.
         unreadCount(READER_ID).andExpect(jsonPath("$.count").value(0));
     }
 

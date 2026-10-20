@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom';
 import { errorNotification, successNotification } from '../../utils/notifications';
 import './RegisterForm.css';
 
-// Same delay as the server before a new code can be requested.
 const RESEND_DELAY_SECONDS = 60;
 
 const form = {
@@ -25,7 +24,6 @@ const RegisterForm = () => {
     const [data, setData] = useState(form);
     const [formError, setFormError] = useState(form);
     const navigate = useNavigate();
-    // 'form', then 'code' once the verification code has been emailed.
     const [step, setStep] = useState('form');
     const [sending, setSending] = useState(false);
     const [code, setCode] = useState('');
@@ -33,7 +31,6 @@ const RegisterForm = () => {
     const [verifying, setVerifying] = useState(false);
     const [cooldown, setCooldown] = useState(0);
     const pinRef = useRef(null);
-    // Six boxes must fit in the card on a 320px wide phone.
     const pinSize = useMatches({ base: 'sm', xs: 'md' });
     const pinGap = useMatches({ base: 6, xs: 'md' });
 
@@ -43,8 +40,6 @@ const RegisterForm = () => {
         return () => clearTimeout(timer);
     }, [cooldown]);
 
-    // After a refused code the boxes are emptied: put the cursor back in the first one
-    // (PinInput gives its ref to the first box).
     useEffect(() => {
         if (codeError) pinRef.current?.focus();
     }, [codeError]);

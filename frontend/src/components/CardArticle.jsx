@@ -243,7 +243,6 @@ const ExperienceCard = ({ title, content, star, userName, userImage, image }) =>
 const ExperienceCard2 = ({ title, content, star, userName, userImage, image }) => (
   <Carousel.Slide >
     <div id='card2' className='card-article-carousel'>
-      {/* flex mx-auto  */}
       <div className="card2 h-96 my-4 mx-2  p-4 pl-6 flex lg:flex-row flex-col-reverse gap-y-5 gap-x-10  hover:shadow-[0_0_5px_2px_black] shadow-amber-50">
         <div className='flex-4 flex flex-col lg:gap-y-14 gap-y-6'>
           <h3 className='text-white/90 lg:text-3xl text-xl charm text-center z-[1]'> <span>{title}</span> </h3>
@@ -269,7 +268,6 @@ const Card = ({ isToggled }) => {
   return (
 
     <div className='flex justify-items-center mx-auto'>
-      {/* Card 1 - visible quand switch est OFF */}
       {!isToggled && (
         <div id='card1' className='card-article grid md:grid-cols-3 grid-row-3 md:space-x-28  space-y-6  mx-auto'>
           {citations.map((citation, index) => (
@@ -278,7 +276,6 @@ const Card = ({ isToggled }) => {
         </div>
       )}
 
-      {/* Card 2 - visible quand switch est ON */}
       {isToggled && (
         <div id='card2' className='card-article flex mx-auto'>
           {experiences.map((experience, index) => (
@@ -294,7 +291,6 @@ const Card2 = ({ isToggled }) => {
   return (
 
     <div className=' p-10'>
-      {/* Card 1 - visible quand switch est OFF */}
       {!isToggled && (
         <Carousel slideSize="30%"  height={300} slideGap="md" controlsOffset="xs" controlSize={40} emblaOptions={{
           loop: false,
@@ -312,7 +308,6 @@ const Card2 = ({ isToggled }) => {
         </Carousel>
       )}
 
-      {/* Card 2 - visible quand switch est ON */}
       {isToggled && (
         <Carousel  slideGap="md" controlsOffset="xs" controlSize={40} emblaOptions={{
           loop: false,

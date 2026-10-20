@@ -7,7 +7,6 @@ import com.voixdesagesse.dto.NotificationType;
 import com.voixdesagesse.entity.Article;
 import com.voixdesagesse.entity.Comment;
 
-// Tells users what others did with their articles and profile. Nobody is notified of their own actions.
 public interface NotificationService {
 
     void articleLiked(Article article, Long actorId);
@@ -20,7 +19,6 @@ public interface NotificationService {
 
     void articleRemoved(Article article);
 
-    // An action was undone (unlike, unfollow, removed from favorites): its notification goes away.
     void withdraw(NotificationType type, Long recipientId, Long actorId, Long articleId);
 
     void commentDeleted(Long commentId);

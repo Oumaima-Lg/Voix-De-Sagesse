@@ -27,7 +27,6 @@ class OpenApiIntegrationTest {
             .andExpect(jsonPath("$.components.securitySchemes['bearer-jwt'].scheme").value("bearer"))
             .andExpect(jsonPath("$.paths['/auth/login'].post.summary").exists())
             .andExpect(jsonPath("$.paths['/articles/posts'].get").exists())
-            // Login and sign-up need no token; the other routes do.
             .andExpect(jsonPath("$.paths['/auth/login'].post.security").isEmpty())
             .andExpect(jsonPath("$.paths['/articles/posts'].get.security").doesNotExist())
             .andExpect(jsonPath("$.paths['/error']").doesNotExist());

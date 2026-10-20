@@ -27,7 +27,6 @@ import com.voixdesagesse.entity.User;
 import com.voixdesagesse.repository.UserRepository;
 import com.voixdesagesse.security.CustomUserDetails;
 
-/** Errors use proper HTTP statuses and readable messages, without internal details. */
 @SpringBootTest
 @AutoConfigureMockMvc
 class ErrorHandlingIntegrationTest {

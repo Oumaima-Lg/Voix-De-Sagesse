@@ -193,22 +193,18 @@ const AdminDashboard = () => {
     if (showSpline) {
         return (
             <div className="w-screen h-screen bg-gradient-to-bl from-[#0f0f0f] to-[#121212] flex">
-                {/* Left */}
                 <div className="w-1/2 h-full flex items-center justify-center">
                     <div className="w-full h-full">
                         <SplineScene scene="https://prod.spline.design/9vqrsAo-EuX1s3i7/scene.splinecode" />
                     </div>
                 </div>
 
-                {/* Right: big rotating circle with centered progress counter */}
                 <div className="w-1/2 h-full flex items-center justify-center">
                     <div className="flex items-center justify-center w-full h-full">
                         <div className="w-96 h-96 flex items-center justify-center">
                             <div className="relative w-80 h-80">
-                                {/* ring that rotates */}
                                 <div className="absolute inset-0 rounded-full border-8 border-[#4C3163] border-t-transparent animate-spin shadow-xl"></div>
 
-                                {/* fixed centered content (does NOT rotate) */}
                                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                                     <div className="text-4xl font-bold text-white select-none">{splineProgress}%</div>
                                     <div className="text-xs text-[#A09F87] mt-1 select-none">Initialisation</div>
@@ -235,7 +231,6 @@ const AdminDashboard = () => {
             <div className="fixed inset-0 -z-10">
                 <div className="absolute inset-0 bg-gradient-to-bl from-[#171717] from-55% to-[#4E3F59] to-100%"></div>
 
-                {/* Floating books */}
                 <div className="absolute top-20 left-10 w-16 h-20 opacity-20 animate-float-slow">
                     <BookOpen className="w-full h-full text-[#A09F87]" />
                 </div>
@@ -246,7 +241,6 @@ const AdminDashboard = () => {
                     <BookOpen className="w-full h-full text-[#A09F87]/70" />
                 </div>
 
-                {/* Floating brains */}
                 <div className="absolute top-1/2 right-10 w-14 h-14 opacity-30 animate-pulse-slow">
                     <Brain className="w-full h-full text-[#4C3163]" />
                 </div>
@@ -254,7 +248,6 @@ const AdminDashboard = () => {
                     <Brain className="w-full h-full text-[#4C3163]/80" />
                 </div>
 
-                {/* Floating lightbulbs */}
                 <div className="absolute top-32 right-1/3 w-12 h-12 opacity-35 animate-float-particle">
                     <Lightbulb className="w-full h-full text-[#A09F87]" />
                 </div>
@@ -265,7 +258,6 @@ const AdminDashboard = () => {
                     <Lightbulb className="w-full h-full text-[#A09F87]/70" />
                 </div>
 
-                {/* Graduation caps */}
                 <div className="absolute top-16 right-1/2 w-12 h-12 opacity-25 animate-rotate-slow">
                     <GraduationCap className="w-full h-full text-[#4C3163]/80" />
                 </div>
@@ -273,7 +265,6 @@ const AdminDashboard = () => {
                     <GraduationCap className="w-full h-full text-[#4C3163]/70" />
                 </div>
 
-                {/* Scrolls */}
                 <div className="absolute top-2/3 right-16 w-10 h-10 opacity-30 animate-pulse-shape">
                     <Scroll className="w-full h-full text-[#A09F87]/80" />
                 </div>
@@ -281,17 +272,14 @@ const AdminDashboard = () => {
                     <Scroll className="w-full h-full text-[#A09F87]/70" />
                 </div>
 
-                {/* Glasses */}
                 <div className="absolute bottom-1/4 left-1/6 w-14 h-14 opacity-20 animate-orbit-reverse">
                     <Glasses className="w-full h-full text-[#4C3163]/60" />
                 </div>
 
-                {/* Feathers */}
                 <div className="absolute top-3/4 right-1/5 w-8 h-8 opacity-35 animate-drift-left">
                     <Feather className="w-full h-full text-[#A09F87]/60" />
                 </div>
 
-                {/* Atoms */}
                 <div className="absolute top-10 left-1/4 w-6 h-6 opacity-40 animate-orbit-fast">
                     <Atom className="w-full h-full text-[#4C3163]/70" />
                 </div>
@@ -304,7 +292,6 @@ const AdminDashboard = () => {
                 <div className="absolute top-24 left-1/3 w-32 h-0.5 bg-gradient-to-r from-transparent via-[#A09F87]/30 to-transparent animate-slide-horizontal"></div>
                 <div className="absolute bottom-48 right-1/3 w-24 h-0.5 bg-gradient-to-r from-transparent via-[#4C3163]/25 to-transparent animate-slide-horizontal-reverse"></div>
 
-                {/* Subtle grid pattern */}
                 <div className="absolute inset-0 opacity-[0.03]">
                     <div className="absolute inset-0 bg-[linear-gradient(90deg,#fff_1px,transparent_1px),linear-gradient(180deg,#fff_1px,transparent_1px)] bg-[size:50px_50px] animate-grid-move"></div>
                 </div>
@@ -341,7 +328,6 @@ const AdminDashboard = () => {
                 </div>
             </header>
 
-            {/* Navigation Tabs */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
                 <div className="flex space-x-1 mb-6">
                     {tabs.map((tab) => {
@@ -369,7 +355,6 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-            {/* Content based on active tab */}
             {activeTab === "signals" ? (
                 <Signals onChange={loadDashboardStats} />
             ) : (

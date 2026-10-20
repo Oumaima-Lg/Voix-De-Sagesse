@@ -35,10 +35,6 @@ import com.voixdesagesse.entity.User;
 import com.voixdesagesse.repository.ArticleRepository;
 import com.voixdesagesse.repository.UserRepository;
 
-/**
- * The API must take the acting user from the authentication, never from ids sent by the client.
- * Runs against the MongoDB configured for tests.
- */
 @SpringBootTest
 @AutoConfigureMockMvc
 class AuthorizationIntegrationTest {

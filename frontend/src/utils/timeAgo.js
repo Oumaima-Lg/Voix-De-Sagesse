@@ -1,6 +1,5 @@
 const rtf = new Intl.RelativeTimeFormat("fr", { numeric: "auto" });
 
-// "à l'instant", "il y a 5 minutes", "hier"... then the date after a week.
 export const timeAgo = (date, now = new Date()) => {
   const seconds = Math.round((new Date(date) - now) / 1000);
   if (seconds > -60) return "à l'instant";

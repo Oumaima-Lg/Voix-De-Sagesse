@@ -1,4 +1,3 @@
-
 package com.voixdesagesse.security;
 
 import java.util.ArrayList;
@@ -50,7 +49,6 @@ public class CustomUserDetails implements UserDetails {
         this.password = password;
         this.accountType = accountType;
         
-        // If authorities are provided, use them, otherwise generate from account type
         if (authorities != null && !authorities.isEmpty()) {
             this.authorities = authorities;
         } else {

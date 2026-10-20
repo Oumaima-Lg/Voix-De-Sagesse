@@ -20,16 +20,13 @@ public class Notification {
     @Id
     private Long id;
     private Long recipientId;
-    // Who did the action; null for moderation decisions.
     private Long actorId;
     private NotificationType type;
     private Long articleId;
     private Long commentId;
-    // Kept as text: the article or the comment may be deleted afterwards.
     private String articleExcerpt;
     private String commentExcerpt;
     private boolean read;
-    // MongoDB removes notifications 90 days after they were created.
     @Indexed(expireAfter = "90d")
     private LocalDateTime createdAt;
 }

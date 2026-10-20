@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-// A sign-up waiting for its email code. The account is only created in `users` once the code is confirmed.
 @Document(collection = "pending_registrations")
 @Data
 @NoArgsConstructor
@@ -19,7 +18,6 @@ public class PendingRegistration {
     private String email;
     private String nom;
     private String prenom;
-    // Already hashed: the plain password is never stored.
     private String motdepasse;
     private String otpCode;
     private LocalDateTime creationTime;

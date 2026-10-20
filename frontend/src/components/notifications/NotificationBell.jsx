@@ -9,7 +9,6 @@ import { timeAgo } from "../../utils/timeAgo"
 import { fileUrl } from "../../config"
 import profileAvatar from "../../assets/profileAvatar.webp"
 
-// How often the unread count is refreshed while a page is open.
 const POLL_INTERVAL_MS = 30000
 
 const fullName = (actor) => `${actor.prenom} ${actor.nom}`
@@ -32,22 +31,18 @@ const message = (notification) => {
   }
 }
 
-// Where a click on the notification leads (nowhere for a removed article).
 const target = (notification) => {
   if (notification.type === "FOLLOW") return `/espace/auteur/${notification.actor.id}`
   if (notification.type === "ARTICLE_REMOVED") return null
   return "/espace/mes-publications"
 }
 
-// Bell with the number of unread notifications; a click opens the list and marks everything as read.
-// `variant`: "tab" in the main header, "icon" in the page title bars.
 const NotificationBell = ({ variant = "icon" }) => {
   const navigate = useNavigate()
   const [count, setCount] = useState(0)
   const [opened, setOpened] = useState(false)
   const [notifications, setNotifications] = useState(null)
 
-  // Errors are ignored here: the badge is simply refreshed on the next tick.
   const refreshCount = useCallback(() => {
     getUnreadCount().then(setCount).catch(() => {})
   }, [])

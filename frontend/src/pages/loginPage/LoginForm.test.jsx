@@ -10,7 +10,6 @@ import LoginForm from './LoginForm'
 vi.mock('../../api/authService')
 vi.mock('../../utils/notifications')
 
-// Unsigned token with the claims the backend puts in the JWT; the page only decodes it.
 const fakeJwt = (claims) => `e30.${btoa(JSON.stringify(claims))}.signature`
 
 const renderLogin = () =>
