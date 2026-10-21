@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { notifications } from '@mantine/notifications'
 import { API_URL } from '../config'
 import { errorNotification } from '../utils/notifications'
+import { SERVER_UNAVAILABLE } from '../api/apiError'
 
 export const SLOW_AFTER_MS = 3000
 export const RETRY_EVERY_MS = 5000
@@ -37,7 +38,7 @@ export const useServerWakeUp = () => {
       } else {
         clearTimeout(slow)
         notifications.hide(NOTIFICATION_ID)
-        errorNotification('Serveur indisponible', 'Le serveur ne répond pas. Réessayez dans quelques minutes.')
+        errorNotification('Serveur indisponible', SERVER_UNAVAILABLE)
       }
     }
     check(1)

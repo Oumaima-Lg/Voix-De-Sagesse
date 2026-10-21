@@ -1,6 +1,5 @@
 package com.voixdesagesse.service;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -49,7 +48,7 @@ public interface UserService {
     public void decrementLikesReceived(Long userId);
 
     
-    public String saveProfilePicture(MultipartFile file, Long userId) throws IOException, VoixDeSagesseException;
+    public String saveProfilePicture(MultipartFile file, Long userId) throws VoixDeSagesseException;
 
     public void incrementContentCount(Long userId);
     

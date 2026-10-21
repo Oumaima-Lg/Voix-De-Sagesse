@@ -89,7 +89,7 @@ class RegistrationIntegrationTest {
     void mailFailureCanBeRetried() throws Exception {
         doThrow(new MailSendException("SMTP down")).when(mailSender).send(any(MimeMessage.class));
         register().andExpect(status().isServiceUnavailable())
-            .andExpect(jsonPath("$.errorMessage").value("L'email n'a pas pu être envoyé. Réessayez dans quelques minutes."));
+            .andExpect(jsonPath("$.errorMessage").value("Les emails ne peuvent pas être envoyés pour le moment : la limite quotidienne du service d'envoi est peut-être atteinte. Réessayez plus tard, ou découvrez le site avec le compte de démonstration."));
         assertTrue(pendingRegistrationRepository.findById(EMAIL).isEmpty());
     }
 

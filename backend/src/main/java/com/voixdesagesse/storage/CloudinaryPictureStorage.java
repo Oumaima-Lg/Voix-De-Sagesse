@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.voixdesagesse.exception.VoixDeSagesseException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,7 +45,7 @@ public class CloudinaryPictureStorage implements PictureStorage {
     }
 
     @Override
-    public String store(MultipartFile file, Long userId) throws IOException {
+    public String store(MultipartFile file, Long userId) throws VoixDeSagesseException {
         PictureStorage.extensionOf(file);
         try {
             Map<?, ?> result = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
@@ -53,9 +54,14 @@ public class CloudinaryPictureStorage implements PictureStorage {
                     "resource_type", "image",
                     "transformation", "c_limit,h_512,w_512"));
             return (String) result.get("secure_url");
-        } catch (RuntimeException e) {
-            throw new IOException("Cloudinary upload failed: " + e.getMessage(), e);
+        } catch (IOException | RuntimeException e) {
+            log.warn("Cloudinary upload failed: {}", e.getMessage());
+            throw new VoixDeSagesseException(isInvalidImage(e) ? "PICTURE_INVALID" : "PICTURE_STORAGE_UNAVAILABLE");
         }
+    }
+
+    private static boolean isInvalidImage(Exception e) {
+        return e.getMessage() != null && e.getMessage().contains("Invalid image");
     }
 
     @Override

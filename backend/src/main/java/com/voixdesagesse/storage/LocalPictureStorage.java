@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.voixdesagesse.exception.VoixDeSagesseException;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Component
@@ -29,10 +31,15 @@ public class LocalPictureStorage implements PictureStorage, WebMvcConfigurer {
     }
 
     @Override
-    public String store(MultipartFile file, Long userId) throws IOException {
+    public String store(MultipartFile file, Long userId) throws VoixDeSagesseException {
         String name = "profile_" + userId + "_" + System.currentTimeMillis() + PictureStorage.extensionOf(file);
-        Files.createDirectories(directory);
-        Files.copy(file.getInputStream(), directory.resolve(name), StandardCopyOption.REPLACE_EXISTING);
+        try {
+            Files.createDirectories(directory);
+            Files.copy(file.getInputStream(), directory.resolve(name), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            log.error("Could not save profile picture {}", name, e);
+            throw new VoixDeSagesseException("PICTURE_STORAGE_UNAVAILABLE");
+        }
         return URL_PREFIX + name;
     }
 

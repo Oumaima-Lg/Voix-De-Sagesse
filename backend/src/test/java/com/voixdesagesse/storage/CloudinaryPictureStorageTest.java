@@ -26,6 +26,7 @@ import org.springframework.mock.web.MockMultipartFile;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Uploader;
+import com.voixdesagesse.exception.VoixDeSagesseException;
 
 @ExtendWith(MockitoExtension.class)
 class CloudinaryPictureStorageTest {
@@ -47,7 +48,7 @@ class CloudinaryPictureStorageTest {
 
     @Test
     @DisplayName("Cloudinary - la photo est envoyée dans le dossier du projet, réduite à 512 px")
-    void storeUploadsToProjectFolder() throws IOException {
+    void storeUploadsToProjectFolder() throws Exception {
         when(uploader.upload(any(), anyMap())).thenReturn(Map.of("secure_url", STORED));
 
         String url = storage.store(new MockMultipartFile("profilePicture", "photo.png", "image/png", new byte[] { 1 }), 7L);
@@ -60,18 +61,30 @@ class CloudinaryPictureStorageTest {
     @Test
     @DisplayName("Cloudinary - un fichier qui n'est pas une image n'est pas envoyé")
     void storeRejectsNonImage() {
-        assertThrows(IOException.class,
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
                 () -> storage.store(new MockMultipartFile("profilePicture", "evil.html", "text/html", new byte[] { 1 }), 7L));
+        assertEquals("FILE_TYPE_NOT_ALLOWED", exception.getMessage());
         verifyNoInteractions(uploader);
     }
 
     @Test
-    @DisplayName("Cloudinary - un refus du service devient une erreur d'entrée-sortie")
-    void storeWrapsServiceErrors() throws IOException {
+    @DisplayName("Cloudinary - un fichier qui n'est pas vraiment une image est signalé comme tel")
+    void storeReportsInvalidImage() throws IOException {
         when(uploader.upload(any(), anyMap())).thenThrow(new RuntimeException("Invalid image file"));
 
-        assertThrows(IOException.class,
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
                 () -> storage.store(new MockMultipartFile("profilePicture", "photo.png", "image/png", new byte[] { 1 }), 7L));
+        assertEquals("PICTURE_INVALID", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Cloudinary - un compte bloqué ou en panne donne un message clair")
+    void storeReportsUnavailableService() throws IOException {
+        when(uploader.upload(any(), anyMap())).thenThrow(new RuntimeException("Your account is disabled"));
+
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
+                () -> storage.store(new MockMultipartFile("profilePicture", "photo.png", "image/png", new byte[] { 1 }), 7L));
+        assertEquals("PICTURE_STORAGE_UNAVAILABLE", exception.getMessage());
     }
 
     @Test

@@ -478,6 +478,7 @@ const AdminDashboard = () => {
                                                                 user.profilePicture ? fileUrl(user.profilePicture) : profileAvatar
                                                             }
                                                             alt={`${user.prenom} ${user.nom}`}
+                                                            onError={(e) => { e.target.src = profileAvatar }}
                                                         />
                                                         <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full border-2 border-[#171717] shadow-sm animate-pulse-gentle"></div>
                                                     </div>

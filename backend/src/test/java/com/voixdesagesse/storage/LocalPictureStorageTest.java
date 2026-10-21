@@ -1,6 +1,7 @@
 package com.voixdesagesse.storage;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -14,6 +15,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.mock.web.MockMultipartFile;
+
+import com.voixdesagesse.exception.VoixDeSagesseException;
 
 class LocalPictureStorageTest {
 
@@ -31,7 +34,7 @@ class LocalPictureStorageTest {
 
     @Test
     @DisplayName("Photo locale - le nom vient du type d'image, pas du nom envoyé")
-    void storeUsesImageType() throws IOException {
+    void storeUsesImageType() throws Exception {
         String url = storage.store(new MockMultipartFile("profilePicture", "evil.html", "image/png", new byte[] { 1, 2, 3 }), 7L);
 
         assertTrue(url.startsWith("/uploads/profile-pictures/profile_7_"), url);
@@ -42,14 +45,26 @@ class LocalPictureStorageTest {
     @Test
     @DisplayName("Photo locale - un fichier qui n'est pas une image est refusé")
     void storeRejectsNonImage() {
-        assertThrows(IOException.class,
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
                 () -> storage.store(new MockMultipartFile("profilePicture", "evil.html", "text/html", new byte[] { 1 }), 7L));
+        assertEquals("FILE_TYPE_NOT_ALLOWED", exception.getMessage());
         assertFalse(Files.exists(directory));
     }
 
     @Test
+    @DisplayName("Photo locale - un disque inutilisable donne un message clair")
+    void storeReportsUnavailableDisk() throws IOException {
+        Files.writeString(root.resolve("blocked"), "pas un dossier");
+        LocalPictureStorage blocked = new LocalPictureStorage(root.resolve("blocked").resolve("pictures").toString());
+
+        VoixDeSagesseException exception = assertThrows(VoixDeSagesseException.class,
+                () -> blocked.store(new MockMultipartFile("profilePicture", "a.png", "image/png", new byte[] { 1 }), 7L));
+        assertEquals("PICTURE_STORAGE_UNAVAILABLE", exception.getMessage());
+    }
+
+    @Test
     @DisplayName("Photo locale - la suppression retire le fichier")
-    void deleteRemovesFile() throws IOException {
+    void deleteRemovesFile() throws Exception {
         String url = storage.store(new MockMultipartFile("profilePicture", "a.png", "image/png", new byte[] { 1 }), 7L);
 
         storage.delete(url);

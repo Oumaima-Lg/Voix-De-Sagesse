@@ -12,6 +12,7 @@ import { setUser } from '../../store/userSlice';
 import { LoadingOverlay } from '@mantine/core';
 import { setJwt } from '../../store/jwtSlice';
 import { loginUser } from '../../api/authService';
+import { getApiErrorMessage } from '../../api/apiError';
 import { jwtDecode } from "jwt-decode";
 import { useAuth } from '../../hooks/useAuth';
 import { useEffect } from 'react';
@@ -116,11 +117,9 @@ const LoginForm = () => {
                     setLoading(false);
                     console.error('Login error:', err);
 
-                    const errorMessage = !err.response
-                        ? 'Impossible de contacter le serveur. Réessayez plus tard.'
-                        : err.response.status === 401
-                            ? 'Email ou mot de passe incorrect.'
-                            : err.response.data?.errorMessage || err.response.data?.message || 'Erreur de connexion.';
+                    const errorMessage = err.response?.status === 401
+                        ? 'Email ou mot de passe incorrect.'
+                        : getApiErrorMessage(err, 'Erreur de connexion.');
 
                     errorNotification('Échec de la connexion', errorMessage);
                     clearAuth();
