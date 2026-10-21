@@ -1,6 +1,5 @@
 package com.voixdesagesse.controller;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +26,8 @@ import com.voixdesagesse.dto.UserProfileDTO;
 import com.voixdesagesse.entity.User;
 import com.voixdesagesse.exception.VoixDeSagesseException;
 import com.voixdesagesse.security.CustomUserDetails;
+import com.voixdesagesse.security.RateLimiter;
+import com.voixdesagesse.security.RateLimiter.Limit;
 import com.voixdesagesse.service.UserService;
 
 import jakarta.validation.Valid;
@@ -43,6 +44,7 @@ public class UserController {
 
 
     private final UserService userService;
+    private final RateLimiter rateLimiter;
 
     private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
             "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp");
@@ -138,13 +140,14 @@ public class UserController {
     @Operation(summary = "Changer sa photo de profil (image, 5 Mo max)")
     @PostMapping("/me/picture")
     public ResponseEntity<?> uploadProfilePicture(@RequestParam("profilePicture") MultipartFile file,
-            @AuthenticationPrincipal CustomUserDetails currentUser) throws VoixDeSagesseException, IOException {
+            @AuthenticationPrincipal CustomUserDetails currentUser) throws VoixDeSagesseException {
         if (file.isEmpty())
             throw new VoixDeSagesseException("FILE_EMPTY");
         String contentType = file.getContentType();
         if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType.toLowerCase()))
             throw new VoixDeSagesseException("FILE_TYPE_NOT_ALLOWED");
 
+        rateLimiter.check(Limit.PICTURE_UPLOAD, String.valueOf(currentUser.getId()));
         String profilePictureUrl = userService.saveProfilePicture(file, currentUser.getId());
         return ResponseEntity.ok(Map.of(
                 "profilePictureUrl", profilePictureUrl,

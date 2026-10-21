@@ -29,6 +29,8 @@ import com.voixdesagesse.dto.AuthenticationRequest;
 import com.voixdesagesse.dto.AuthenticationResponse;
 import com.voixdesagesse.security.JwtHelper;
 import com.voixdesagesse.security.LoginAttemptService;
+import com.voixdesagesse.security.RateLimiter;
+import com.voixdesagesse.security.RateLimiter.Limit;
 import com.voixdesagesse.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,6 +56,7 @@ public class AuthController {
 
     private final UserService userService;
     private final LoginAttemptService loginAttemptService;
+    private final RateLimiter rateLimiter;
 
     @Operation(summary = "Se connecter : renvoie un jeton JWT")
     @PostMapping("/login")
@@ -84,8 +87,9 @@ public class AuthController {
 
     @Operation(summary = "Inscription, étape 1 : envoie un code par email")
     @PostMapping("/register")
-    public ResponseEntity<ResponseDTO> registerUser(@RequestBody @Valid UserRegistrationDTO registerDTO)
-            throws VoixDeSagesseException {
+    public ResponseEntity<ResponseDTO> registerUser(@RequestBody @Valid UserRegistrationDTO registerDTO,
+            HttpServletRequest httpRequest) throws VoixDeSagesseException {
+        rateLimiter.check(Limit.EMAIL_CODE, httpRequest.getRemoteAddr());
         return new ResponseEntity<>(userService.startRegistration(registerDTO), HttpStatus.ACCEPTED);
     }
 
@@ -105,7 +109,9 @@ public class AuthController {
 
     @Operation(summary = "Mot de passe oublié, étape 1 : envoie un code par email")
     @PostMapping("/password/otp")
-    public ResponseEntity<ResponseDTO> sendOtp(@RequestBody @Valid OtpRequest request) throws VoixDeSagesseException {
+    public ResponseEntity<ResponseDTO> sendOtp(@RequestBody @Valid OtpRequest request, HttpServletRequest httpRequest)
+            throws VoixDeSagesseException {
+        rateLimiter.check(Limit.EMAIL_CODE, httpRequest.getRemoteAddr());
         userService.sendOtp(request.email());
         return ResponseEntity.ok(new ResponseDTO("Si un compte existe avec cet email, un code vient d'être envoyé."));
     }

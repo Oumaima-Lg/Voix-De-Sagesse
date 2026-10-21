@@ -31,6 +31,8 @@ Every setting that changes between environments comes from an environment variab
 | `PICTURE_STORAGE` | `local` | Where profile pictures go: `local` (a folder) or `cloudinary` |
 | `UPLOAD_DIR` | `uploads/profile-pictures` | Folder used by the `local` storage |
 | `CLOUDINARY_URL` | empty | `cloudinary://<api_key>:<api_secret>@<cloud_name>`, required by the `cloudinary` storage |
+| `EMAIL_CODES_PER_HOUR` | `5` | Sign-up and password codes one IP address can request per hour (Docker Compose raises it to 100 for local tests) |
+| `PICTURE_UPLOADS_PER_HOUR` | `10` | Profile picture changes per user per hour |
 | `PORT` | `8080` | HTTP port |
 | `DEMO_DATA` | `false` | Create demo accounts and articles when the database is empty |
 | `DEMO_USER_PASSWORD` | `Demo1234!` | Password of the shared demo accounts, which cannot change their password or profile, be deleted, or delete the demo articles |

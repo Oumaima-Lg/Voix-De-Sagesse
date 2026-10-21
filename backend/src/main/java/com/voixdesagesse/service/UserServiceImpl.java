@@ -1,6 +1,5 @@
 package com.voixdesagesse.service;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.LocalDateTime;
@@ -380,7 +379,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String saveProfilePicture(MultipartFile file, Long userId) throws IOException, VoixDeSagesseException {
+    public String saveProfilePicture(MultipartFile file, Long userId) throws VoixDeSagesseException {
         User user = getUserById(userId);
         rejectSharedDemoAccount(user.getEmail());
         String profilePictureUrl = pictureStorage.store(file, userId);

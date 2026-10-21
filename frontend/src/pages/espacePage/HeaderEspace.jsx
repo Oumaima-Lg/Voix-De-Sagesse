@@ -60,6 +60,7 @@ const HeaderEspace = () => {
                                 <img src={user.profilePicture ?
                                     (fileUrl(user.profilePicture) 
                                     ) : profileAvatar} alt="" 
+                                    onError={(e) => { e.target.src = profileAvatar }}
                                     className="size-10 border-[#A09F87] object-cover"/>
                             </div>
 

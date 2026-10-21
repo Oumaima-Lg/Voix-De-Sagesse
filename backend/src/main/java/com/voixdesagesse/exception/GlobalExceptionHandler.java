@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.MessageSource;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+
+import com.mongodb.MongoException;
+import com.mongodb.MongoSocketException;
+import com.mongodb.MongoTimeoutException;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -50,15 +55,18 @@ public class GlobalExceptionHandler {
             Map.entry("SIGNAL_ALREADY_PROCESSED", HttpStatus.CONFLICT),
             Map.entry("OTP_TOO_SOON", HttpStatus.TOO_MANY_REQUESTS),
             Map.entry("LOGIN_BLOCKED", HttpStatus.TOO_MANY_REQUESTS),
-            Map.entry("MAIL_FAILED", HttpStatus.SERVICE_UNAVAILABLE));
+            Map.entry("TOO_MANY_CODE_REQUESTS", HttpStatus.TOO_MANY_REQUESTS),
+            Map.entry("TOO_MANY_UPLOADS", HttpStatus.TOO_MANY_REQUESTS),
+            Map.entry("MAIL_FAILED", HttpStatus.SERVICE_UNAVAILABLE),
+            Map.entry("PICTURE_STORAGE_UNAVAILABLE", HttpStatus.SERVICE_UNAVAILABLE),
+            Map.entry("DATABASE_UNAVAILABLE", HttpStatus.SERVICE_UNAVAILABLE),
+            Map.entry("DATABASE_FULL", HttpStatus.INSUFFICIENT_STORAGE));
 
     private final MessageSource messageSource;
 
     @ExceptionHandler(VoixDeSagesseException.class)
     public ResponseEntity<ErrorInfo> handleArticlaException(VoixDeSagesseException exception) {
-        String key = exception.getMessage();
-        String msg = messageSource.getMessage(key, null, key, Locale.FRENCH);
-        return error(STATUS_BY_KEY.getOrDefault(key, HttpStatus.BAD_REQUEST), msg);
+        return keyError(exception.getMessage());
     }
 
     @ExceptionHandler({ MethodArgumentNotValidException.class, ConstraintViolationException.class })
@@ -101,8 +109,29 @@ public class GlobalExceptionHandler {
             HttpStatusCode status = errorResponse.getStatusCode();
             return error(status, status.value() == 404 ? "Ressource introuvable." : "Requête invalide.");
         }
+        String databaseKey = databaseErrorKey(exception);
+        if (databaseKey != null) {
+            log.error("Database error: {}", exception.getMessage());
+            return keyError(databaseKey);
+        }
         log.error("Unexpected error", exception);
         return error(HttpStatus.INTERNAL_SERVER_ERROR, "Une erreur interne est survenue.");
+    }
+
+    public static String databaseErrorKey(Throwable exception) {
+        for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
+            if (cause instanceof MongoException mongo && mongo.getMessage() != null && mongo.getMessage().contains("space quota"))
+                return "DATABASE_FULL";
+            if (cause instanceof DataAccessResourceFailureException || cause instanceof MongoTimeoutException
+                    || cause instanceof MongoSocketException)
+                return "DATABASE_UNAVAILABLE";
+        }
+        return null;
+    }
+
+    private ResponseEntity<ErrorInfo> keyError(String key) {
+        String msg = messageSource.getMessage(key, null, key, Locale.FRENCH);
+        return error(STATUS_BY_KEY.getOrDefault(key, HttpStatus.BAD_REQUEST), msg);
     }
 
     private static ResponseEntity<ErrorInfo> error(HttpStatusCode status, String message) {
