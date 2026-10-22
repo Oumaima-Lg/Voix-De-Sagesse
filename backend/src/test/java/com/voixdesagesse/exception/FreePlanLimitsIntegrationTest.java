@@ -29,7 +29,7 @@ import com.voixdesagesse.repository.ArticleRepository;
 import com.voixdesagesse.repository.UserRepository;
 import com.voixdesagesse.security.CustomUserDetails;
 
-@SpringBootTest(properties = "app.rate-limit.email-codes-per-hour=2")
+@SpringBootTest(properties = { "app.rate-limit.email-codes-per-hour=2", "app.client-ip-header=True-Client-IP" })
 @AutoConfigureMockMvc
 class FreePlanLimitsIntegrationTest {
 
@@ -67,18 +67,20 @@ class FreePlanLimitsIntegrationTest {
     }
 
     @Test
-    @DisplayName("Codes par email : refusés au-delà de la limite par adresse IP (429)")
-    void codeRequestsAreLimitedPerIp() throws Exception {
+    @DisplayName("Codes par email : refusés au-delà de la limite pour un même visiteur, pas pour les autres (429)")
+    void codeRequestsAreLimitedPerVisitor() throws Exception {
         for (int i = 0; i < 2; i++)
-            requestCode().andExpect(status().isOk());
+            requestCode("203.0.113.7").andExpect(status().isOk());
 
-        requestCode()
+        requestCode("203.0.113.7")
                 .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.errorMessage").value("Trop de demandes de code depuis votre connexion. Réessayez dans une heure."));
+        requestCode("198.51.100.2").andExpect(status().isOk());
     }
 
-    private ResultActions requestCode() throws Exception {
-        return mvc.perform(post("/auth/password/otp").contentType(MediaType.APPLICATION_JSON)
+    private ResultActions requestCode(String clientIp) throws Exception {
+        return mvc.perform(post("/auth/password/otp").header("True-Client-IP", clientIp)
+                .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"email\":\"nobody@test.local\"}"));
     }
 }

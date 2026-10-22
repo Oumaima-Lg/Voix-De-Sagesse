@@ -82,7 +82,7 @@ flowchart LR
 - **Consistent data.** Likes use atomic MongoDB updates, so a double click cannot count twice. Notifications are not duplicated, disappear when the action is undone, and expire after 90 days through a TTL index.
 - **Moderation workflow.** Deleting a reported article settles all its reports; reports are closed if the author deletes the article first. A failed email never undoes a decision.
 - **Demo data.** On an empty database, the backend creates demo accounts and content through its own services, so counters and notifications match real use.
-- **Tests at three levels.** 99 backend tests (unit, and integration against a real MongoDB), 43 frontend unit tests, and 27 end-to-end tests that drive a real browser through the whole app. Backend and frontend checks run on every pull request with GitHub Actions.
+- **Tests at three levels.** 102 backend tests (unit, and integration against a real MongoDB), 43 frontend unit tests, and 27 end-to-end tests that drive a real browser through the whole app. Backend and frontend checks run on every pull request with GitHub Actions.
 
 ## Getting started
 
@@ -114,7 +114,7 @@ These passwords only exist on your machine and can be changed in `.env`. The sha
 
 | Level | Tools | Command |
 |---|---|---|
-| Backend: unit and integration (99) | JUnit 5, Mockito, MockMvc | `cd backend && ./mvnw test`, with MongoDB running (`docker compose up -d mongo`) |
+| Backend: unit and integration (102) | JUnit 5, Mockito, MockMvc | `cd backend && ./mvnw test`, with MongoDB running (`docker compose up -d mongo`) |
 | Frontend: unit (43) | Vitest, Testing Library | `cd frontend && npm test` |
 | End-to-end (27) | Playwright | `cd frontend && npm run test:e2e`, with the app running (`docker compose up`) |
 

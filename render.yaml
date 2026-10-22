@@ -34,6 +34,8 @@ services:
         value: cloudinary
       - key: CLOUDINARY_URL
         sync: false
+      - key: CLIENT_IP_HEADER
+        value: True-Client-IP
       - key: DEMO_DATA
         value: "true"
       - key: DEMO_ADMIN_PASSWORD
