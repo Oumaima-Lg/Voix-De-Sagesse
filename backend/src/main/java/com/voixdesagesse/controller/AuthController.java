@@ -27,6 +27,7 @@ import com.voixdesagesse.dto.VerifyOtpRequest;
 import com.voixdesagesse.exception.VoixDeSagesseException;
 import com.voixdesagesse.dto.AuthenticationRequest;
 import com.voixdesagesse.dto.AuthenticationResponse;
+import com.voixdesagesse.security.ClientIpResolver;
 import com.voixdesagesse.security.JwtHelper;
 import com.voixdesagesse.security.LoginAttemptService;
 import com.voixdesagesse.security.RateLimiter;
@@ -57,12 +58,14 @@ public class AuthController {
     private final UserService userService;
     private final LoginAttemptService loginAttemptService;
     private final RateLimiter rateLimiter;
+    private final ClientIpResolver clientIpResolver;
 
     @Operation(summary = "Se connecter : renvoie un jeton JWT")
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody @Valid AuthenticationRequest request,
             HttpServletRequest httpRequest) throws VoixDeSagesseException {
-        String attemptKey = request.getEmail().toLowerCase() + "|" + httpRequest.getRemoteAddr();
+        String clientIp = clientIpResolver.resolve(httpRequest);
+        String attemptKey = request.getEmail().toLowerCase() + "|" + clientIp;
         if (loginAttemptService.isBlocked(attemptKey))
             throw new VoixDeSagesseException("LOGIN_BLOCKED");
 
@@ -80,7 +83,7 @@ public class AuthController {
             
         } catch (BadCredentialsException e) {
             loginAttemptService.loginFailed(attemptKey);
-            log.warn("Failed login attempt from {}", httpRequest.getRemoteAddr());
+            log.warn("Failed login attempt from {}", clientIp);
             throw new VoixDeSagesseException("INVALID_CREDENTIALS");
         }
     }
@@ -89,7 +92,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<ResponseDTO> registerUser(@RequestBody @Valid UserRegistrationDTO registerDTO,
             HttpServletRequest httpRequest) throws VoixDeSagesseException {
-        rateLimiter.check(Limit.EMAIL_CODE, httpRequest.getRemoteAddr());
+        rateLimiter.check(Limit.EMAIL_CODE, clientIpResolver.resolve(httpRequest));
         return new ResponseEntity<>(userService.startRegistration(registerDTO), HttpStatus.ACCEPTED);
     }
 
@@ -111,7 +114,7 @@ public class AuthController {
     @PostMapping("/password/otp")
     public ResponseEntity<ResponseDTO> sendOtp(@RequestBody @Valid OtpRequest request, HttpServletRequest httpRequest)
             throws VoixDeSagesseException {
-        rateLimiter.check(Limit.EMAIL_CODE, httpRequest.getRemoteAddr());
+        rateLimiter.check(Limit.EMAIL_CODE, clientIpResolver.resolve(httpRequest));
         userService.sendOtp(request.email());
         return ResponseEntity.ok(new ResponseDTO("Si un compte existe avec cet email, un code vient d'être envoyé."));
     }
